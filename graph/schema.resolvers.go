@@ -10,9 +10,9 @@ import (
 	"timeline/backend/graph/model"
 )
 
-// CreateTodo is the resolver for the createTodo field.
-func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) (*model.Todo, error) {
-	panic(fmt.Errorf("not implemented: CreateTodo - createTodo"))
+// Authorize is the resolver for the authorize field.
+func (r *mutationResolver) Authorize(ctx context.Context) (*model.User, error) {
+	panic(fmt.Errorf("not implemented: Authorize - authorize"))
 }
 
 // Todos is the resolver for the todos field.
