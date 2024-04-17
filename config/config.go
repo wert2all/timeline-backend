@@ -7,8 +7,9 @@ type CORS struct {
 	Debug         bool
 }
 type appConfig struct {
-	Port string
-	CORS CORS
+	Port          string
+	CORS          CORS
+	GoogleClintID string
 }
 
 var AppConfig = &appConfig{
@@ -16,4 +17,6 @@ var AppConfig = &appConfig{
 	CORS: CORS{
 		Debug: genv.Key("CORS_DEBUG").Default(false).Bool(), AllowedOrigin: genv.Key("CORS_ALLOWED_ORIGIN").String(),
 	},
+
+	GoogleClintID: genv.Key("GOOGLE_CLIENT_ID").String(),
 }

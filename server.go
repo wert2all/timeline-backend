@@ -16,7 +16,7 @@ func main() {
 	router := chi.NewRouter()
 
 	router.Use(middleware.Cors(config.AppConfig.CORS.AllowedOrigin, config.AppConfig.CORS.Debug).Handler)
-	router.Use(middleware.AuthMiddleware())
+	router.Use(middleware.AuthMiddleware(config.AppConfig.GoogleClintID))
 
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{}}))
 	router.Handle("/graphql", srv)

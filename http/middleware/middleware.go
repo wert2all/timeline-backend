@@ -1,20 +1,30 @@
 package middleware
 
 import (
+	"context"
+	"fmt"
 	"net/http"
+	"strings"
 
-	"github.com/rs/cors"
+	"google.golang.org/api/idtoken"
 )
 
-func AuthMiddleware() func(http.Handler) http.Handler {
+func AuthMiddleware(googleClientID string) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-			// token := extractToken(req)
-			// if token == "" {
-			// 	http.Error(w, "Invalid token", http.StatusForbidden)
-			// 	return
-			// }
+			token := extractToken(req)
+			if token == "" {
+				http.Error(w, "Invalid token", http.StatusForbidden)
+				return
+			}
 
+			payload, err := idtoken.Validate(context.Background(), token, googleClientID)
+			if err != nil {
+				http.Error(w, "Invalid token", http.StatusForbidden)
+				return
+			}
+			fmt.Print(payload.Claims)
+			//
 			// // Allow unauthenticated users in
 			// if err != nil || c == nil {
 			// 	next.ServeHTTP(w, r)
@@ -40,16 +50,16 @@ func AuthMiddleware() func(http.Handler) http.Handler {
 	}
 }
 
-// func extractToken(req *http.Request) string {
-// 	authHeader := req.Header.Get("Authorization")
-// 	splitted := strings.Split(authHeader, " ")
-//
-// 	if len(splitted) == 2 {
-// 		return splitted[1]
-// 	} else {
-// 		return ""
-// 	}
-// }
+func extractToken(req *http.Request) string {
+	authHeader := req.Header.Get("Authorization")
+	splitted := strings.Split(authHeader, " ")
+
+	if len(splitted) == 2 {
+		return splitted[1]
+	} else {
+		return ""
+	}
+}
 
 func Cors(allowedOrigin string, debug bool) *cors.Cors {
 	return cors.New(cors.Options{
