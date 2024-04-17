@@ -1,0 +1,7 @@
+{
+  "[golang]": {
+    "editor.defaultFormatter": "golang.Go",
+    "editor.formatOnSave": true
+  },
+  "gopls": { "ui.semanticTokens": true }
+}
