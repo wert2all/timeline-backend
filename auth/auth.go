@@ -2,7 +2,6 @@ package auth
 
 import (
 	"net/http"
-	"strings"
 )
 
 func Middleware() func(http.Handler) http.Handler {
@@ -39,13 +38,13 @@ func Middleware() func(http.Handler) http.Handler {
 	}
 }
 
-func extractToken(req *http.Request) string {
-	authHeader := req.Header.Get("Authorization")
-	splitted := strings.Split(authHeader, " ")
-
-	if len(splitted) == 2 {
-		return splitted[1]
-	} else {
-		return ""
-	}
-}
+// func extractToken(req *http.Request) string {
+// 	authHeader := req.Header.Get("Authorization")
+// 	splitted := strings.Split(authHeader, " ")
+//
+// 	if len(splitted) == 2 {
+// 		return splitted[1]
+// 	} else {
+// 		return ""
+// 	}
+// }
