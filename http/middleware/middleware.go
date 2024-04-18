@@ -1,10 +1,12 @@
-package auth
+package middleware
 
 import (
 	"net/http"
+
+	"github.com/rs/cors"
 )
 
-func Middleware() func(http.Handler) http.Handler {
+func AuthMiddleware() func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 			// token := extractToken(req)
@@ -48,3 +50,11 @@ func Middleware() func(http.Handler) http.Handler {
 // 		return ""
 // 	}
 // }
+
+func Cors(allowedOrigin string, debug bool) *cors.Cors {
+	return cors.New(cors.Options{
+		AllowedOrigins:   []string{allowedOrigin},
+		AllowCredentials: true,
+		Debug:            debug,
+	})
+}

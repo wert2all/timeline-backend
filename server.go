@@ -3,25 +3,20 @@ package main
 import (
 	"log"
 	"net/http"
-	"timeline/backend/auth"
 	"timeline/backend/config"
 	"timeline/backend/graph"
+	"timeline/backend/http/middleware"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/go-chi/chi"
-	"github.com/rs/cors"
 	_ "github.com/sakirsensoy/genv/dotenv/autoload"
 )
 
 func main() {
 	router := chi.NewRouter()
-	router.Use(cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:4200"},
-		AllowCredentials: true,
-		Debug:            true,
-	}).Handler)
 
-	router.Use(auth.Middleware())
+	router.Use(middleware.Cors(config.AppConfig.CORS.AllowedOrigin, config.AppConfig.CORS.Debug).Handler)
+	router.Use(middleware.AuthMiddleware())
 
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{}}))
 	router.Handle("/graphql", srv)
