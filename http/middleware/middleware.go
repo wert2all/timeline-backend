@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/rs/cors"
 	"google.golang.org/api/idtoken"
 )
 
