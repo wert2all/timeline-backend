@@ -11,11 +11,8 @@ type CORS struct {
 }
 
 type Postgres struct {
-	Host     string
-	Port     int
-	User     string
-	Password string
-	Database string
+	Host, User, Password, Database string
+	Port                           int
 }
 
 type appConfig struct {

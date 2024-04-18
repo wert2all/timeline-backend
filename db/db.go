@@ -11,11 +11,8 @@ import (
 )
 
 type PostgresConfig struct {
-	Host     string
-	Port     int
-	User     string
-	Password string
-	Database string
+	Host, User, Password, Database string
+	Port                           int
 }
 
 func CreateClient(connectionURL string) *ent.Client {
