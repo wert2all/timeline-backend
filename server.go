@@ -9,7 +9,6 @@ import (
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/go-chi/chi"
-	_ "github.com/sakirsensoy/genv/dotenv/autoload"
 )
 
 func main() {
