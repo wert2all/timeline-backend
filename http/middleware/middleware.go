@@ -24,7 +24,8 @@ func AuthMiddleware(googleClientID string) func(http.Handler) http.Handler {
 				http.Error(w, "Invalid token", http.StatusForbidden)
 				return
 			}
-			fmt.Print(payload.Claims)
+
+			fmt.Println(payload.Claims)
 			//
 			// // Allow unauthenticated users in
 			// if err != nil || c == nil {
@@ -53,7 +54,7 @@ func AuthMiddleware(googleClientID string) func(http.Handler) http.Handler {
 
 func extractToken(req *http.Request) string {
 	authHeader := req.Header.Get("Authorization")
-	splitted := strings.Split(authHeader, " ")
+	splitted := strings.Split(authHeader, "Bearer ")
 
 	if len(splitted) == 2 {
 		return splitted[1]

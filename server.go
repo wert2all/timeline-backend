@@ -19,6 +19,6 @@ func main() {
 
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{}}))
 	router.Handle("/graphql", srv)
-	http.Handle("/graphql", srv)
+
 	log.Fatal(http.ListenAndServe(":"+config.AppConfig.Port, router))
 }
