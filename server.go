@@ -4,13 +4,13 @@ import (
 	"log"
 	"net/http"
 	"timeline/backend/auth"
+	"timeline/backend/config"
 	"timeline/backend/graph"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/go-chi/chi"
+	_ "github.com/sakirsensoy/genv/dotenv/autoload"
 )
-
-const defaultPort = "8000"
 
 func main() {
 	router := chi.NewRouter()
@@ -19,5 +19,5 @@ func main() {
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{}}))
 	router.Handle("/graphql", srv)
 	http.Handle("/graphql", srv)
-	log.Fatal(http.ListenAndServe(":"+defaultPort, router))
+	log.Fatal(http.ListenAndServe(":"+config.AppConfig.Port, router))
 }
