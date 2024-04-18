@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"timeline/backend/http/middleware/auth"
 
 	"github.com/rs/cors"
 	"google.golang.org/api/idtoken"
@@ -15,7 +16,7 @@ func AuthMiddleware(googleClientID string) func(http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 			token := extractToken(req)
 			if token == "" {
-				http.Error(w, "Invalid token", http.StatusForbidden)
+				http.Error(w, "Empty token", http.StatusForbidden)
 				return
 			}
 
@@ -25,7 +26,8 @@ func AuthMiddleware(googleClientID string) func(http.Handler) http.Handler {
 				return
 			}
 
-			fmt.Println(payload.Claims)
+			googleUser := auth.From(*payload)
+			fmt.Println(googleUser)
 			//
 			// // Allow unauthenticated users in
 			// if err != nil || c == nil {
