@@ -8,11 +8,11 @@ import (
 func Middleware() func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-			token := extractToken(req)
-			if token == "" {
-				http.Error(w, "Invalid token", http.StatusForbidden)
-				return
-			}
+			// token := extractToken(req)
+			// if token == "" {
+			// 	http.Error(w, "Invalid token", http.StatusForbidden)
+			// 	return
+			// }
 
 			// // Allow unauthenticated users in
 			// if err != nil || c == nil {
