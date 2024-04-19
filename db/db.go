@@ -5,15 +5,11 @@ import (
 	"log"
 	"strconv"
 	"strings"
+	"timeline/backend/app"
 	"timeline/backend/ent"
 
 	_ "github.com/lib/pq"
 )
-
-type PostgresConfig struct {
-	Host, User, Password, Database string
-	Port                           int
-}
 
 func CreateClient(connectionURL string) *ent.Client {
 	client, err := ent.Open("postgres", connectionURL)
@@ -26,7 +22,7 @@ func CreateClient(connectionURL string) *ent.Client {
 	return client
 }
 
-func CreateConnectionURL(config PostgresConfig) string {
+func CreateConnectionURL(config app.Postgres) string {
 	var sb strings.Builder
 
 	optionsMap := map[string]string{
