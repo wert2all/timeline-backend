@@ -5,7 +5,6 @@ import (
 	"log"
 	"net/http"
 	"strings"
-	"timeline/backend/app/http/middleware/auth"
 	"timeline/backend/db/model/user"
 
 	"github.com/rs/cors"
@@ -27,7 +26,13 @@ func AuthMiddleware(googleClientID string, authorizeModel user.Authorize) func(h
 				return
 			}
 
-			user := authorizeModel.CheckOrCreate(auth.From(*payload))
+			someUser := user.NewSomeUser(payload.Claims["sub"].(string),
+				payload.Claims["name"].(string),
+				payload.Claims["email"].(string),
+				payload.Claims["picture"].(string),
+			)
+
+			user := authorizeModel.CheckOrCreate(someUser)
 			if user == nil {
 				http.Error(w, "Blocked", http.StatusForbidden)
 				return
