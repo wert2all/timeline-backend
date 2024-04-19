@@ -74,8 +74,11 @@ func extractToken(req *http.Request) string {
 
 func Cors(allowedOrigin string, debug bool) *cors.Cors {
 	return cors.New(cors.Options{
-		AllowedOrigins:   []string{allowedOrigin},
-		AllowCredentials: true,
-		Debug:            debug,
+		AllowedOrigins:     []string{allowedOrigin},
+		AllowCredentials:   true,
+		AllowedMethods:     []string{"GET", "POST", "OPTIONS"},
+		AllowedHeaders:     []string{"Content-Type", "Bearer", "Bearer ", "content-type", "Origin", "Accept", "Authorization"},
+		OptionsPassthrough: true,
+		Debug:              debug,
 	})
 }
