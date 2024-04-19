@@ -13,13 +13,13 @@ type UserRepository interface {
 	Create(uuid, name, email, avatar string) *ent.User
 }
 
-type UserRepositoryImpl struct {
+type userRepositoryImpl struct {
 	client  *ent.Client
 	context context.Context
 }
 
 // Create implements UserRepository.
-func (u UserRepositoryImpl) Create(uuid string, name string, email string, avatar string) *ent.User {
+func (u userRepositoryImpl) Create(uuid string, name string, email string, avatar string) *ent.User {
 	user, err := u.client.User.Create().SetUUID(uuid).SetName(name).SetEmail(email).SetAvatar(avatar).Save(u.context)
 	if err != nil {
 		panic(fmt.Errorf("failed creating user: %w", err))
@@ -28,7 +28,7 @@ func (u UserRepositoryImpl) Create(uuid string, name string, email string, avata
 }
 
 // Create implements UserRepository.
-func (u UserRepositoryImpl) FindByUUID(uuid string) *ent.User {
+func (u userRepositoryImpl) FindByUUID(uuid string) *ent.User {
 	user, err := u.client.User.Query().Where(user.UUID(uuid)).Only(u.context)
 	if err != nil {
 		return nil
@@ -37,7 +37,7 @@ func (u UserRepositoryImpl) FindByUUID(uuid string) *ent.User {
 }
 
 func NewUserRepository(ctx context.Context, client *ent.Client) UserRepository {
-	return UserRepositoryImpl{
+	return userRepositoryImpl{
 		client:  client,
 		context: ctx,
 	}
