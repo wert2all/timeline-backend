@@ -2,9 +2,9 @@ package middleware
 
 import (
 	"context"
-	"log"
 	"net/http"
 	"strings"
+	appContext "timeline/backend/app/context"
 	"timeline/backend/db/model/user"
 
 	"github.com/rs/cors"
@@ -38,29 +38,9 @@ func AuthMiddleware(googleClientID string, authorizeModel user.Authorize) func(h
 				return
 			}
 
-			log.Println("user was created: ", user)
+			ctx := context.WithValue(req.Context(), appContext.AppContextUserKey{}, user.ID)
 
-			//
-			// // Allow unauthenticated users in
-			// if err != nil || c == nil {
-			// 	next.ServeHTTP(w, r)
-			// 	return
-			// }
-
-			// userId, err := validateAndGetUserID(c)
-			// if err != nil {
-			// 	http.Error(w, "Invalid cookie", http.StatusForbidden)
-			// 	return
-			// }
-
-			// // get the user from the database
-			// user := getUserByID(db, userId)
-
-			// // put it in context
-			// ctx := context.WithValue(r.Context(), userCtxKey, user)
-
-			// // and call the next with our new context
-			// r = r.WithContext(ctx)
+			req = req.WithContext(ctx)
 			next.ServeHTTP(w, req)
 		})
 	}
