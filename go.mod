@@ -6,7 +6,6 @@ require (
 	entgo.io/ent v0.13.1
 	github.com/99designs/gqlgen v0.17.45
 	github.com/go-chi/chi v1.5.5
-	github.com/lib/pq v1.10.9
 	github.com/rs/cors v1.10.1
 	github.com/sakirsensoy/genv v1.0.1
 	github.com/vektah/gqlparser/v2 v2.5.11
@@ -22,7 +21,6 @@ require (
 	github.com/agnivade/levenshtein v1.1.1 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.4 // indirect
-	github.com/fatih/color v1.16.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/go-logr/logr v1.4.1 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
@@ -36,11 +34,6 @@ require (
 	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 	github.com/hashicorp/hcl/v2 v2.13.0 // indirect
-	github.com/mattn/go-colorable v0.1.13 // indirect
-	github.com/mattn/go-isatty v0.0.20 // indirect
-	github.com/mattn/go-shellwords v1.0.12 // indirect
-	github.com/mattn/go-zglob v0.0.4 // indirect
-	github.com/maxcnunes/gaper v1.1.0 // indirect
 	github.com/mitchellh/go-wordwrap v0.0.0-20150314170334-ad45545899c7 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
