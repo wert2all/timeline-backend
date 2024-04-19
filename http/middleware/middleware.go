@@ -2,16 +2,17 @@ package middleware
 
 import (
 	"context"
-	"fmt"
+	"log"
 	"net/http"
 	"strings"
+	"timeline/backend/db/model/user"
 	"timeline/backend/http/middleware/auth"
 
 	"github.com/rs/cors"
 	"google.golang.org/api/idtoken"
 )
 
-func AuthMiddleware(googleClientID string) func(http.Handler) http.Handler {
+func AuthMiddleware(googleClientID string, authorizeModel user.Authorize) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 			token := extractToken(req)
@@ -26,8 +27,14 @@ func AuthMiddleware(googleClientID string) func(http.Handler) http.Handler {
 				return
 			}
 
-			googleUser := auth.From(*payload)
-			fmt.Println(googleUser)
+			user := authorizeModel.CheckOrCreate(auth.From(*payload))
+			if user == nil {
+				http.Error(w, "Blocked", http.StatusForbidden)
+				return
+			}
+
+			log.Println("user was created: ", user)
+
 			//
 			// // Allow unauthenticated users in
 			// if err != nil || c == nil {

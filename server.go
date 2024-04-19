@@ -1,10 +1,13 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"timeline/backend/config"
 	"timeline/backend/db"
+	"timeline/backend/db/model/user"
+	userRepository "timeline/backend/db/repository/user"
 	"timeline/backend/graph"
 	"timeline/backend/http/middleware"
 
@@ -13,8 +16,6 @@ import (
 )
 
 func main() {
-	router := chi.NewRouter()
-
 	client := db.CreateClient(
 		db.CreateConnectionURL(
 			db.PostgresConfig{
@@ -26,9 +27,14 @@ func main() {
 			}))
 
 	defer client.Close()
+	ctx := context.Background()
+
+	userModel := user.NewUserModel(userRepository.NewUserRepository(ctx, client))
+
+	router := chi.NewRouter()
 
 	router.Use(middleware.Cors(config.AppConfig.CORS.AllowedOrigin, config.AppConfig.CORS.Debug).Handler)
-	router.Use(middleware.AuthMiddleware(config.AppConfig.GoogleClintID))
+	router.Use(middleware.AuthMiddleware(config.AppConfig.GoogleClintID, userModel))
 
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{}}))
 	router.Handle("/graphql", srv)
