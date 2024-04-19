@@ -5,19 +5,19 @@ import (
 	"timeline/backend/ent"
 )
 
-type GoogleUser struct {
+type SomeUser struct {
 	UUID, Name, Email, Avatar string
 }
 
 type Authorize interface {
-	CheckOrCreate(googleUser GoogleUser) *ent.User
+	CheckOrCreate(someUser SomeUser) *ent.User
 }
 
 type UserModel struct {
 	repository user.UserRepository
 }
 
-func (u UserModel) CheckOrCreate(googleUser GoogleUser) *ent.User {
+func (u UserModel) CheckOrCreate(googleUser SomeUser) *ent.User {
 	user := u.repository.FindByUUID(googleUser.UUID)
 
 	if user == nil {
@@ -29,6 +29,10 @@ func (u UserModel) CheckOrCreate(googleUser GoogleUser) *ent.User {
 	} else {
 		return nil
 	}
+}
+
+func NewSomeUser(uuid, name, email, avatar string) SomeUser {
+	return SomeUser{UUID: uuid, Name: name, Email: email, Avatar: avatar}
 }
 
 func NewUserModel(repository user.UserRepository) UserModel {
