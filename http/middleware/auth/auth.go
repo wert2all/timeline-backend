@@ -1,21 +1,16 @@
 package auth
 
 import (
+	"timeline/backend/db/model/user"
+
 	"google.golang.org/api/idtoken"
 )
 
-type GoogleUser struct {
-	uuid   string
-	name   string
-	email  string
-	avatar string
-}
-
-func From(payload idtoken.Payload) GoogleUser {
-	return GoogleUser{
-		uuid:   payload.Claims["sub"].(string),
-		name:   payload.Claims["name"].(string),
-		email:  payload.Claims["email"].(string),
-		avatar: payload.Claims["picture"].(string),
+func From(payload idtoken.Payload) user.GoogleUser {
+	return user.GoogleUser{
+		UUID:   payload.Claims["sub"].(string),
+		Name:   payload.Claims["name"].(string),
+		Email:  payload.Claims["email"].(string),
+		Avatar: payload.Claims["picture"].(string),
 	}
 }
