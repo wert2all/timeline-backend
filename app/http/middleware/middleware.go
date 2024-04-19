@@ -5,8 +5,8 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"timeline/backend/app/http/middleware/auth"
 	"timeline/backend/db/model/user"
-	"timeline/backend/http/middleware/auth"
 
 	"github.com/rs/cors"
 	"google.golang.org/api/idtoken"
