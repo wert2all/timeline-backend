@@ -28,21 +28,19 @@ func CreateClient(connectionURL string) *ent.Client {
 
 func CreateConnectionURL(config PostgresConfig) string {
 	var sb strings.Builder
-	sb.WriteString("host=")
-	sb.WriteString(config.Host)
 
-	sb.WriteString(" port=")
-	sb.WriteString(strconv.Itoa(config.Port))
+	optionsMap := map[string]string{
+		"host":     config.Host,
+		"port":     strconv.Itoa(config.Port),
+		"user":     config.User,
+		"password": config.Password,
+		"dbname":   config.Database,
+		"sslmode":  "disable",
+	}
 
-	sb.WriteString(" user=")
-	sb.WriteString(config.User)
-	sb.WriteString(" password=")
-	sb.WriteString(config.Password)
-
-	sb.WriteString(" dbname=")
-	sb.WriteString(config.Database)
-
-	sb.WriteString(" sslmode=disable")
+	for key, val := range optionsMap {
+		sb.WriteString(key + "=" + val + " ")
+	}
 
 	return sb.String()
 }
