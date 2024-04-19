@@ -31,13 +31,16 @@ func main() {
 
 	userModel := user.NewUserModel(userRepository.NewUserRepository(ctx, client))
 
-	router := chi.NewRouter()
-
-	router.Use(middleware.Cors(config.AppConfig.CORS.AllowedOrigin, config.AppConfig.CORS.Debug).Handler)
-	router.Use(middleware.AuthMiddleware(config.AppConfig.GoogleClintID, userModel))
-
+	authMiddleWare := middleware.AuthMiddleware(config.AppConfig.GoogleClintID, userModel)
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{}}))
-	router.Handle("/graphql", srv)
+
+	router := chi.NewRouter()
+	router.Use(middleware.Cors(config.AppConfig.CORS.AllowedOrigin, config.AppConfig.CORS.Debug).Handler)
+	router.Use(authMiddleWare)
+
+	router.Post("/graphql", func(w http.ResponseWriter, r *http.Request) {
+		srv.ServeHTTP(w, r)
+	})
 
 	log.Fatal(http.ListenAndServe(":"+config.AppConfig.Port, router))
 }
