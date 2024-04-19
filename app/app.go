@@ -1,21 +1,23 @@
 package app
 
 import (
+	"context"
 	"log"
 	"net/http"
+	"strconv"
+	"strings"
 	"timeline/backend/app/http/middleware"
 	"timeline/backend/db/model/user"
+	"timeline/backend/ent"
 	"timeline/backend/graph"
-
-	_ "github.com/sakirsensoy/genv/dotenv/autoload"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/go-chi/chi"
-	"github.com/sakirsensoy/genv"
 )
 
 type Application interface {
 	Start()
+	Stop()
 }
 
 type Factory[T any] interface {
@@ -41,6 +43,7 @@ type AppConfig struct {
 
 type AppState struct {
 	Config AppConfig
+	Client *ent.Client
 }
 
 type app struct {
@@ -58,6 +61,10 @@ type handlerFactory struct{}
 // Start implements Application.
 func (a *app) Start() {
 	log.Fatal(http.ListenAndServe(":"+a.state.Config.Port, a.router))
+}
+
+func (a *app) Stop() {
+	a.state.Client.Close()
 }
 
 // Start implements Factory.
@@ -81,13 +88,6 @@ func (h *handlerFactory) Create(state AppState) http.HandlerFunc {
 	}
 }
 
-func NewApplication(state AppState, userModel user.Authorize) Application {
-	handler := getHandlerFactory().Create(state)
-	router := getRouterFactory(handler, userModel).Create(state)
-
-	return &app{router: router, state: state}
-}
-
 func getHandlerFactory() *handlerFactory {
 	return &handlerFactory{}
 }
@@ -99,24 +99,42 @@ func getRouterFactory(handler http.HandlerFunc, userModel user.Authorize) *route
 	}
 }
 
-func ReadConfig() AppConfig {
-	return AppConfig{
-		Port: genv.Key("PORT").Default("8000").String(),
-		CORS: CORS{
-			Debug:         genv.Key("CORS_DEBUG").Default(false).Bool(),
-			AllowedOrigin: genv.Key("CORS_ALLOWED_ORIGIN").String(),
-		},
-		Postgres: Postgres{
-			Host:     genv.Key("POSTGRES_HOST").Default("localhost").String(),
-			Port:     genv.Key("POSTGRES_PORT").Default(5432).Int(),
-			User:     genv.Key("POSTGRES_USER").String(),
-			Password: genv.Key("POSTGRES_PASSWORD").String(),
-			Database: genv.Key("POSTGRES_DB").String(),
-		},
-		GoogleClintID: genv.Key("GOOGLE_CLIENT_ID").String(),
+func createConnectionURL(config Postgres) string {
+	var sb strings.Builder
+
+	optionsMap := map[string]string{
+		"host":     config.Host,
+		"port":     strconv.Itoa(config.Port),
+		"user":     config.User,
+		"password": config.Password,
+		"dbname":   config.Database,
+		"sslmode":  "disable",
 	}
+
+	for key, val := range optionsMap {
+		sb.WriteString(key + "=" + val + " ")
+	}
+
+	return sb.String()
+}
+func createClient(connectionURL string) *ent.Client {
+	client, err := ent.Open("postgres", connectionURL)
+	if err != nil {
+		log.Fatalf("failed opening connection to postgres: %v", err)
+	}
+	if err := client.Schema.Create(context.Background()); err != nil {
+		log.Fatalf("failed creating schema resources: %v", err)
+	}
+	return client
 }
 
 func NewAppState(config AppConfig) AppState {
-	return AppState{Config: config}
+	return AppState{Config: config, Client: createClient(createConnectionURL(config.Postgres))}
+}
+
+func NewApplication(state AppState, userModel user.Authorize) Application {
+	handler := getHandlerFactory().Create(state)
+	router := getRouterFactory(handler, userModel).Create(state)
+
+	return &app{router: router, state: state}
 }
