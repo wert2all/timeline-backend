@@ -8,10 +8,9 @@ import (
 	"timeline/backend/db"
 	"timeline/backend/db/model/user"
 	userRepository "timeline/backend/db/repository/user"
-	"timeline/backend/graph"
+	appHttp "timeline/backend/http"
 	"timeline/backend/http/middleware"
 
-	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/go-chi/chi"
 )
 
@@ -32,14 +31,16 @@ func main() {
 	userModel := user.NewUserModel(userRepository.NewUserRepository(ctx, client))
 
 	authMiddleWare := middleware.AuthMiddleware(config.AppConfig.GoogleClintID, userModel)
-	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{}}))
 
 	router := chi.NewRouter()
 	router.Use(middleware.Cors(config.AppConfig.CORS.AllowedOrigin, config.AppConfig.CORS.Debug).Handler)
-	router.Use(authMiddleWare)
 
-	router.Post("/graphql", func(w http.ResponseWriter, r *http.Request) {
-		srv.ServeHTTP(w, r)
+	handler := appHttp.Handler()
+
+	router.Options("/graphql", handler)
+	router.Group(func(r chi.Router) {
+		r.Use(authMiddleWare)
+		r.Post("/graphql", handler)
 	})
 
 	log.Fatal(http.ListenAndServe(":"+config.AppConfig.Port, router))
