@@ -10,8 +10,8 @@ import (
 
 type UserRepository interface {
 	FindByID(ID int) (*ent.User, error)
-	FindByUUID(uuid string) *ent.User
-	Create(uuid, name, email, avatar string) *ent.User
+	FindByUUID(uuid string) (*ent.User, error)
+	Create(uuid, name, email, avatar string) (*ent.User, error)
 }
 
 type userRepositoryImpl struct {
@@ -25,21 +25,17 @@ func (u userRepositoryImpl) FindByID(ID int) (*ent.User, error) {
 }
 
 // Create implements UserRepository.
-func (u userRepositoryImpl) Create(uuid string, name string, email string, avatar string) *ent.User {
+func (u userRepositoryImpl) Create(uuid string, name string, email string, avatar string) (*ent.User, error) {
 	user, err := u.client.User.Create().SetUUID(uuid).SetName(name).SetEmail(email).SetAvatar(avatar).Save(u.context)
 	if err != nil {
 		panic(fmt.Errorf("failed creating user: %w", err))
 	}
-	return user
+	return user, nil
 }
 
 // Create implements UserRepository.
-func (u userRepositoryImpl) FindByUUID(uuid string) *ent.User {
-	user, err := u.client.User.Query().Where(user.UUID(uuid)).Only(u.context)
-	if err != nil {
-		return nil
-	}
-	return user
+func (u userRepositoryImpl) FindByUUID(uuid string) (*ent.User, error) {
+	return u.client.User.Query().Where(user.UUID(uuid)).Only(u.context)
 }
 
 func NewUserRepository(ctx context.Context, client *ent.Client) UserRepository {

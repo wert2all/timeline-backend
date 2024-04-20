@@ -10,7 +10,7 @@ type SomeUser struct {
 }
 
 type Authorize interface {
-	CheckOrCreate(someUser SomeUser) *ent.User
+	CheckOrCreate(someUser SomeUser) (*ent.User, error)
 }
 
 type Get interface {
@@ -19,17 +19,18 @@ type Get interface {
 
 type UserModel struct{ repository user.UserRepository }
 
-func (u UserModel) CheckOrCreate(googleUser SomeUser) *ent.User {
-	user := u.repository.FindByUUID(googleUser.UUID)
+func (u UserModel) CheckOrCreate(googleUser SomeUser) (*ent.User, error) {
+	user, error := u.repository.FindByUUID(googleUser.UUID)
+	error, notFound := error.(*ent.NotFoundError)
 
-	if user == nil {
+	if notFound {
 		return u.repository.Create(googleUser.UUID, googleUser.Name, googleUser.Email, googleUser.Avatar)
 	}
 
 	if user.Active {
-		return user
+		return user, nil
 	} else {
-		return nil
+		return nil, error
 	}
 }
 
