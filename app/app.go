@@ -1,14 +1,11 @@
 package app
 
 import (
-	"context"
 	"log"
 	"net/http"
-	"strconv"
-	"strings"
+	appContext "timeline/backend/app/context"
 	"timeline/backend/app/http/middleware"
 	"timeline/backend/db/model/user"
-	"timeline/backend/ent"
 	"timeline/backend/graph"
 
 	"github.com/99designs/gqlgen/graphql/handler"
@@ -17,7 +14,6 @@ import (
 
 type Application interface {
 	Start()
-	Stop()
 }
 
 type Factory[T any] interface {
@@ -42,8 +38,8 @@ type AppConfig struct {
 }
 
 type AppState struct {
-	Config AppConfig
-	Client *ent.Client
+	Config  AppConfig
+	Context appContext.AppContext
 }
 
 type app struct {
@@ -63,10 +59,6 @@ func (a *app) Start() {
 	log.Fatal(http.ListenAndServe(":"+a.state.Config.Port, a.router))
 }
 
-func (a *app) Stop() {
-	a.state.Client.Close()
-}
-
 // Start implements Factory.
 func (a *routerFactory) Create(state AppState) chi.Router {
 	router := chi.NewRouter()
@@ -74,7 +66,7 @@ func (a *routerFactory) Create(state AppState) chi.Router {
 
 	router.Options("/graphql", a.handler)
 	router.Group(func(r chi.Router) {
-		r.Use(middleware.AuthMiddleware(state.Config.GoogleClintID, a.userModel))
+		r.Use(middleware.AuthMiddleware(state.Context, state.Config.GoogleClintID))
 		r.Post("/graphql", a.handler)
 	})
 	return router
@@ -99,42 +91,16 @@ func getRouterFactory(handler http.HandlerFunc, userModel user.Authorize) *route
 	}
 }
 
-func createConnectionURL(config Postgres) string {
-	var sb strings.Builder
-
-	optionsMap := map[string]string{
-		"host":     config.Host,
-		"port":     strconv.Itoa(config.Port),
-		"user":     config.User,
-		"password": config.Password,
-		"dbname":   config.Database,
-		"sslmode":  "disable",
+func NewAppState(context appContext.AppContext, config AppConfig) AppState {
+	return AppState{
+		Config:  config,
+		Context: context,
 	}
-
-	for key, val := range optionsMap {
-		sb.WriteString(key + "=" + val + " ")
-	}
-
-	return sb.String()
-}
-func createClient(connectionURL string) *ent.Client {
-	client, err := ent.Open("postgres", connectionURL)
-	if err != nil {
-		log.Fatalf("failed opening connection to postgres: %v", err)
-	}
-	if err := client.Schema.Create(context.Background()); err != nil {
-		log.Fatalf("failed creating schema resources: %v", err)
-	}
-	return client
 }
 
-func NewAppState(config AppConfig) AppState {
-	return AppState{Config: config, Client: createClient(createConnectionURL(config.Postgres))}
-}
-
-func NewApplication(state AppState, userModel user.Authorize) Application {
+func NewApplication(state AppState) Application {
 	handler := getHandlerFactory().Create(state)
-	router := getRouterFactory(handler, userModel).Create(state)
+	router := getRouterFactory(handler, state.Context.GetModels().Users).Create(state)
 
 	return &app{router: router, state: state}
 }

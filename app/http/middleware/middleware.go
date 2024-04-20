@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"context"
 	"net/http"
 	"strings"
 	appContext "timeline/backend/app/context"
@@ -11,16 +10,18 @@ import (
 	"google.golang.org/api/idtoken"
 )
 
-func AuthMiddleware(googleClientID string, authorizeModel user.Authorize) func(http.Handler) http.Handler {
+func AuthMiddleware(context appContext.AppContext, googleClientID string) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+			// fmt.Printf("User ID: %d\n", context.GetUserID())
+
 			token := extractToken(req)
 			if token == "" {
 				http.Error(w, "Empty token", http.StatusForbidden)
 				return
 			}
 
-			payload, err := idtoken.Validate(context.Background(), token, googleClientID)
+			payload, err := idtoken.Validate(context.GetContext(), token, googleClientID)
 			if err != nil {
 				http.Error(w, "Invalid token", http.StatusForbidden)
 				return
@@ -32,15 +33,13 @@ func AuthMiddleware(googleClientID string, authorizeModel user.Authorize) func(h
 				payload.Claims["picture"].(string),
 			)
 
-			user := authorizeModel.CheckOrCreate(someUser)
+			user := context.GetModels().Users.CheckOrCreate(someUser)
 			if user == nil {
 				http.Error(w, "Blocked", http.StatusForbidden)
 				return
 			}
 
-			ctx := context.WithValue(req.Context(), appContext.AppContextUserKey{}, user.ID)
-
-			req = req.WithContext(ctx)
+			req = req.WithContext(context.SetUserID(user.ID))
 			next.ServeHTTP(w, req)
 		})
 	}

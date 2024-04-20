@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 	"timeline/backend/app"
+	appContext "timeline/backend/app/context"
+	"timeline/backend/db"
 	"timeline/backend/db/model/user"
 	userRepository "timeline/backend/db/repository/user"
 
@@ -11,12 +13,17 @@ import (
 )
 
 func main() {
-	state := app.NewAppState(readConfig())
-	userModel := user.NewUserModel(userRepository.NewUserRepository(context.Background(), state.Client))
+	appConfig := readConfig()
+	client := db.NewClient(appConfig.Postgres)
+	defer client.Close()
 
-	app := app.NewApplication(state, userModel)
-	app.Start()
-	defer app.Stop()
+	ctx := context.Background()
+
+	userModel := user.NewUserModel(userRepository.NewUserRepository(ctx, client))
+
+	models := appContext.NewModels(userModel)
+
+	app.NewApplication(app.NewAppState(appContext.NewAppContext(ctx, models), appConfig)).Start()
 }
 
 func readConfig() app.AppConfig {
