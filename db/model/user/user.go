@@ -13,9 +13,11 @@ type Authorize interface {
 	CheckOrCreate(someUser SomeUser) *ent.User
 }
 
-type UserModel struct {
-	repository user.UserRepository
+type Get interface {
+	GetByID(int) (ent.User, error)
 }
+
+type UserModel struct{ repository user.UserRepository }
 
 func (u UserModel) CheckOrCreate(googleUser SomeUser) *ent.User {
 	user := u.repository.FindByUUID(googleUser.UUID)
@@ -30,6 +32,8 @@ func (u UserModel) CheckOrCreate(googleUser SomeUser) *ent.User {
 		return nil
 	}
 }
+
+func (u UserModel) GetByID(userID int) (*ent.User, error) { return u.repository.FindByID(userID) }
 
 func NewSomeUser(uuid, name, email, avatar string) SomeUser {
 	return SomeUser{UUID: uuid, Name: name, Email: email, Avatar: avatar}

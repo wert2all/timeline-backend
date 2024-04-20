@@ -9,6 +9,7 @@ import (
 )
 
 type UserRepository interface {
+	FindByID(ID int) (*ent.User, error)
 	FindByUUID(uuid string) *ent.User
 	Create(uuid, name, email, avatar string) *ent.User
 }
@@ -16,6 +17,11 @@ type UserRepository interface {
 type userRepositoryImpl struct {
 	client  *ent.Client
 	context context.Context
+}
+
+// FindByID implements UserRepository.
+func (u userRepositoryImpl) FindByID(ID int) (*ent.User, error) {
+	return u.client.User.Query().Where(user.ID(ID)).Only(u.context)
 }
 
 // Create implements UserRepository.
