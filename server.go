@@ -3,8 +3,8 @@ package main
 import (
 	"context"
 	"timeline/backend/app"
-	appContext "timeline/backend/app/context"
 	"timeline/backend/db"
+	"timeline/backend/db/model"
 	"timeline/backend/db/model/user"
 	userRepository "timeline/backend/db/repository/user"
 
@@ -21,9 +21,9 @@ func main() {
 
 	userModel := user.NewUserModel(userRepository.NewUserRepository(ctx, client))
 
-	models := appContext.NewModels(userModel)
+	models := model.NewAllModels(userModel)
 
-	app.NewApplication(app.NewAppState(appContext.NewAppContext(ctx, models), appConfig)).Start()
+	app.NewApplication(app.NewAppState(models, appConfig)).Start()
 }
 
 func readConfig() app.AppConfig {
