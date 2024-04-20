@@ -8,13 +8,18 @@ import (
 	"context"
 	"fmt"
 	appContext "timeline/backend/app/context"
+	"timeline/backend/graph/convert"
 	"timeline/backend/graph/model"
 )
 
 // Authorize is the resolver for the authorize field.
 func (r *mutationResolver) Authorize(ctx context.Context) (*model.User, error) {
-	fmt.Println(appContext.GetUserID(ctx))
-	return nil, nil
+	userEntity, error := r.Models.Users.GetByID(appContext.GetUserID(ctx))
+	if error != nil {
+		return nil, error
+	}
+
+	return convert.ToUser(userEntity), nil
 }
 
 // Todos is the resolver for the todos field.
