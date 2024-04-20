@@ -3,8 +3,8 @@ package app
 import (
 	"log"
 	"net/http"
-	appContext "timeline/backend/app/context"
 	"timeline/backend/app/http/middleware"
+	"timeline/backend/db/model"
 	"timeline/backend/db/model/user"
 	"timeline/backend/graph"
 
@@ -38,8 +38,8 @@ type AppConfig struct {
 }
 
 type AppState struct {
-	Config  AppConfig
-	Context appContext.AppContext
+	Config AppConfig
+	Models model.AppModels
 }
 
 type app struct {
@@ -66,14 +66,18 @@ func (a *routerFactory) Create(state AppState) chi.Router {
 
 	router.Options("/graphql", a.handler)
 	router.Group(func(r chi.Router) {
-		r.Use(middleware.AuthMiddleware(state.Context, state.Config.GoogleClintID))
+		r.Use(middleware.AuthMiddleware(a.userModel, state.Config.GoogleClintID))
 		r.Post("/graphql", a.handler)
 	})
 	return router
 }
 
 func (h *handlerFactory) Create(state AppState) http.HandlerFunc {
-	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{}}))
+	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{
+		Resolvers: &graph.Resolver{
+			Models: state.Models,
+		},
+	}))
 
 	return func(w http.ResponseWriter, r *http.Request) {
 		srv.ServeHTTP(w, r)
@@ -91,16 +95,17 @@ func getRouterFactory(handler http.HandlerFunc, userModel user.Authorize) *route
 	}
 }
 
-func NewAppState(context appContext.AppContext, config AppConfig) AppState {
+func NewAppState(models model.AppModels, config AppConfig) AppState {
 	return AppState{
-		Config:  config,
-		Context: context,
+		Config: config,
+		Models: models,
 	}
 }
 
 func NewApplication(state AppState) Application {
 	handler := getHandlerFactory().Create(state)
-	router := getRouterFactory(handler, state.Context.GetModels().Users).Create(state)
+
+	router := getRouterFactory(handler, state.Models.Users).Create(state)
 
 	return &app{router: router, state: state}
 }

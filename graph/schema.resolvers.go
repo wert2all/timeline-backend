@@ -7,12 +7,14 @@ package graph
 import (
 	"context"
 	"fmt"
+	appContext "timeline/backend/app/context"
 	"timeline/backend/graph/model"
 )
 
 // Authorize is the resolver for the authorize field.
 func (r *mutationResolver) Authorize(ctx context.Context) (*model.User, error) {
-	panic(fmt.Errorf("not implemented: Authorize - authorize"))
+	fmt.Println(appContext.GetUserID(ctx))
+	return nil, nil
 }
 
 // Todos is the resolver for the todos field.
@@ -26,5 +28,7 @@ func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 // Query returns QueryResolver implementation.
 func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
-type mutationResolver struct{ *Resolver }
-type queryResolver struct{ *Resolver }
+type (
+	mutationResolver struct{ *Resolver }
+	queryResolver    struct{ *Resolver }
+)
