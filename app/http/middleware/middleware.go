@@ -33,8 +33,8 @@ func AuthMiddleware(userModel user.Authorize, googleClientID string) func(http.H
 				payload.Claims["picture"].(string),
 			)
 
-			user := userModel.CheckOrCreate(someUser)
-			if user == nil {
+			user, error := userModel.CheckOrCreate(someUser)
+			if error != nil {
 				http.Error(w, "Blocked", http.StatusForbidden)
 				return
 			}
