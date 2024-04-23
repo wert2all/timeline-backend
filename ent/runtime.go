@@ -4,6 +4,7 @@ package ent
 
 import (
 	"time"
+	"timeline/backend/ent/event"
 	"timeline/backend/ent/schema"
 	"timeline/backend/ent/user"
 )
@@ -12,6 +13,16 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	eventFields := schema.Event{}.Fields()
+	_ = eventFields
+	// eventDescCreatedAt is the schema descriptor for created_at field.
+	eventDescCreatedAt := eventFields[0].Descriptor()
+	// event.DefaultCreatedAt holds the default value on creation for the created_at field.
+	event.DefaultCreatedAt = eventDescCreatedAt.Default.(func() time.Time)
+	// eventDescShowTime is the schema descriptor for showTime field.
+	eventDescShowTime := eventFields[3].Descriptor()
+	// event.DefaultShowTime holds the default value on creation for the showTime field.
+	event.DefaultShowTime = eventDescShowTime.Default.(bool)
 	userFields := schema.User{}.Fields()
 	_ = userFields
 	// userDescUUID is the schema descriptor for uuid field.

@@ -11,6 +11,8 @@ import (
 
 	"timeline/backend/ent/migrate"
 
+	"timeline/backend/ent/event"
+	"timeline/backend/ent/timeline"
 	"timeline/backend/ent/user"
 
 	"entgo.io/ent"
@@ -23,6 +25,10 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
+	// Event is the client for interacting with the Event builders.
+	Event *EventClient
+	// Timeline is the client for interacting with the Timeline builders.
+	Timeline *TimelineClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 }
@@ -36,6 +42,8 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
+	c.Event = NewEventClient(c.config)
+	c.Timeline = NewTimelineClient(c.config)
 	c.User = NewUserClient(c.config)
 }
 
@@ -127,9 +135,11 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:    ctx,
-		config: cfg,
-		User:   NewUserClient(cfg),
+		ctx:      ctx,
+		config:   cfg,
+		Event:    NewEventClient(cfg),
+		Timeline: NewTimelineClient(cfg),
+		User:     NewUserClient(cfg),
 	}, nil
 }
 
@@ -147,16 +157,18 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:    ctx,
-		config: cfg,
-		User:   NewUserClient(cfg),
+		ctx:      ctx,
+		config:   cfg,
+		Event:    NewEventClient(cfg),
+		Timeline: NewTimelineClient(cfg),
+		User:     NewUserClient(cfg),
 	}, nil
 }
 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		User.
+//		Event.
 //		Query().
 //		Count(ctx)
 func (c *Client) Debug() *Client {
@@ -178,22 +190,296 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
+	c.Event.Use(hooks...)
+	c.Timeline.Use(hooks...)
 	c.User.Use(hooks...)
 }
 
 // Intercept adds the query interceptors to all the entity clients.
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
+	c.Event.Intercept(interceptors...)
+	c.Timeline.Intercept(interceptors...)
 	c.User.Intercept(interceptors...)
 }
 
 // Mutate implements the ent.Mutator interface.
 func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
+	case *EventMutation:
+		return c.Event.mutate(ctx, m)
+	case *TimelineMutation:
+		return c.Timeline.mutate(ctx, m)
 	case *UserMutation:
 		return c.User.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
+	}
+}
+
+// EventClient is a client for the Event schema.
+type EventClient struct {
+	config
+}
+
+// NewEventClient returns a client for the Event from the given config.
+func NewEventClient(c config) *EventClient {
+	return &EventClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `event.Hooks(f(g(h())))`.
+func (c *EventClient) Use(hooks ...Hook) {
+	c.hooks.Event = append(c.hooks.Event, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `event.Intercept(f(g(h())))`.
+func (c *EventClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Event = append(c.inters.Event, interceptors...)
+}
+
+// Create returns a builder for creating a Event entity.
+func (c *EventClient) Create() *EventCreate {
+	mutation := newEventMutation(c.config, OpCreate)
+	return &EventCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Event entities.
+func (c *EventClient) CreateBulk(builders ...*EventCreate) *EventCreateBulk {
+	return &EventCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *EventClient) MapCreateBulk(slice any, setFunc func(*EventCreate, int)) *EventCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &EventCreateBulk{err: fmt.Errorf("calling to EventClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*EventCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &EventCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Event.
+func (c *EventClient) Update() *EventUpdate {
+	mutation := newEventMutation(c.config, OpUpdate)
+	return &EventUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *EventClient) UpdateOne(e *Event) *EventUpdateOne {
+	mutation := newEventMutation(c.config, OpUpdateOne, withEvent(e))
+	return &EventUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *EventClient) UpdateOneID(id int) *EventUpdateOne {
+	mutation := newEventMutation(c.config, OpUpdateOne, withEventID(id))
+	return &EventUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Event.
+func (c *EventClient) Delete() *EventDelete {
+	mutation := newEventMutation(c.config, OpDelete)
+	return &EventDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *EventClient) DeleteOne(e *Event) *EventDeleteOne {
+	return c.DeleteOneID(e.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *EventClient) DeleteOneID(id int) *EventDeleteOne {
+	builder := c.Delete().Where(event.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &EventDeleteOne{builder}
+}
+
+// Query returns a query builder for Event.
+func (c *EventClient) Query() *EventQuery {
+	return &EventQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeEvent},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Event entity by its id.
+func (c *EventClient) Get(ctx context.Context, id int) (*Event, error) {
+	return c.Query().Where(event.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *EventClient) GetX(ctx context.Context, id int) *Event {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *EventClient) Hooks() []Hook {
+	return c.hooks.Event
+}
+
+// Interceptors returns the client interceptors.
+func (c *EventClient) Interceptors() []Interceptor {
+	return c.inters.Event
+}
+
+func (c *EventClient) mutate(ctx context.Context, m *EventMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&EventCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&EventUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&EventUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&EventDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Event mutation op: %q", m.Op())
+	}
+}
+
+// TimelineClient is a client for the Timeline schema.
+type TimelineClient struct {
+	config
+}
+
+// NewTimelineClient returns a client for the Timeline from the given config.
+func NewTimelineClient(c config) *TimelineClient {
+	return &TimelineClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `timeline.Hooks(f(g(h())))`.
+func (c *TimelineClient) Use(hooks ...Hook) {
+	c.hooks.Timeline = append(c.hooks.Timeline, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `timeline.Intercept(f(g(h())))`.
+func (c *TimelineClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Timeline = append(c.inters.Timeline, interceptors...)
+}
+
+// Create returns a builder for creating a Timeline entity.
+func (c *TimelineClient) Create() *TimelineCreate {
+	mutation := newTimelineMutation(c.config, OpCreate)
+	return &TimelineCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Timeline entities.
+func (c *TimelineClient) CreateBulk(builders ...*TimelineCreate) *TimelineCreateBulk {
+	return &TimelineCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *TimelineClient) MapCreateBulk(slice any, setFunc func(*TimelineCreate, int)) *TimelineCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &TimelineCreateBulk{err: fmt.Errorf("calling to TimelineClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*TimelineCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &TimelineCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Timeline.
+func (c *TimelineClient) Update() *TimelineUpdate {
+	mutation := newTimelineMutation(c.config, OpUpdate)
+	return &TimelineUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *TimelineClient) UpdateOne(t *Timeline) *TimelineUpdateOne {
+	mutation := newTimelineMutation(c.config, OpUpdateOne, withTimeline(t))
+	return &TimelineUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *TimelineClient) UpdateOneID(id int) *TimelineUpdateOne {
+	mutation := newTimelineMutation(c.config, OpUpdateOne, withTimelineID(id))
+	return &TimelineUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Timeline.
+func (c *TimelineClient) Delete() *TimelineDelete {
+	mutation := newTimelineMutation(c.config, OpDelete)
+	return &TimelineDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *TimelineClient) DeleteOne(t *Timeline) *TimelineDeleteOne {
+	return c.DeleteOneID(t.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *TimelineClient) DeleteOneID(id int) *TimelineDeleteOne {
+	builder := c.Delete().Where(timeline.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &TimelineDeleteOne{builder}
+}
+
+// Query returns a query builder for Timeline.
+func (c *TimelineClient) Query() *TimelineQuery {
+	return &TimelineQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeTimeline},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Timeline entity by its id.
+func (c *TimelineClient) Get(ctx context.Context, id int) (*Timeline, error) {
+	return c.Query().Where(timeline.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *TimelineClient) GetX(ctx context.Context, id int) *Timeline {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *TimelineClient) Hooks() []Hook {
+	return c.hooks.Timeline
+}
+
+// Interceptors returns the client interceptors.
+func (c *TimelineClient) Interceptors() []Interceptor {
+	return c.inters.Timeline
+}
+
+func (c *TimelineClient) mutate(ctx context.Context, m *TimelineMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&TimelineCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&TimelineUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&TimelineUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&TimelineDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Timeline mutation op: %q", m.Op())
 	}
 }
 
@@ -333,9 +619,9 @@ func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error)
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		User []ent.Hook
+		Event, Timeline, User []ent.Hook
 	}
 	inters struct {
-		User []ent.Interceptor
+		Event, Timeline, User []ent.Interceptor
 	}
 )
