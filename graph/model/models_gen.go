@@ -8,6 +8,11 @@ type Mutation struct {
 type Query struct {
 }
 
+type ShortUserTimeline struct {
+	ID   int     `json:"id"`
+	Name *string `json:"name,omitempty"`
+}
+
 type Todo struct {
 	ID   int    `json:"id"`
 	Text string `json:"text"`
@@ -16,9 +21,10 @@ type Todo struct {
 }
 
 type User struct {
-	ID     int     `json:"id"`
-	Name   string  `json:"name"`
-	Email  string  `json:"email"`
-	Avatar *string `json:"avatar,omitempty"`
-	IsNew  bool    `json:"isNew"`
+	ID        int                  `json:"id"`
+	Name      string               `json:"name"`
+	Email     string               `json:"email"`
+	Avatar    *string              `json:"avatar,omitempty"`
+	IsNew     bool                 `json:"isNew"`
+	Timelines []*ShortUserTimeline `json:"timelines"`
 }

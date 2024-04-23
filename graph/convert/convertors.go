@@ -7,10 +7,11 @@ import (
 
 func ToUser(user *ent.User, isNew bool) *model.User {
 	return &model.User{
-		ID:     user.ID,
-		Name:   user.Name,
-		Email:  user.Email,
-		Avatar: user.Avatar,
-		IsNew:  isNew,
+		ID:        user.ID,
+		Name:      user.Name,
+		Email:     user.Email,
+		Avatar:    user.Avatar,
+		IsNew:     isNew,
+		Timelines: []*model.ShortUserTimeline{},
 	}
 }
