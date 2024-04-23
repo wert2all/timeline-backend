@@ -17,10 +17,16 @@ type Todo {
   user: User!
 }
 
+type ShortUserTimeline {
+  id: Int!
+  name: String
+}
+
 type User {
   id: Int!
   name: String!
   email: String!
   avatar: String
   isNew: Boolean!
+  timelines: [ShortUserTimeline!]!
 }
