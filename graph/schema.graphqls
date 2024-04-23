@@ -22,4 +22,5 @@ type User {
   name: String!
   email: String!
   avatar: String
+  isNew: Boolean!
 }
