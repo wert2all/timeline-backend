@@ -21,6 +21,7 @@ type EventQuery struct {
 	order      []event.OrderOption
 	inters     []Interceptor
 	predicates []predicate.Event
+	withFKs    bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -331,9 +332,13 @@ func (eq *EventQuery) prepareQuery(ctx context.Context) error {
 
 func (eq *EventQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Event, error) {
 	var (
-		nodes = []*Event{}
-		_spec = eq.querySpec()
+		nodes   = []*Event{}
+		withFKs = eq.withFKs
+		_spec   = eq.querySpec()
 	)
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, event.ForeignKeys...)
+	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Event).scanValues(nil, columns)
 	}

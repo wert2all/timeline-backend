@@ -6,8 +6,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"timeline/backend/ent/event"
 	"timeline/backend/ent/predicate"
 	"timeline/backend/ent/timeline"
+	"timeline/backend/ent/user"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -41,9 +43,70 @@ func (tu *TimelineUpdate) SetNillableName(s *string) *TimelineUpdate {
 	return tu
 }
 
+// SetUserID sets the "user" edge to the User entity by ID.
+func (tu *TimelineUpdate) SetUserID(id int) *TimelineUpdate {
+	tu.mutation.SetUserID(id)
+	return tu
+}
+
+// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
+func (tu *TimelineUpdate) SetNillableUserID(id *int) *TimelineUpdate {
+	if id != nil {
+		tu = tu.SetUserID(*id)
+	}
+	return tu
+}
+
+// SetUser sets the "user" edge to the User entity.
+func (tu *TimelineUpdate) SetUser(u *User) *TimelineUpdate {
+	return tu.SetUserID(u.ID)
+}
+
+// AddEventIDs adds the "event" edge to the Event entity by IDs.
+func (tu *TimelineUpdate) AddEventIDs(ids ...int) *TimelineUpdate {
+	tu.mutation.AddEventIDs(ids...)
+	return tu
+}
+
+// AddEvent adds the "event" edges to the Event entity.
+func (tu *TimelineUpdate) AddEvent(e ...*Event) *TimelineUpdate {
+	ids := make([]int, len(e))
+	for i := range e {
+		ids[i] = e[i].ID
+	}
+	return tu.AddEventIDs(ids...)
+}
+
 // Mutation returns the TimelineMutation object of the builder.
 func (tu *TimelineUpdate) Mutation() *TimelineMutation {
 	return tu.mutation
+}
+
+// ClearUser clears the "user" edge to the User entity.
+func (tu *TimelineUpdate) ClearUser() *TimelineUpdate {
+	tu.mutation.ClearUser()
+	return tu
+}
+
+// ClearEvent clears all "event" edges to the Event entity.
+func (tu *TimelineUpdate) ClearEvent() *TimelineUpdate {
+	tu.mutation.ClearEvent()
+	return tu
+}
+
+// RemoveEventIDs removes the "event" edge to Event entities by IDs.
+func (tu *TimelineUpdate) RemoveEventIDs(ids ...int) *TimelineUpdate {
+	tu.mutation.RemoveEventIDs(ids...)
+	return tu
+}
+
+// RemoveEvent removes "event" edges to Event entities.
+func (tu *TimelineUpdate) RemoveEvent(e ...*Event) *TimelineUpdate {
+	ids := make([]int, len(e))
+	for i := range e {
+		ids[i] = e[i].ID
+	}
+	return tu.RemoveEventIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -85,6 +148,80 @@ func (tu *TimelineUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := tu.mutation.Name(); ok {
 		_spec.SetField(timeline.FieldName, field.TypeString, value)
 	}
+	if tu.mutation.UserCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   timeline.UserTable,
+			Columns: []string{timeline.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tu.mutation.UserIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   timeline.UserTable,
+			Columns: []string{timeline.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if tu.mutation.EventCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   timeline.EventTable,
+			Columns: []string{timeline.EventColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(event.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tu.mutation.RemovedEventIDs(); len(nodes) > 0 && !tu.mutation.EventCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   timeline.EventTable,
+			Columns: []string{timeline.EventColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(event.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tu.mutation.EventIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   timeline.EventTable,
+			Columns: []string{timeline.EventColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(event.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, tu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{timeline.Label}
@@ -119,9 +256,70 @@ func (tuo *TimelineUpdateOne) SetNillableName(s *string) *TimelineUpdateOne {
 	return tuo
 }
 
+// SetUserID sets the "user" edge to the User entity by ID.
+func (tuo *TimelineUpdateOne) SetUserID(id int) *TimelineUpdateOne {
+	tuo.mutation.SetUserID(id)
+	return tuo
+}
+
+// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
+func (tuo *TimelineUpdateOne) SetNillableUserID(id *int) *TimelineUpdateOne {
+	if id != nil {
+		tuo = tuo.SetUserID(*id)
+	}
+	return tuo
+}
+
+// SetUser sets the "user" edge to the User entity.
+func (tuo *TimelineUpdateOne) SetUser(u *User) *TimelineUpdateOne {
+	return tuo.SetUserID(u.ID)
+}
+
+// AddEventIDs adds the "event" edge to the Event entity by IDs.
+func (tuo *TimelineUpdateOne) AddEventIDs(ids ...int) *TimelineUpdateOne {
+	tuo.mutation.AddEventIDs(ids...)
+	return tuo
+}
+
+// AddEvent adds the "event" edges to the Event entity.
+func (tuo *TimelineUpdateOne) AddEvent(e ...*Event) *TimelineUpdateOne {
+	ids := make([]int, len(e))
+	for i := range e {
+		ids[i] = e[i].ID
+	}
+	return tuo.AddEventIDs(ids...)
+}
+
 // Mutation returns the TimelineMutation object of the builder.
 func (tuo *TimelineUpdateOne) Mutation() *TimelineMutation {
 	return tuo.mutation
+}
+
+// ClearUser clears the "user" edge to the User entity.
+func (tuo *TimelineUpdateOne) ClearUser() *TimelineUpdateOne {
+	tuo.mutation.ClearUser()
+	return tuo
+}
+
+// ClearEvent clears all "event" edges to the Event entity.
+func (tuo *TimelineUpdateOne) ClearEvent() *TimelineUpdateOne {
+	tuo.mutation.ClearEvent()
+	return tuo
+}
+
+// RemoveEventIDs removes the "event" edge to Event entities by IDs.
+func (tuo *TimelineUpdateOne) RemoveEventIDs(ids ...int) *TimelineUpdateOne {
+	tuo.mutation.RemoveEventIDs(ids...)
+	return tuo
+}
+
+// RemoveEvent removes "event" edges to Event entities.
+func (tuo *TimelineUpdateOne) RemoveEvent(e ...*Event) *TimelineUpdateOne {
+	ids := make([]int, len(e))
+	for i := range e {
+		ids[i] = e[i].ID
+	}
+	return tuo.RemoveEventIDs(ids...)
 }
 
 // Where appends a list predicates to the TimelineUpdate builder.
@@ -192,6 +390,80 @@ func (tuo *TimelineUpdateOne) sqlSave(ctx context.Context) (_node *Timeline, err
 	}
 	if value, ok := tuo.mutation.Name(); ok {
 		_spec.SetField(timeline.FieldName, field.TypeString, value)
+	}
+	if tuo.mutation.UserCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   timeline.UserTable,
+			Columns: []string{timeline.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tuo.mutation.UserIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   timeline.UserTable,
+			Columns: []string{timeline.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if tuo.mutation.EventCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   timeline.EventTable,
+			Columns: []string{timeline.EventColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(event.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tuo.mutation.RemovedEventIDs(); len(nodes) > 0 && !tuo.mutation.EventCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   timeline.EventTable,
+			Columns: []string{timeline.EventColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(event.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tuo.mutation.EventIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   timeline.EventTable,
+			Columns: []string{timeline.EventColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(event.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &Timeline{config: tuo.config}
 	_spec.Assign = _node.assignValues

@@ -28,8 +28,9 @@ type Event struct {
 	// Title holds the value of the "title" field.
 	Title *string `json:"title,omitempty"`
 	// Description holds the value of the "description" field.
-	Description  *string `json:"description,omitempty"`
-	selectValues sql.SelectValues
+	Description    *string `json:"description,omitempty"`
+	timeline_event *int
+	selectValues   sql.SelectValues
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -45,6 +46,8 @@ func (*Event) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullString)
 		case event.FieldCreatedAt, event.FieldDate:
 			values[i] = new(sql.NullTime)
+		case event.ForeignKeys[0]: // timeline_event
+			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -104,6 +107,13 @@ func (e *Event) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				e.Description = new(string)
 				*e.Description = value.String
+			}
+		case event.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field timeline_event", value)
+			} else if value.Valid {
+				e.timeline_event = new(int)
+				*e.timeline_event = int(value.Int64)
 			}
 		default:
 			e.selectValues.Set(columns[i], values[i])

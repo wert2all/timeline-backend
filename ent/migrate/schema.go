@@ -17,23 +17,41 @@ var (
 		{Name: "show_time", Type: field.TypeBool, Default: true},
 		{Name: "title", Type: field.TypeString},
 		{Name: "description", Type: field.TypeString},
+		{Name: "timeline_event", Type: field.TypeInt, Nullable: true},
 	}
 	// EventsTable holds the schema information for the "events" table.
 	EventsTable = &schema.Table{
 		Name:       "events",
 		Columns:    EventsColumns,
 		PrimaryKey: []*schema.Column{EventsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "events_timelines_event",
+				Columns:    []*schema.Column{EventsColumns[7]},
+				RefColumns: []*schema.Column{TimelinesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
 	}
 	// TimelinesColumns holds the columns for the "timelines" table.
 	TimelinesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "name", Type: field.TypeString},
+		{Name: "user_timeline", Type: field.TypeInt, Nullable: true},
 	}
 	// TimelinesTable holds the schema information for the "timelines" table.
 	TimelinesTable = &schema.Table{
 		Name:       "timelines",
 		Columns:    TimelinesColumns,
 		PrimaryKey: []*schema.Column{TimelinesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "timelines_users_timeline",
+				Columns:    []*schema.Column{TimelinesColumns[2]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
 	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
@@ -62,4 +80,6 @@ var (
 )
 
 func init() {
+	EventsTable.ForeignKeys[0].RefTable = TimelinesTable
+	TimelinesTable.ForeignKeys[0].RefTable = UsersTable
 }
