@@ -33,13 +33,13 @@ func AuthMiddleware(userModel user.Authorize, googleClientID string) func(http.H
 				payload.Claims["picture"].(string),
 			)
 
-			user, error := userModel.CheckOrCreate(someUser)
+			userCheck, error := userModel.CheckOrCreate(someUser)
 			if error != nil {
 				http.Error(w, "Blocked", http.StatusForbidden)
 				return
 			}
 
-			req = req.WithContext(appContext.SetUserID(req.Context(), user.ID))
+			req = req.WithContext(appContext.SetUserID(req.Context(), userCheck.ID, userCheck.IsNew))
 			next.ServeHTTP(w, req)
 		})
 	}

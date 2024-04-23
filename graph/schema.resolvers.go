@@ -19,7 +19,7 @@ func (r *mutationResolver) Authorize(ctx context.Context) (*model.User, error) {
 		return nil, error
 	}
 
-	return convert.ToUser(userEntity), nil
+	return convert.ToUser(userEntity, appContext.GetIsNew(ctx)), nil
 }
 
 // Todos is the resolver for the todos field.
@@ -33,7 +33,5 @@ func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 // Query returns QueryResolver implementation.
 func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
-type (
-	mutationResolver struct{ *Resolver }
-	queryResolver    struct{ *Resolver }
-)
+type mutationResolver struct{ *Resolver }
+type queryResolver struct{ *Resolver }
