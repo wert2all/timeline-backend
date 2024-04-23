@@ -12,11 +12,17 @@ type UserRepository interface {
 	FindByID(ID int) (*ent.User, error)
 	FindByUUID(uuid string) (*ent.User, error)
 	Create(uuid, name, email, avatar string) (*ent.User, error)
+	Save(user *ent.UserUpdateOne) (*ent.User, error)
 }
 
 type userRepositoryImpl struct {
 	client  *ent.Client
 	context context.Context
+}
+
+// Save implements UserRepository.
+func (u userRepositoryImpl) Save(user *ent.UserUpdateOne) (*ent.User, error) {
+	return user.Save(u.context)
 }
 
 // FindByID implements UserRepository.
