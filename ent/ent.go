@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"reflect"
 	"sync"
+	"timeline/backend/ent/event"
+	"timeline/backend/ent/timeline"
 	"timeline/backend/ent/user"
 
 	"entgo.io/ent"
@@ -73,7 +75,9 @@ var (
 func checkColumn(table, column string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			user.Table: user.ValidColumn,
+			event.Table:    event.ValidColumn,
+			timeline.Table: timeline.ValidColumn,
+			user.Table:     user.ValidColumn,
 		})
 	})
 	return columnCheck(table, column)

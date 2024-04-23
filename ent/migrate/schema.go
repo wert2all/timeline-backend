@@ -8,6 +8,33 @@ import (
 )
 
 var (
+	// EventsColumns holds the columns for the "events" table.
+	EventsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "date", Type: field.TypeTime},
+		{Name: "time", Type: field.TypeString},
+		{Name: "show_time", Type: field.TypeBool, Default: true},
+		{Name: "title", Type: field.TypeString},
+		{Name: "description", Type: field.TypeString},
+	}
+	// EventsTable holds the schema information for the "events" table.
+	EventsTable = &schema.Table{
+		Name:       "events",
+		Columns:    EventsColumns,
+		PrimaryKey: []*schema.Column{EventsColumns[0]},
+	}
+	// TimelinesColumns holds the columns for the "timelines" table.
+	TimelinesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "name", Type: field.TypeString},
+	}
+	// TimelinesTable holds the schema information for the "timelines" table.
+	TimelinesTable = &schema.Table{
+		Name:       "timelines",
+		Columns:    TimelinesColumns,
+		PrimaryKey: []*schema.Column{TimelinesColumns[0]},
+	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -28,6 +55,8 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		EventsTable,
+		TimelinesTable,
 		UsersTable,
 	}
 )
