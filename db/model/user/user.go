@@ -1,6 +1,7 @@
 package user
 
 import (
+	"time"
 	"timeline/backend/db/repository/user"
 	"timeline/backend/ent"
 )
@@ -16,10 +17,7 @@ type CheckOrCreate struct {
 
 type Authorize interface {
 	CheckOrCreate(someUser SomeUser) (*CheckOrCreate, error)
-}
-
-type Get interface {
-	GetByID(int) (ent.User, error)
+	Authorize(int) (*ent.User, error)
 }
 
 type UserModel struct{ repository user.UserRepository }
@@ -41,6 +39,14 @@ func (u UserModel) CheckOrCreate(googleUser SomeUser) (*CheckOrCreate, error) {
 	} else {
 		return nil, error
 	}
+}
+
+func (u UserModel) Authorize(userID int) (*ent.User, error) {
+	fetchedUser, error := u.repository.FindByID(userID)
+	if error != nil {
+		return nil, error
+	}
+	return u.repository.Save(fetchedUser.Update().SetUpdatedAt(time.Now()))
 }
 
 func (u UserModel) GetByID(userID int) (*ent.User, error) { return u.repository.FindByID(userID) }

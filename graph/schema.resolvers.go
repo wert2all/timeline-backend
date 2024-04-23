@@ -14,7 +14,7 @@ import (
 
 // Authorize is the resolver for the authorize field.
 func (r *mutationResolver) Authorize(ctx context.Context) (*model.User, error) {
-	userEntity, error := r.Models.Users.GetByID(appContext.GetUserID(ctx))
+	userEntity, error := r.Models.Users.Authorize(appContext.GetUserID(ctx))
 	if error != nil {
 		return nil, error
 	}
