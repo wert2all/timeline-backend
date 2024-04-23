@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 const (
@@ -29,8 +30,17 @@ const (
 	FieldActive = "active"
 	// FieldAdmin holds the string denoting the admin field in the database.
 	FieldAdmin = "admin"
+	// EdgeTimeline holds the string denoting the timeline edge name in mutations.
+	EdgeTimeline = "timeline"
 	// Table holds the table name of the user in the database.
 	Table = "users"
+	// TimelineTable is the table that holds the timeline relation/edge.
+	TimelineTable = "timelines"
+	// TimelineInverseTable is the table name for the Timeline entity.
+	// It exists in this package in order to avoid circular dependency with the "timeline" package.
+	TimelineInverseTable = "timelines"
+	// TimelineColumn is the table column denoting the timeline relation/edge.
+	TimelineColumn = "user_timeline"
 )
 
 // Columns holds all SQL columns for user fields.
@@ -121,4 +131,25 @@ func ByActive(opts ...sql.OrderTermOption) OrderOption {
 // ByAdmin orders the results by the admin field.
 func ByAdmin(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldAdmin, opts...).ToFunc()
+}
+
+// ByTimelineCount orders the results by timeline count.
+func ByTimelineCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newTimelineStep(), opts...)
+	}
+}
+
+// ByTimeline orders the results by timeline terms.
+func ByTimeline(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newTimelineStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+func newTimelineStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(TimelineInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, TimelineTable, TimelineColumn),
+	)
 }

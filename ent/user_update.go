@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"time"
 	"timeline/backend/ent/predicate"
+	"timeline/backend/ent/timeline"
 	"timeline/backend/ent/user"
 
 	"entgo.io/ent/dialect/sql"
@@ -118,9 +119,45 @@ func (uu *UserUpdate) SetNillableAdmin(b *bool) *UserUpdate {
 	return uu
 }
 
+// AddTimelineIDs adds the "timeline" edge to the Timeline entity by IDs.
+func (uu *UserUpdate) AddTimelineIDs(ids ...int) *UserUpdate {
+	uu.mutation.AddTimelineIDs(ids...)
+	return uu
+}
+
+// AddTimeline adds the "timeline" edges to the Timeline entity.
+func (uu *UserUpdate) AddTimeline(t ...*Timeline) *UserUpdate {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return uu.AddTimelineIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
+}
+
+// ClearTimeline clears all "timeline" edges to the Timeline entity.
+func (uu *UserUpdate) ClearTimeline() *UserUpdate {
+	uu.mutation.ClearTimeline()
+	return uu
+}
+
+// RemoveTimelineIDs removes the "timeline" edge to Timeline entities by IDs.
+func (uu *UserUpdate) RemoveTimelineIDs(ids ...int) *UserUpdate {
+	uu.mutation.RemoveTimelineIDs(ids...)
+	return uu
+}
+
+// RemoveTimeline removes "timeline" edges to Timeline entities.
+func (uu *UserUpdate) RemoveTimeline(t ...*Timeline) *UserUpdate {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return uu.RemoveTimelineIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -211,6 +248,51 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := uu.mutation.Admin(); ok {
 		_spec.SetField(user.FieldAdmin, field.TypeBool, value)
+	}
+	if uu.mutation.TimelineCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.TimelineTable,
+			Columns: []string{user.TimelineColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(timeline.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.RemovedTimelineIDs(); len(nodes) > 0 && !uu.mutation.TimelineCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.TimelineTable,
+			Columns: []string{user.TimelineColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(timeline.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.TimelineIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.TimelineTable,
+			Columns: []string{user.TimelineColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(timeline.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -322,9 +404,45 @@ func (uuo *UserUpdateOne) SetNillableAdmin(b *bool) *UserUpdateOne {
 	return uuo
 }
 
+// AddTimelineIDs adds the "timeline" edge to the Timeline entity by IDs.
+func (uuo *UserUpdateOne) AddTimelineIDs(ids ...int) *UserUpdateOne {
+	uuo.mutation.AddTimelineIDs(ids...)
+	return uuo
+}
+
+// AddTimeline adds the "timeline" edges to the Timeline entity.
+func (uuo *UserUpdateOne) AddTimeline(t ...*Timeline) *UserUpdateOne {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return uuo.AddTimelineIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uuo *UserUpdateOne) Mutation() *UserMutation {
 	return uuo.mutation
+}
+
+// ClearTimeline clears all "timeline" edges to the Timeline entity.
+func (uuo *UserUpdateOne) ClearTimeline() *UserUpdateOne {
+	uuo.mutation.ClearTimeline()
+	return uuo
+}
+
+// RemoveTimelineIDs removes the "timeline" edge to Timeline entities by IDs.
+func (uuo *UserUpdateOne) RemoveTimelineIDs(ids ...int) *UserUpdateOne {
+	uuo.mutation.RemoveTimelineIDs(ids...)
+	return uuo
+}
+
+// RemoveTimeline removes "timeline" edges to Timeline entities.
+func (uuo *UserUpdateOne) RemoveTimeline(t ...*Timeline) *UserUpdateOne {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return uuo.RemoveTimelineIDs(ids...)
 }
 
 // Where appends a list predicates to the UserUpdate builder.
@@ -445,6 +563,51 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	}
 	if value, ok := uuo.mutation.Admin(); ok {
 		_spec.SetField(user.FieldAdmin, field.TypeBool, value)
+	}
+	if uuo.mutation.TimelineCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.TimelineTable,
+			Columns: []string{user.TimelineColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(timeline.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.RemovedTimelineIDs(); len(nodes) > 0 && !uuo.mutation.TimelineCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.TimelineTable,
+			Columns: []string{user.TimelineColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(timeline.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.TimelineIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.TimelineTable,
+			Columns: []string{user.TimelineColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(timeline.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &User{config: uuo.config}
 	_spec.Assign = _node.assignValues

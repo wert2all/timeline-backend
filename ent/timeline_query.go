@@ -4,10 +4,13 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
+	"timeline/backend/ent/event"
 	"timeline/backend/ent/predicate"
 	"timeline/backend/ent/timeline"
+	"timeline/backend/ent/user"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -21,6 +24,9 @@ type TimelineQuery struct {
 	order      []timeline.OrderOption
 	inters     []Interceptor
 	predicates []predicate.Timeline
+	withUser   *UserQuery
+	withEvent  *EventQuery
+	withFKs    bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -55,6 +61,50 @@ func (tq *TimelineQuery) Unique(unique bool) *TimelineQuery {
 func (tq *TimelineQuery) Order(o ...timeline.OrderOption) *TimelineQuery {
 	tq.order = append(tq.order, o...)
 	return tq
+}
+
+// QueryUser chains the current query on the "user" edge.
+func (tq *TimelineQuery) QueryUser() *UserQuery {
+	query := (&UserClient{config: tq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := tq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := tq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(timeline.Table, timeline.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, timeline.UserTable, timeline.UserColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(tq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryEvent chains the current query on the "event" edge.
+func (tq *TimelineQuery) QueryEvent() *EventQuery {
+	query := (&EventClient{config: tq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := tq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := tq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(timeline.Table, timeline.FieldID, selector),
+			sqlgraph.To(event.Table, event.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, timeline.EventTable, timeline.EventColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(tq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
 }
 
 // First returns the first Timeline entity from the query.
@@ -249,10 +299,34 @@ func (tq *TimelineQuery) Clone() *TimelineQuery {
 		order:      append([]timeline.OrderOption{}, tq.order...),
 		inters:     append([]Interceptor{}, tq.inters...),
 		predicates: append([]predicate.Timeline{}, tq.predicates...),
+		withUser:   tq.withUser.Clone(),
+		withEvent:  tq.withEvent.Clone(),
 		// clone intermediate query.
 		sql:  tq.sql.Clone(),
 		path: tq.path,
 	}
+}
+
+// WithUser tells the query-builder to eager-load the nodes that are connected to
+// the "user" edge. The optional arguments are used to configure the query builder of the edge.
+func (tq *TimelineQuery) WithUser(opts ...func(*UserQuery)) *TimelineQuery {
+	query := (&UserClient{config: tq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	tq.withUser = query
+	return tq
+}
+
+// WithEvent tells the query-builder to eager-load the nodes that are connected to
+// the "event" edge. The optional arguments are used to configure the query builder of the edge.
+func (tq *TimelineQuery) WithEvent(opts ...func(*EventQuery)) *TimelineQuery {
+	query := (&EventClient{config: tq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	tq.withEvent = query
+	return tq
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -331,15 +405,27 @@ func (tq *TimelineQuery) prepareQuery(ctx context.Context) error {
 
 func (tq *TimelineQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Timeline, error) {
 	var (
-		nodes = []*Timeline{}
-		_spec = tq.querySpec()
+		nodes       = []*Timeline{}
+		withFKs     = tq.withFKs
+		_spec       = tq.querySpec()
+		loadedTypes = [2]bool{
+			tq.withUser != nil,
+			tq.withEvent != nil,
+		}
 	)
+	if tq.withUser != nil {
+		withFKs = true
+	}
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, timeline.ForeignKeys...)
+	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Timeline).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
 		node := &Timeline{config: tq.config}
 		nodes = append(nodes, node)
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	for i := range hooks {
@@ -351,7 +437,84 @@ func (tq *TimelineQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Tim
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+	if query := tq.withUser; query != nil {
+		if err := tq.loadUser(ctx, query, nodes, nil,
+			func(n *Timeline, e *User) { n.Edges.User = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := tq.withEvent; query != nil {
+		if err := tq.loadEvent(ctx, query, nodes,
+			func(n *Timeline) { n.Edges.Event = []*Event{} },
+			func(n *Timeline, e *Event) { n.Edges.Event = append(n.Edges.Event, e) }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
+}
+
+func (tq *TimelineQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*Timeline, init func(*Timeline), assign func(*Timeline, *User)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Timeline)
+	for i := range nodes {
+		if nodes[i].user_timeline == nil {
+			continue
+		}
+		fk := *nodes[i].user_timeline
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(user.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "user_timeline" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
+func (tq *TimelineQuery) loadEvent(ctx context.Context, query *EventQuery, nodes []*Timeline, init func(*Timeline), assign func(*Timeline, *Event)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Timeline)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.Event(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(timeline.EventColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.timeline_event
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "timeline_event" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "timeline_event" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
 }
 
 func (tq *TimelineQuery) sqlCount(ctx context.Context) (int, error) {

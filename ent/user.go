@@ -32,8 +32,29 @@ type User struct {
 	// Active holds the value of the "active" field.
 	Active bool `json:"active,omitempty"`
 	// Admin holds the value of the "admin" field.
-	Admin        bool `json:"admin,omitempty"`
+	Admin bool `json:"admin,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the UserQuery when eager-loading is set.
+	Edges        UserEdges `json:"edges"`
 	selectValues sql.SelectValues
+}
+
+// UserEdges holds the relations/edges for other nodes in the graph.
+type UserEdges struct {
+	// Timeline holds the value of the timeline edge.
+	Timeline []*Timeline `json:"timeline,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+}
+
+// TimelineOrErr returns the Timeline value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) TimelineOrErr() ([]*Timeline, error) {
+	if e.loadedTypes[0] {
+		return e.Timeline, nil
+	}
+	return nil, &NotLoadedError{edge: "timeline"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -130,6 +151,11 @@ func (u *User) assignValues(columns []string, values []any) error {
 // This includes values selected through modifiers, order, etc.
 func (u *User) Value(name string) (ent.Value, error) {
 	return u.selectValues.Get(name)
+}
+
+// QueryTimeline queries the "timeline" edge of the User entity.
+func (u *User) QueryTimeline() *TimelineQuery {
+	return NewUserClient(u.config).QueryTimeline(u)
 }
 
 // Update returns a builder for updating this User.

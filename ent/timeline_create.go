@@ -6,7 +6,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"timeline/backend/ent/event"
 	"timeline/backend/ent/timeline"
+	"timeline/backend/ent/user"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -23,6 +25,40 @@ type TimelineCreate struct {
 func (tc *TimelineCreate) SetName(s string) *TimelineCreate {
 	tc.mutation.SetName(s)
 	return tc
+}
+
+// SetUserID sets the "user" edge to the User entity by ID.
+func (tc *TimelineCreate) SetUserID(id int) *TimelineCreate {
+	tc.mutation.SetUserID(id)
+	return tc
+}
+
+// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
+func (tc *TimelineCreate) SetNillableUserID(id *int) *TimelineCreate {
+	if id != nil {
+		tc = tc.SetUserID(*id)
+	}
+	return tc
+}
+
+// SetUser sets the "user" edge to the User entity.
+func (tc *TimelineCreate) SetUser(u *User) *TimelineCreate {
+	return tc.SetUserID(u.ID)
+}
+
+// AddEventIDs adds the "event" edge to the Event entity by IDs.
+func (tc *TimelineCreate) AddEventIDs(ids ...int) *TimelineCreate {
+	tc.mutation.AddEventIDs(ids...)
+	return tc
+}
+
+// AddEvent adds the "event" edges to the Event entity.
+func (tc *TimelineCreate) AddEvent(e ...*Event) *TimelineCreate {
+	ids := make([]int, len(e))
+	for i := range e {
+		ids[i] = e[i].ID
+	}
+	return tc.AddEventIDs(ids...)
 }
 
 // Mutation returns the TimelineMutation object of the builder.
@@ -91,6 +127,39 @@ func (tc *TimelineCreate) createSpec() (*Timeline, *sqlgraph.CreateSpec) {
 	if value, ok := tc.mutation.Name(); ok {
 		_spec.SetField(timeline.FieldName, field.TypeString, value)
 		_node.Name = value
+	}
+	if nodes := tc.mutation.UserIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   timeline.UserTable,
+			Columns: []string{timeline.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.user_timeline = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := tc.mutation.EventIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   timeline.EventTable,
+			Columns: []string{timeline.EventColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(event.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }
