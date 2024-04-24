@@ -25,6 +25,20 @@ func (r *mutationResolver) Authorize(ctx context.Context) (*model.User, error) {
 	return convert.ToUser(userEntity, timelines, appContext.GetIsNew(ctx)), nil
 }
 
+// AddTimeline is the resolver for the addTimeline field.
+func (r *mutationResolver) AddTimeline(ctx context.Context, timeline *model.AddTimeline) (*model.ShortUserTimeline, error) {
+	userEntity, error := r.Models.Users.GetUser(appContext.GetUserID(ctx))
+	if error != nil {
+		return nil, error
+	}
+
+	created, error := r.Models.Timeline.CreateTimeline(timeline.Name, userEntity)
+	if error != nil {
+		return nil, error
+	}
+	return convert.ToShortTimeline(created), nil
+}
+
 // Todos is the resolver for the todos field.
 func (r *queryResolver) Todos(ctx context.Context) ([]*model.Todo, error) {
 	panic(fmt.Errorf("not implemented: Todos - todos"))

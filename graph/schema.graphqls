@@ -8,6 +8,7 @@ type Query {
 
 type Mutation {
   authorize: User
+  addTimeline(timeline: AddTimeline): ShortUserTimeline!
 }
 
 type Todo {
@@ -29,4 +30,8 @@ type User {
   avatar: String
   isNew: Boolean!
   timelines: [ShortUserTimeline!]!
+}
+
+input AddTimeline{
+  name: String
 }

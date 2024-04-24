@@ -20,9 +20,20 @@ type Authorize interface {
 	Authorize(int) (*ent.User, error)
 }
 
-type UserModel struct{ repository user.UserRepository }
+type UserModel interface {
+	Authorize
+	GetUser(int) (*ent.User, error)
+}
 
-func (u UserModel) CheckOrCreate(googleUser SomeUser) (*CheckOrCreate, error) {
+type userModelImp struct {
+	repository user.UserRepository
+}
+
+func (u userModelImp) GetUser(userID int) (*ent.User, error) {
+	return u.repository.FindByID(userID)
+}
+
+func (u userModelImp) CheckOrCreate(googleUser SomeUser) (*CheckOrCreate, error) {
 	user, error := u.repository.FindByUUID(googleUser.UUID)
 	error, notFound := error.(*ent.NotFoundError)
 
@@ -41,7 +52,7 @@ func (u UserModel) CheckOrCreate(googleUser SomeUser) (*CheckOrCreate, error) {
 	}
 }
 
-func (u UserModel) Authorize(userID int) (*ent.User, error) {
+func (u userModelImp) Authorize(userID int) (*ent.User, error) {
 	fetchedUser, error := u.repository.FindByID(userID)
 	if error != nil {
 		return nil, error
@@ -49,14 +60,12 @@ func (u UserModel) Authorize(userID int) (*ent.User, error) {
 	return u.repository.Save(fetchedUser.Update().SetUpdatedAt(time.Now()))
 }
 
-func (u UserModel) GetByID(userID int) (*ent.User, error) { return u.repository.FindByID(userID) }
-
 func NewSomeUser(uuid, name, email, avatar string) SomeUser {
 	return SomeUser{UUID: uuid, Name: name, Email: email, Avatar: avatar}
 }
 
 func NewUserModel(repository user.UserRepository) UserModel {
-	return UserModel{
+	return userModelImp{
 		repository: repository,
 	}
 }

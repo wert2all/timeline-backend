@@ -15,15 +15,13 @@ func ToUser(user *ent.User, timelines []*ent.Timeline, isNew bool) *model.User {
 		Timelines: converTimelines(timelines),
 	}
 }
-
+func ToShortTimeline(timeline *ent.Timeline) *model.ShortUserTimeline {
+	return &model.ShortUserTimeline{ID: timeline.ID, Name: &timeline.Name}
+}
 func converTimelines(timelines []*ent.Timeline) []*model.ShortUserTimeline {
 	gqlTimelines := make([]*model.ShortUserTimeline, len(timelines))
 	for i, timeline := range timelines {
-		gqlTimelines[i] = newShortUserTimeline(timeline)
+		gqlTimelines[i] = ToShortTimeline(timeline)
 	}
 	return gqlTimelines
-}
-
-func newShortUserTimeline(timeline *ent.Timeline) *model.ShortUserTimeline {
-	return &model.ShortUserTimeline{ID: timeline.ID, Name: &timeline.Name}
 }
