@@ -7,10 +7,21 @@ import (
 
 type UserTimeline interface {
 	GetUserTimelines(*ent.User) ([]*ent.Timeline, error)
+	CreateTimeline(*string, *ent.User) (*ent.Timeline, error)
 }
 
 type timelineModelImpl struct {
 	repository timeline.TimelineRepository
+}
+
+func (t timelineModelImpl) CreateTimeline(timelineName *string, user *ent.User) (*ent.Timeline, error) {
+	var name string
+	if timelineName != nil {
+		name = *timelineName
+	} else {
+		name = ""
+	}
+	return t.repository.Create(name, user)
 }
 
 func (t timelineModelImpl) GetUserTimelines(user *ent.User) ([]*ent.Timeline, error) {

@@ -2,6 +2,10 @@
 
 package model
 
+type AddTimeline struct {
+	Name *string `json:"name,omitempty"`
+}
+
 type Mutation struct {
 }
 
