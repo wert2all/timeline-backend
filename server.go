@@ -5,7 +5,9 @@ import (
 	"timeline/backend/app"
 	"timeline/backend/db"
 	"timeline/backend/db/model"
+	"timeline/backend/db/model/timeline"
 	"timeline/backend/db/model/user"
+	timelineRepository "timeline/backend/db/repository/timeline"
 	userRepository "timeline/backend/db/repository/user"
 
 	"github.com/sakirsensoy/genv"
@@ -20,8 +22,9 @@ func main() {
 	ctx := context.Background()
 
 	userModel := user.NewUserModel(userRepository.NewUserRepository(ctx, client))
+	timelineModel := timeline.NewTimelineModel(timelineRepository.NewTimelineRepository(ctx, client))
 
-	models := model.NewAllModels(userModel)
+	models := model.NewAllModels(userModel, timelineModel)
 
 	app.NewApplication(app.NewAppState(models, appConfig)).Start()
 }
