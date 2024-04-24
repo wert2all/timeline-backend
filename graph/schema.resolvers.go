@@ -18,8 +18,11 @@ func (r *mutationResolver) Authorize(ctx context.Context) (*model.User, error) {
 	if error != nil {
 		return nil, error
 	}
-
-	return convert.ToUser(userEntity, appContext.GetIsNew(ctx)), nil
+	timelines, error := r.Models.Timeline.GetUserTimelines(userEntity)
+	if error != nil {
+		return nil, error
+	}
+	return convert.ToUser(userEntity, timelines, appContext.GetIsNew(ctx)), nil
 }
 
 // Todos is the resolver for the todos field.
