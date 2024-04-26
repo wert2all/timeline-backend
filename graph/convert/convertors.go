@@ -25,3 +25,11 @@ func converTimelines(timelines []*ent.Timeline) []*model.ShortUserTimeline {
 	}
 	return gqlTimelines
 }
+
+func ToEvent(event *ent.Event) *model.TimelineEvent {
+	return &model.TimelineEvent{
+		ID:   event.ID,
+		Date: event.Date,
+		Type: model.TimelineType(event.Type.String()),
+	}
+}

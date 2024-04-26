@@ -14,10 +14,10 @@ var (
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "date", Type: field.TypeTime},
 		{Name: "type", Type: field.TypeEnum, Enums: []string{"default", "selebrate"}, Default: "default"},
-		{Name: "time", Type: field.TypeString},
+		{Name: "time", Type: field.TypeString, Nullable: true},
 		{Name: "show_time", Type: field.TypeBool, Default: true},
-		{Name: "title", Type: field.TypeString},
-		{Name: "description", Type: field.TypeString},
+		{Name: "title", Type: field.TypeString, Nullable: true},
+		{Name: "description", Type: field.TypeString, Nullable: true},
 		{Name: "timeline_event", Type: field.TypeInt, Nullable: true},
 	}
 	// EventsTable holds the schema information for the "events" table.

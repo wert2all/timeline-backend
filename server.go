@@ -5,8 +5,10 @@ import (
 	"timeline/backend/app"
 	"timeline/backend/db"
 	"timeline/backend/db/model"
+	"timeline/backend/db/model/event"
 	"timeline/backend/db/model/timeline"
 	"timeline/backend/db/model/user"
+	eventRepository "timeline/backend/db/repository/event"
 	timelineRepository "timeline/backend/db/repository/timeline"
 	userRepository "timeline/backend/db/repository/user"
 
@@ -23,8 +25,9 @@ func main() {
 
 	userModel := user.NewUserModel(userRepository.NewUserRepository(ctx, client))
 	timelineModel := timeline.NewTimelineModel(timelineRepository.NewTimelineRepository(ctx, client))
+	eventModel := event.NewEventModel(eventRepository.NewRepository(ctx, client))
 
-	models := model.NewAllModels(userModel, timelineModel)
+	models := model.NewAllModels(userModel, timelineModel, eventModel)
 
 	app.NewApplication(app.NewAppState(models, appConfig)).Start()
 }

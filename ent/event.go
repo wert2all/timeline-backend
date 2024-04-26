@@ -24,13 +24,13 @@ type Event struct {
 	// Type holds the value of the "type" field.
 	Type event.Type `json:"type,omitempty"`
 	// Time holds the value of the "time" field.
-	Time *string `json:"time,omitempty"`
+	Time string `json:"time,omitempty"`
 	// ShowTime holds the value of the "showTime" field.
 	ShowTime bool `json:"showTime,omitempty"`
 	// Title holds the value of the "title" field.
-	Title *string `json:"title,omitempty"`
+	Title string `json:"title,omitempty"`
 	// Description holds the value of the "description" field.
-	Description    *string `json:"description,omitempty"`
+	Description    string `json:"description,omitempty"`
 	timeline_event *int
 	selectValues   sql.SelectValues
 }
@@ -93,8 +93,7 @@ func (e *Event) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field time", values[i])
 			} else if value.Valid {
-				e.Time = new(string)
-				*e.Time = value.String
+				e.Time = value.String
 			}
 		case event.FieldShowTime:
 			if value, ok := values[i].(*sql.NullBool); !ok {
@@ -106,15 +105,13 @@ func (e *Event) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field title", values[i])
 			} else if value.Valid {
-				e.Title = new(string)
-				*e.Title = value.String
+				e.Title = value.String
 			}
 		case event.FieldDescription:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field description", values[i])
 			} else if value.Valid {
-				e.Description = new(string)
-				*e.Description = value.String
+				e.Description = value.String
 			}
 		case event.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -168,23 +165,17 @@ func (e *Event) String() string {
 	builder.WriteString("type=")
 	builder.WriteString(fmt.Sprintf("%v", e.Type))
 	builder.WriteString(", ")
-	if v := e.Time; v != nil {
-		builder.WriteString("time=")
-		builder.WriteString(*v)
-	}
+	builder.WriteString("time=")
+	builder.WriteString(e.Time)
 	builder.WriteString(", ")
 	builder.WriteString("showTime=")
 	builder.WriteString(fmt.Sprintf("%v", e.ShowTime))
 	builder.WriteString(", ")
-	if v := e.Title; v != nil {
-		builder.WriteString("title=")
-		builder.WriteString(*v)
-	}
+	builder.WriteString("title=")
+	builder.WriteString(e.Title)
 	builder.WriteString(", ")
-	if v := e.Description; v != nil {
-		builder.WriteString("description=")
-		builder.WriteString(*v)
-	}
+	builder.WriteString("description=")
+	builder.WriteString(e.Description)
 	builder.WriteByte(')')
 	return builder.String()
 }

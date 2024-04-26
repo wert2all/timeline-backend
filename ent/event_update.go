@@ -70,6 +70,12 @@ func (eu *EventUpdate) SetNillableTime(s *string) *EventUpdate {
 	return eu
 }
 
+// ClearTime clears the value of the "time" field.
+func (eu *EventUpdate) ClearTime() *EventUpdate {
+	eu.mutation.ClearTime()
+	return eu
+}
+
 // SetShowTime sets the "showTime" field.
 func (eu *EventUpdate) SetShowTime(b bool) *EventUpdate {
 	eu.mutation.SetShowTime(b)
@@ -98,6 +104,12 @@ func (eu *EventUpdate) SetNillableTitle(s *string) *EventUpdate {
 	return eu
 }
 
+// ClearTitle clears the value of the "title" field.
+func (eu *EventUpdate) ClearTitle() *EventUpdate {
+	eu.mutation.ClearTitle()
+	return eu
+}
+
 // SetDescription sets the "description" field.
 func (eu *EventUpdate) SetDescription(s string) *EventUpdate {
 	eu.mutation.SetDescription(s)
@@ -109,6 +121,12 @@ func (eu *EventUpdate) SetNillableDescription(s *string) *EventUpdate {
 	if s != nil {
 		eu.SetDescription(*s)
 	}
+	return eu
+}
+
+// ClearDescription clears the value of the "description" field.
+func (eu *EventUpdate) ClearDescription() *EventUpdate {
+	eu.mutation.ClearDescription()
 	return eu
 }
 
@@ -175,14 +193,23 @@ func (eu *EventUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := eu.mutation.Time(); ok {
 		_spec.SetField(event.FieldTime, field.TypeString, value)
 	}
+	if eu.mutation.TimeCleared() {
+		_spec.ClearField(event.FieldTime, field.TypeString)
+	}
 	if value, ok := eu.mutation.ShowTime(); ok {
 		_spec.SetField(event.FieldShowTime, field.TypeBool, value)
 	}
 	if value, ok := eu.mutation.Title(); ok {
 		_spec.SetField(event.FieldTitle, field.TypeString, value)
 	}
+	if eu.mutation.TitleCleared() {
+		_spec.ClearField(event.FieldTitle, field.TypeString)
+	}
 	if value, ok := eu.mutation.Description(); ok {
 		_spec.SetField(event.FieldDescription, field.TypeString, value)
+	}
+	if eu.mutation.DescriptionCleared() {
+		_spec.ClearField(event.FieldDescription, field.TypeString)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, eu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -246,6 +273,12 @@ func (euo *EventUpdateOne) SetNillableTime(s *string) *EventUpdateOne {
 	return euo
 }
 
+// ClearTime clears the value of the "time" field.
+func (euo *EventUpdateOne) ClearTime() *EventUpdateOne {
+	euo.mutation.ClearTime()
+	return euo
+}
+
 // SetShowTime sets the "showTime" field.
 func (euo *EventUpdateOne) SetShowTime(b bool) *EventUpdateOne {
 	euo.mutation.SetShowTime(b)
@@ -274,6 +307,12 @@ func (euo *EventUpdateOne) SetNillableTitle(s *string) *EventUpdateOne {
 	return euo
 }
 
+// ClearTitle clears the value of the "title" field.
+func (euo *EventUpdateOne) ClearTitle() *EventUpdateOne {
+	euo.mutation.ClearTitle()
+	return euo
+}
+
 // SetDescription sets the "description" field.
 func (euo *EventUpdateOne) SetDescription(s string) *EventUpdateOne {
 	euo.mutation.SetDescription(s)
@@ -285,6 +324,12 @@ func (euo *EventUpdateOne) SetNillableDescription(s *string) *EventUpdateOne {
 	if s != nil {
 		euo.SetDescription(*s)
 	}
+	return euo
+}
+
+// ClearDescription clears the value of the "description" field.
+func (euo *EventUpdateOne) ClearDescription() *EventUpdateOne {
+	euo.mutation.ClearDescription()
 	return euo
 }
 
@@ -381,14 +426,23 @@ func (euo *EventUpdateOne) sqlSave(ctx context.Context) (_node *Event, err error
 	if value, ok := euo.mutation.Time(); ok {
 		_spec.SetField(event.FieldTime, field.TypeString, value)
 	}
+	if euo.mutation.TimeCleared() {
+		_spec.ClearField(event.FieldTime, field.TypeString)
+	}
 	if value, ok := euo.mutation.ShowTime(); ok {
 		_spec.SetField(event.FieldShowTime, field.TypeBool, value)
 	}
 	if value, ok := euo.mutation.Title(); ok {
 		_spec.SetField(event.FieldTitle, field.TypeString, value)
 	}
+	if euo.mutation.TitleCleared() {
+		_spec.ClearField(event.FieldTitle, field.TypeString)
+	}
 	if value, ok := euo.mutation.Description(); ok {
 		_spec.SetField(event.FieldDescription, field.TypeString, value)
+	}
+	if euo.mutation.DescriptionCleared() {
+		_spec.ClearField(event.FieldDescription, field.TypeString)
 	}
 	_node = &Event{config: euo.config}
 	_spec.Assign = _node.assignValues

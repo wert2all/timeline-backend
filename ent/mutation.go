@@ -273,7 +273,7 @@ func (m *EventMutation) Time() (r string, exists bool) {
 // OldTime returns the old "time" field's value of the Event entity.
 // If the Event object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *EventMutation) OldTime(ctx context.Context) (v *string, err error) {
+func (m *EventMutation) OldTime(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldTime is only allowed on UpdateOne operations")
 	}
@@ -287,9 +287,22 @@ func (m *EventMutation) OldTime(ctx context.Context) (v *string, err error) {
 	return oldValue.Time, nil
 }
 
+// ClearTime clears the value of the "time" field.
+func (m *EventMutation) ClearTime() {
+	m.time = nil
+	m.clearedFields[event.FieldTime] = struct{}{}
+}
+
+// TimeCleared returns if the "time" field was cleared in this mutation.
+func (m *EventMutation) TimeCleared() bool {
+	_, ok := m.clearedFields[event.FieldTime]
+	return ok
+}
+
 // ResetTime resets all changes to the "time" field.
 func (m *EventMutation) ResetTime() {
 	m.time = nil
+	delete(m.clearedFields, event.FieldTime)
 }
 
 // SetShowTime sets the "showTime" field.
@@ -345,7 +358,7 @@ func (m *EventMutation) Title() (r string, exists bool) {
 // OldTitle returns the old "title" field's value of the Event entity.
 // If the Event object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *EventMutation) OldTitle(ctx context.Context) (v *string, err error) {
+func (m *EventMutation) OldTitle(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldTitle is only allowed on UpdateOne operations")
 	}
@@ -359,9 +372,22 @@ func (m *EventMutation) OldTitle(ctx context.Context) (v *string, err error) {
 	return oldValue.Title, nil
 }
 
+// ClearTitle clears the value of the "title" field.
+func (m *EventMutation) ClearTitle() {
+	m.title = nil
+	m.clearedFields[event.FieldTitle] = struct{}{}
+}
+
+// TitleCleared returns if the "title" field was cleared in this mutation.
+func (m *EventMutation) TitleCleared() bool {
+	_, ok := m.clearedFields[event.FieldTitle]
+	return ok
+}
+
 // ResetTitle resets all changes to the "title" field.
 func (m *EventMutation) ResetTitle() {
 	m.title = nil
+	delete(m.clearedFields, event.FieldTitle)
 }
 
 // SetDescription sets the "description" field.
@@ -381,7 +407,7 @@ func (m *EventMutation) Description() (r string, exists bool) {
 // OldDescription returns the old "description" field's value of the Event entity.
 // If the Event object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *EventMutation) OldDescription(ctx context.Context) (v *string, err error) {
+func (m *EventMutation) OldDescription(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldDescription is only allowed on UpdateOne operations")
 	}
@@ -395,9 +421,22 @@ func (m *EventMutation) OldDescription(ctx context.Context) (v *string, err erro
 	return oldValue.Description, nil
 }
 
+// ClearDescription clears the value of the "description" field.
+func (m *EventMutation) ClearDescription() {
+	m.description = nil
+	m.clearedFields[event.FieldDescription] = struct{}{}
+}
+
+// DescriptionCleared returns if the "description" field was cleared in this mutation.
+func (m *EventMutation) DescriptionCleared() bool {
+	_, ok := m.clearedFields[event.FieldDescription]
+	return ok
+}
+
 // ResetDescription resets all changes to the "description" field.
 func (m *EventMutation) ResetDescription() {
 	m.description = nil
+	delete(m.clearedFields, event.FieldDescription)
 }
 
 // Where appends a list predicates to the EventMutation builder.
@@ -588,7 +627,17 @@ func (m *EventMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *EventMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(event.FieldTime) {
+		fields = append(fields, event.FieldTime)
+	}
+	if m.FieldCleared(event.FieldTitle) {
+		fields = append(fields, event.FieldTitle)
+	}
+	if m.FieldCleared(event.FieldDescription) {
+		fields = append(fields, event.FieldDescription)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -601,6 +650,17 @@ func (m *EventMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *EventMutation) ClearField(name string) error {
+	switch name {
+	case event.FieldTime:
+		m.ClearTime()
+		return nil
+	case event.FieldTitle:
+		m.ClearTitle()
+		return nil
+	case event.FieldDescription:
+		m.ClearDescription()
+		return nil
+	}
 	return fmt.Errorf("unknown Event nullable field %s", name)
 }
 
