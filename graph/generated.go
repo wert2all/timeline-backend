@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"sync"
 	"sync/atomic"
+	"time"
 	"timeline/backend/graph/model"
 
 	"github.com/99designs/gqlgen/graphql"
@@ -48,6 +49,7 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Mutation struct {
+		AddEvent    func(childComplexity int, event model.TimelineEventInput) int
 		AddTimeline func(childComplexity int, timeline *model.AddTimeline) int
 		Authorize   func(childComplexity int) int
 	}
@@ -59,6 +61,12 @@ type ComplexityRoot struct {
 	ShortUserTimeline struct {
 		ID   func(childComplexity int) int
 		Name func(childComplexity int) int
+	}
+
+	TimelineEvent struct {
+		Date func(childComplexity int) int
+		ID   func(childComplexity int) int
+		Type func(childComplexity int) int
 	}
 
 	Todo struct {
@@ -81,6 +89,7 @@ type ComplexityRoot struct {
 type MutationResolver interface {
 	Authorize(ctx context.Context) (*model.User, error)
 	AddTimeline(ctx context.Context, timeline *model.AddTimeline) (*model.ShortUserTimeline, error)
+	AddEvent(ctx context.Context, event model.TimelineEventInput) (*model.TimelineEvent, error)
 }
 type QueryResolver interface {
 	Todos(ctx context.Context) ([]*model.Todo, error)
@@ -104,6 +113,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	ec := executionContext{nil, e, 0, 0, nil}
 	_ = ec
 	switch typeName + "." + field {
+
+	case "Mutation.addEvent":
+		if e.complexity.Mutation.AddEvent == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_addEvent_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.AddEvent(childComplexity, args["event"].(model.TimelineEventInput)), true
 
 	case "Mutation.addTimeline":
 		if e.complexity.Mutation.AddTimeline == nil {
@@ -144,6 +165,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ShortUserTimeline.Name(childComplexity), true
+
+	case "TimelineEvent.date":
+		if e.complexity.TimelineEvent.Date == nil {
+			break
+		}
+
+		return e.complexity.TimelineEvent.Date(childComplexity), true
+
+	case "TimelineEvent.id":
+		if e.complexity.TimelineEvent.ID == nil {
+			break
+		}
+
+		return e.complexity.TimelineEvent.ID(childComplexity), true
+
+	case "TimelineEvent.type":
+		if e.complexity.TimelineEvent.Type == nil {
+			break
+		}
+
+		return e.complexity.TimelineEvent.Type(childComplexity), true
 
 	case "Todo.done":
 		if e.complexity.Todo.Done == nil {
@@ -224,6 +266,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	ec := executionContext{rc, e, 0, 0, make(chan graphql.DeferredResult)}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
 		ec.unmarshalInputAddTimeline,
+		ec.unmarshalInputTimelineEventInput,
 	)
 	first := true
 
@@ -339,6 +382,21 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
+
+func (ec *executionContext) field_Mutation_addEvent_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.TimelineEventInput
+	if tmp, ok := rawArgs["event"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("event"))
+		arg0, err = ec.unmarshalNTimelineEventInput2timelineᚋbackendᚋgraphᚋmodelᚐTimelineEventInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["event"] = arg0
+	return args, nil
+}
 
 func (ec *executionContext) field_Mutation_addTimeline_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -518,6 +576,69 @@ func (ec *executionContext) fieldContext_Mutation_addTimeline(ctx context.Contex
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_addTimeline_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_addEvent(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_addEvent(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().AddEvent(rctx, fc.Args["event"].(model.TimelineEventInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.TimelineEvent)
+	fc.Result = res
+	return ec.marshalNTimelineEvent2ᚖtimelineᚋbackendᚋgraphᚋmodelᚐTimelineEvent(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_addEvent(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_TimelineEvent_id(ctx, field)
+			case "date":
+				return ec.fieldContext_TimelineEvent_date(ctx, field)
+			case "type":
+				return ec.fieldContext_TimelineEvent_type(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type TimelineEvent", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_addEvent_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -787,6 +908,138 @@ func (ec *executionContext) fieldContext_ShortUserTimeline_name(ctx context.Cont
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TimelineEvent_id(ctx context.Context, field graphql.CollectedField, obj *model.TimelineEvent) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_TimelineEvent_id(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_TimelineEvent_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TimelineEvent",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TimelineEvent_date(ctx context.Context, field graphql.CollectedField, obj *model.TimelineEvent) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_TimelineEvent_date(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Date, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_TimelineEvent_date(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TimelineEvent",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Time does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TimelineEvent_type(ctx context.Context, field graphql.CollectedField, obj *model.TimelineEvent) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_TimelineEvent_type(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Type, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(model.TimelineType)
+	fc.Result = res
+	return ec.marshalNTimelineType2timelineᚋbackendᚋgraphᚋmodelᚐTimelineType(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_TimelineEvent_type(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TimelineEvent",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type TimelineType does not have child fields")
 		},
 	}
 	return fc, nil
@@ -3049,6 +3302,54 @@ func (ec *executionContext) unmarshalInputAddTimeline(ctx context.Context, obj i
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputTimelineEventInput(ctx context.Context, obj interface{}) (model.TimelineEventInput, error) {
+	var it model.TimelineEventInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"id", "timelineId", "date", "type"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "id":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ID = data
+		case "timelineId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("timelineId"))
+			data, err := ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.TimelineID = data
+		case "date":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("date"))
+			data, err := ec.unmarshalNTime2timeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Date = data
+		case "type":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("type"))
+			data, err := ec.unmarshalOTimelineType2ᚖtimelineᚋbackendᚋgraphᚋmodelᚐTimelineType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Type = data
+		}
+	}
+
+	return it, nil
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
@@ -3083,6 +3384,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "addTimeline":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_addTimeline(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "addEvent":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_addEvent(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
@@ -3200,6 +3508,55 @@ func (ec *executionContext) _ShortUserTimeline(ctx context.Context, sel ast.Sele
 			}
 		case "name":
 			out.Values[i] = ec._ShortUserTimeline_name(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var timelineEventImplementors = []string{"TimelineEvent"}
+
+func (ec *executionContext) _TimelineEvent(ctx context.Context, sel ast.SelectionSet, obj *model.TimelineEvent) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, timelineEventImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("TimelineEvent")
+		case "id":
+			out.Values[i] = ec._TimelineEvent_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "date":
+			out.Values[i] = ec._TimelineEvent_date(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "type":
+			out.Values[i] = ec._TimelineEvent_type(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3767,6 +4124,50 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 	return res
 }
 
+func (ec *executionContext) unmarshalNTime2timeᚐTime(ctx context.Context, v interface{}) (time.Time, error) {
+	res, err := graphql.UnmarshalTime(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNTime2timeᚐTime(ctx context.Context, sel ast.SelectionSet, v time.Time) graphql.Marshaler {
+	res := graphql.MarshalTime(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
+}
+
+func (ec *executionContext) marshalNTimelineEvent2timelineᚋbackendᚋgraphᚋmodelᚐTimelineEvent(ctx context.Context, sel ast.SelectionSet, v model.TimelineEvent) graphql.Marshaler {
+	return ec._TimelineEvent(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNTimelineEvent2ᚖtimelineᚋbackendᚋgraphᚋmodelᚐTimelineEvent(ctx context.Context, sel ast.SelectionSet, v *model.TimelineEvent) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._TimelineEvent(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNTimelineEventInput2timelineᚋbackendᚋgraphᚋmodelᚐTimelineEventInput(ctx context.Context, v interface{}) (model.TimelineEventInput, error) {
+	res, err := ec.unmarshalInputTimelineEventInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNTimelineType2timelineᚋbackendᚋgraphᚋmodelᚐTimelineType(ctx context.Context, v interface{}) (model.TimelineType, error) {
+	var res model.TimelineType
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNTimelineType2timelineᚋbackendᚋgraphᚋmodelᚐTimelineType(ctx context.Context, sel ast.SelectionSet, v model.TimelineType) graphql.Marshaler {
+	return v
+}
+
 func (ec *executionContext) marshalNTodo2ᚕᚖtimelineᚋbackendᚋgraphᚋmodelᚐTodoᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Todo) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
@@ -4118,6 +4519,22 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return res
 }
 
+func (ec *executionContext) unmarshalOInt2ᚖint(ctx context.Context, v interface{}) (*int, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := graphql.UnmarshalInt(v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.SelectionSet, v *int) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	res := graphql.MarshalInt(*v)
+	return res
+}
+
 func (ec *executionContext) unmarshalOString2ᚖstring(ctx context.Context, v interface{}) (*string, error) {
 	if v == nil {
 		return nil, nil
@@ -4132,6 +4549,22 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 	}
 	res := graphql.MarshalString(*v)
 	return res
+}
+
+func (ec *executionContext) unmarshalOTimelineType2ᚖtimelineᚋbackendᚋgraphᚋmodelᚐTimelineType(ctx context.Context, v interface{}) (*model.TimelineType, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var res = new(model.TimelineType)
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOTimelineType2ᚖtimelineᚋbackendᚋgraphᚋmodelᚐTimelineType(ctx context.Context, sel ast.SelectionSet, v *model.TimelineType) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return v
 }
 
 func (ec *executionContext) marshalOUser2ᚖtimelineᚋbackendᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v *model.User) graphql.Marshaler {

@@ -8,6 +8,7 @@ import (
 	"context"
 	"fmt"
 	appContext "timeline/backend/app/context"
+	entEvent "timeline/backend/ent/event"
 	"timeline/backend/graph/convert"
 	"timeline/backend/graph/model"
 )
@@ -37,6 +38,32 @@ func (r *mutationResolver) AddTimeline(ctx context.Context, timeline *model.AddT
 		return nil, error
 	}
 	return convert.ToShortTimeline(created), nil
+}
+
+// AddEvent is the resolver for the addEvent field.
+func (r *mutationResolver) AddEvent(ctx context.Context, event model.TimelineEventInput) (*model.TimelineEvent, error) {
+	timeline, error := r.Models.Timeline.GetUserTimeline(appContext.GetUserID(ctx), event.TimelineID)
+	if error != nil {
+		return nil, error
+	}
+
+	var eventType entEvent.Type
+	if event.Type == nil {
+		eventType = entEvent.Type(model.TimelineTypeDefault)
+	} else {
+		eventType = entEvent.Type(event.Type.String())
+	}
+
+	eventEntity, error := r.Models.Event.Create(event.Date, eventType)
+	if error != nil {
+		return nil, error
+	}
+
+	_, error = r.Models.Timeline.AttachEvent(timeline, eventEntity)
+	if error != nil {
+		return nil, error
+	}
+	return convert.ToEvent(eventEntity), nil
 }
 
 // Todos is the resolver for the todos field.

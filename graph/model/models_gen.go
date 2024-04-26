@@ -2,6 +2,13 @@
 
 package model
 
+import (
+	"fmt"
+	"io"
+	"strconv"
+	"time"
+)
+
 type AddTimeline struct {
 	Name *string `json:"name,omitempty"`
 }
@@ -15,6 +22,19 @@ type Query struct {
 type ShortUserTimeline struct {
 	ID   int     `json:"id"`
 	Name *string `json:"name,omitempty"`
+}
+
+type TimelineEvent struct {
+	ID   int          `json:"id"`
+	Date time.Time    `json:"date"`
+	Type TimelineType `json:"type"`
+}
+
+type TimelineEventInput struct {
+	ID         *int          `json:"id,omitempty"`
+	TimelineID int           `json:"timelineId"`
+	Date       time.Time     `json:"date"`
+	Type       *TimelineType `json:"type,omitempty"`
 }
 
 type Todo struct {
@@ -31,4 +51,45 @@ type User struct {
 	Avatar    *string              `json:"avatar,omitempty"`
 	IsNew     bool                 `json:"isNew"`
 	Timelines []*ShortUserTimeline `json:"timelines"`
+}
+
+type TimelineType string
+
+const (
+	TimelineTypeDefault   TimelineType = "default"
+	TimelineTypeSelebrate TimelineType = "selebrate"
+)
+
+var AllTimelineType = []TimelineType{
+	TimelineTypeDefault,
+	TimelineTypeSelebrate,
+}
+
+func (e TimelineType) IsValid() bool {
+	switch e {
+	case TimelineTypeDefault, TimelineTypeSelebrate:
+		return true
+	}
+	return false
+}
+
+func (e TimelineType) String() string {
+	return string(e)
+}
+
+func (e *TimelineType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = TimelineType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid TimelineType", str)
+	}
+	return nil
+}
+
+func (e TimelineType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
 }

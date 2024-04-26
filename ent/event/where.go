@@ -239,6 +239,16 @@ func TimeHasSuffix(v string) predicate.Event {
 	return predicate.Event(sql.FieldHasSuffix(FieldTime, v))
 }
 
+// TimeIsNil applies the IsNil predicate on the "time" field.
+func TimeIsNil() predicate.Event {
+	return predicate.Event(sql.FieldIsNull(FieldTime))
+}
+
+// TimeNotNil applies the NotNil predicate on the "time" field.
+func TimeNotNil() predicate.Event {
+	return predicate.Event(sql.FieldNotNull(FieldTime))
+}
+
 // TimeEqualFold applies the EqualFold predicate on the "time" field.
 func TimeEqualFold(v string) predicate.Event {
 	return predicate.Event(sql.FieldEqualFold(FieldTime, v))
@@ -314,6 +324,16 @@ func TitleHasSuffix(v string) predicate.Event {
 	return predicate.Event(sql.FieldHasSuffix(FieldTitle, v))
 }
 
+// TitleIsNil applies the IsNil predicate on the "title" field.
+func TitleIsNil() predicate.Event {
+	return predicate.Event(sql.FieldIsNull(FieldTitle))
+}
+
+// TitleNotNil applies the NotNil predicate on the "title" field.
+func TitleNotNil() predicate.Event {
+	return predicate.Event(sql.FieldNotNull(FieldTitle))
+}
+
 // TitleEqualFold applies the EqualFold predicate on the "title" field.
 func TitleEqualFold(v string) predicate.Event {
 	return predicate.Event(sql.FieldEqualFold(FieldTitle, v))
@@ -377,6 +397,16 @@ func DescriptionHasPrefix(v string) predicate.Event {
 // DescriptionHasSuffix applies the HasSuffix predicate on the "description" field.
 func DescriptionHasSuffix(v string) predicate.Event {
 	return predicate.Event(sql.FieldHasSuffix(FieldDescription, v))
+}
+
+// DescriptionIsNil applies the IsNil predicate on the "description" field.
+func DescriptionIsNil() predicate.Event {
+	return predicate.Event(sql.FieldIsNull(FieldDescription))
+}
+
+// DescriptionNotNil applies the NotNil predicate on the "description" field.
+func DescriptionNotNil() predicate.Event {
+	return predicate.Event(sql.FieldNotNull(FieldDescription))
 }
 
 // DescriptionEqualFold applies the EqualFold predicate on the "description" field.

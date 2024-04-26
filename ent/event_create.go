@@ -60,6 +60,14 @@ func (ec *EventCreate) SetTime(s string) *EventCreate {
 	return ec
 }
 
+// SetNillableTime sets the "time" field if the given value is not nil.
+func (ec *EventCreate) SetNillableTime(s *string) *EventCreate {
+	if s != nil {
+		ec.SetTime(*s)
+	}
+	return ec
+}
+
 // SetShowTime sets the "showTime" field.
 func (ec *EventCreate) SetShowTime(b bool) *EventCreate {
 	ec.mutation.SetShowTime(b)
@@ -80,9 +88,25 @@ func (ec *EventCreate) SetTitle(s string) *EventCreate {
 	return ec
 }
 
+// SetNillableTitle sets the "title" field if the given value is not nil.
+func (ec *EventCreate) SetNillableTitle(s *string) *EventCreate {
+	if s != nil {
+		ec.SetTitle(*s)
+	}
+	return ec
+}
+
 // SetDescription sets the "description" field.
 func (ec *EventCreate) SetDescription(s string) *EventCreate {
 	ec.mutation.SetDescription(s)
+	return ec
+}
+
+// SetNillableDescription sets the "description" field if the given value is not nil.
+func (ec *EventCreate) SetNillableDescription(s *string) *EventCreate {
+	if s != nil {
+		ec.SetDescription(*s)
+	}
 	return ec
 }
 
@@ -151,17 +175,8 @@ func (ec *EventCreate) check() error {
 			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "Event.type": %w`, err)}
 		}
 	}
-	if _, ok := ec.mutation.Time(); !ok {
-		return &ValidationError{Name: "time", err: errors.New(`ent: missing required field "Event.time"`)}
-	}
 	if _, ok := ec.mutation.ShowTime(); !ok {
 		return &ValidationError{Name: "showTime", err: errors.New(`ent: missing required field "Event.showTime"`)}
-	}
-	if _, ok := ec.mutation.Title(); !ok {
-		return &ValidationError{Name: "title", err: errors.New(`ent: missing required field "Event.title"`)}
-	}
-	if _, ok := ec.mutation.Description(); !ok {
-		return &ValidationError{Name: "description", err: errors.New(`ent: missing required field "Event.description"`)}
 	}
 	return nil
 }
@@ -203,7 +218,7 @@ func (ec *EventCreate) createSpec() (*Event, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := ec.mutation.Time(); ok {
 		_spec.SetField(event.FieldTime, field.TypeString, value)
-		_node.Time = &value
+		_node.Time = value
 	}
 	if value, ok := ec.mutation.ShowTime(); ok {
 		_spec.SetField(event.FieldShowTime, field.TypeBool, value)
@@ -211,11 +226,11 @@ func (ec *EventCreate) createSpec() (*Event, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := ec.mutation.Title(); ok {
 		_spec.SetField(event.FieldTitle, field.TypeString, value)
-		_node.Title = &value
+		_node.Title = value
 	}
 	if value, ok := ec.mutation.Description(); ok {
 		_spec.SetField(event.FieldDescription, field.TypeString, value)
-		_node.Description = &value
+		_node.Description = value
 	}
 	return _node, _spec
 }

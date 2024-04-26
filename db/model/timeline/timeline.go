@@ -8,10 +8,20 @@ import (
 type UserTimeline interface {
 	GetUserTimelines(*ent.User) ([]*ent.Timeline, error)
 	CreateTimeline(*string, *ent.User) (*ent.Timeline, error)
+	GetUserTimeline(userID int, timelineID int) (*ent.Timeline, error)
+	AttachEvent(*ent.Timeline, *ent.Event) (*ent.Timeline, error)
 }
 
 type timelineModelImpl struct {
 	repository timeline.TimelineRepository
+}
+
+func (t timelineModelImpl) AttachEvent(timeline *ent.Timeline, event *ent.Event) (*ent.Timeline, error) {
+	return t.repository.Save(timeline.Update().AddEvent(event))
+}
+
+func (t timelineModelImpl) GetUserTimeline(userID int, timelineID int) (*ent.Timeline, error) {
+	return t.repository.GetUserTimeline(userID, timelineID)
 }
 
 func (t timelineModelImpl) CreateTimeline(timelineName *string, user *ent.User) (*ent.Timeline, error) {
