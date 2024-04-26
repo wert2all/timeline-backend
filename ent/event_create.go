@@ -40,6 +40,20 @@ func (ec *EventCreate) SetDate(t time.Time) *EventCreate {
 	return ec
 }
 
+// SetType sets the "type" field.
+func (ec *EventCreate) SetType(e event.Type) *EventCreate {
+	ec.mutation.SetType(e)
+	return ec
+}
+
+// SetNillableType sets the "type" field if the given value is not nil.
+func (ec *EventCreate) SetNillableType(e *event.Type) *EventCreate {
+	if e != nil {
+		ec.SetType(*e)
+	}
+	return ec
+}
+
 // SetTime sets the "time" field.
 func (ec *EventCreate) SetTime(s string) *EventCreate {
 	ec.mutation.SetTime(s)
@@ -111,6 +125,10 @@ func (ec *EventCreate) defaults() {
 		v := event.DefaultCreatedAt()
 		ec.mutation.SetCreatedAt(v)
 	}
+	if _, ok := ec.mutation.GetType(); !ok {
+		v := event.DefaultType
+		ec.mutation.SetType(v)
+	}
 	if _, ok := ec.mutation.ShowTime(); !ok {
 		v := event.DefaultShowTime
 		ec.mutation.SetShowTime(v)
@@ -124,6 +142,14 @@ func (ec *EventCreate) check() error {
 	}
 	if _, ok := ec.mutation.Date(); !ok {
 		return &ValidationError{Name: "date", err: errors.New(`ent: missing required field "Event.date"`)}
+	}
+	if _, ok := ec.mutation.GetType(); !ok {
+		return &ValidationError{Name: "type", err: errors.New(`ent: missing required field "Event.type"`)}
+	}
+	if v, ok := ec.mutation.GetType(); ok {
+		if err := event.TypeValidator(v); err != nil {
+			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "Event.type": %w`, err)}
+		}
 	}
 	if _, ok := ec.mutation.Time(); !ok {
 		return &ValidationError{Name: "time", err: errors.New(`ent: missing required field "Event.time"`)}
@@ -170,6 +196,10 @@ func (ec *EventCreate) createSpec() (*Event, *sqlgraph.CreateSpec) {
 	if value, ok := ec.mutation.Date(); ok {
 		_spec.SetField(event.FieldDate, field.TypeTime, value)
 		_node.Date = value
+	}
+	if value, ok := ec.mutation.GetType(); ok {
+		_spec.SetField(event.FieldType, field.TypeEnum, value)
+		_node.Type = value
 	}
 	if value, ok := ec.mutation.Time(); ok {
 		_spec.SetField(event.FieldTime, field.TypeString, value)

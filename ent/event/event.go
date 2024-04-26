@@ -3,6 +3,7 @@
 package event
 
 import (
+	"fmt"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -17,6 +18,8 @@ const (
 	FieldCreatedAt = "created_at"
 	// FieldDate holds the string denoting the date field in the database.
 	FieldDate = "date"
+	// FieldType holds the string denoting the type field in the database.
+	FieldType = "type"
 	// FieldTime holds the string denoting the time field in the database.
 	FieldTime = "time"
 	// FieldShowTime holds the string denoting the showtime field in the database.
@@ -34,6 +37,7 @@ var Columns = []string{
 	FieldID,
 	FieldCreatedAt,
 	FieldDate,
+	FieldType,
 	FieldTime,
 	FieldShowTime,
 	FieldTitle,
@@ -68,6 +72,32 @@ var (
 	DefaultShowTime bool
 )
 
+// Type defines the type for the "type" enum field.
+type Type string
+
+// TypeDefault is the default value of the Type enum.
+const DefaultType = TypeDefault
+
+// Type values.
+const (
+	TypeDefault   Type = "default"
+	TypeSelebrate Type = "selebrate"
+)
+
+func (_type Type) String() string {
+	return string(_type)
+}
+
+// TypeValidator is a validator for the "type" field enum values. It is called by the builders before save.
+func TypeValidator(_type Type) error {
+	switch _type {
+	case TypeDefault, TypeSelebrate:
+		return nil
+	default:
+		return fmt.Errorf("event: invalid enum value for type field: %q", _type)
+	}
+}
+
 // OrderOption defines the ordering options for the Event queries.
 type OrderOption func(*sql.Selector)
 
@@ -84,6 +114,11 @@ func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
 // ByDate orders the results by the date field.
 func ByDate(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDate, opts...).ToFunc()
+}
+
+// ByType orders the results by the type field.
+func ByType(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldType, opts...).ToFunc()
 }
 
 // ByTime orders the results by the time field.

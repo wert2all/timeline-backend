@@ -164,6 +164,26 @@ func DateLTE(v time.Time) predicate.Event {
 	return predicate.Event(sql.FieldLTE(FieldDate, v))
 }
 
+// TypeEQ applies the EQ predicate on the "type" field.
+func TypeEQ(v Type) predicate.Event {
+	return predicate.Event(sql.FieldEQ(FieldType, v))
+}
+
+// TypeNEQ applies the NEQ predicate on the "type" field.
+func TypeNEQ(v Type) predicate.Event {
+	return predicate.Event(sql.FieldNEQ(FieldType, v))
+}
+
+// TypeIn applies the In predicate on the "type" field.
+func TypeIn(vs ...Type) predicate.Event {
+	return predicate.Event(sql.FieldIn(FieldType, vs...))
+}
+
+// TypeNotIn applies the NotIn predicate on the "type" field.
+func TypeNotIn(vs ...Type) predicate.Event {
+	return predicate.Event(sql.FieldNotIn(FieldType, vs...))
+}
+
 // TimeEQ applies the EQ predicate on the "time" field.
 func TimeEQ(v string) predicate.Event {
 	return predicate.Event(sql.FieldEQ(FieldTime, v))

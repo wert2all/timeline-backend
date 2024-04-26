@@ -42,6 +42,20 @@ func (eu *EventUpdate) SetNillableDate(t *time.Time) *EventUpdate {
 	return eu
 }
 
+// SetType sets the "type" field.
+func (eu *EventUpdate) SetType(e event.Type) *EventUpdate {
+	eu.mutation.SetType(e)
+	return eu
+}
+
+// SetNillableType sets the "type" field if the given value is not nil.
+func (eu *EventUpdate) SetNillableType(e *event.Type) *EventUpdate {
+	if e != nil {
+		eu.SetType(*e)
+	}
+	return eu
+}
+
 // SetTime sets the "time" field.
 func (eu *EventUpdate) SetTime(s string) *EventUpdate {
 	eu.mutation.SetTime(s)
@@ -130,7 +144,20 @@ func (eu *EventUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (eu *EventUpdate) check() error {
+	if v, ok := eu.mutation.GetType(); ok {
+		if err := event.TypeValidator(v); err != nil {
+			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "Event.type": %w`, err)}
+		}
+	}
+	return nil
+}
+
 func (eu *EventUpdate) sqlSave(ctx context.Context) (n int, err error) {
+	if err := eu.check(); err != nil {
+		return n, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(event.Table, event.Columns, sqlgraph.NewFieldSpec(event.FieldID, field.TypeInt))
 	if ps := eu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -141,6 +168,9 @@ func (eu *EventUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := eu.mutation.Date(); ok {
 		_spec.SetField(event.FieldDate, field.TypeTime, value)
+	}
+	if value, ok := eu.mutation.GetType(); ok {
+		_spec.SetField(event.FieldType, field.TypeEnum, value)
 	}
 	if value, ok := eu.mutation.Time(); ok {
 		_spec.SetField(event.FieldTime, field.TypeString, value)
@@ -184,6 +214,20 @@ func (euo *EventUpdateOne) SetDate(t time.Time) *EventUpdateOne {
 func (euo *EventUpdateOne) SetNillableDate(t *time.Time) *EventUpdateOne {
 	if t != nil {
 		euo.SetDate(*t)
+	}
+	return euo
+}
+
+// SetType sets the "type" field.
+func (euo *EventUpdateOne) SetType(e event.Type) *EventUpdateOne {
+	euo.mutation.SetType(e)
+	return euo
+}
+
+// SetNillableType sets the "type" field if the given value is not nil.
+func (euo *EventUpdateOne) SetNillableType(e *event.Type) *EventUpdateOne {
+	if e != nil {
+		euo.SetType(*e)
 	}
 	return euo
 }
@@ -289,7 +333,20 @@ func (euo *EventUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (euo *EventUpdateOne) check() error {
+	if v, ok := euo.mutation.GetType(); ok {
+		if err := event.TypeValidator(v); err != nil {
+			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "Event.type": %w`, err)}
+		}
+	}
+	return nil
+}
+
 func (euo *EventUpdateOne) sqlSave(ctx context.Context) (_node *Event, err error) {
+	if err := euo.check(); err != nil {
+		return _node, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(event.Table, event.Columns, sqlgraph.NewFieldSpec(event.FieldID, field.TypeInt))
 	id, ok := euo.mutation.ID()
 	if !ok {
@@ -317,6 +374,9 @@ func (euo *EventUpdateOne) sqlSave(ctx context.Context) (_node *Event, err error
 	}
 	if value, ok := euo.mutation.Date(); ok {
 		_spec.SetField(event.FieldDate, field.TypeTime, value)
+	}
+	if value, ok := euo.mutation.GetType(); ok {
+		_spec.SetField(event.FieldType, field.TypeEnum, value)
 	}
 	if value, ok := euo.mutation.Time(); ok {
 		_spec.SetField(event.FieldTime, field.TypeString, value)
