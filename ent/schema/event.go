@@ -17,6 +17,7 @@ func (Event) Fields() []ent.Field {
 	return []ent.Field{
 		field.Time("created_at").Immutable().Default(time.Now),
 		field.Time("date"),
+		field.Enum("type").Values("default", "selebrate").Default("default"),
 		field.String("time").Nillable(),
 		field.Bool("showTime").Default(true),
 		field.String("title").Nillable(),

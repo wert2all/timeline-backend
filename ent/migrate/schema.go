@@ -13,6 +13,7 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "date", Type: field.TypeTime},
+		{Name: "type", Type: field.TypeEnum, Enums: []string{"default", "selebrate"}, Default: "default"},
 		{Name: "time", Type: field.TypeString},
 		{Name: "show_time", Type: field.TypeBool, Default: true},
 		{Name: "title", Type: field.TypeString},
@@ -27,7 +28,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "events_timelines_event",
-				Columns:    []*schema.Column{EventsColumns[7]},
+				Columns:    []*schema.Column{EventsColumns[8]},
 				RefColumns: []*schema.Column{TimelinesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

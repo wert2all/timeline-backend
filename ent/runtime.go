@@ -20,7 +20,7 @@ func init() {
 	// event.DefaultCreatedAt holds the default value on creation for the created_at field.
 	event.DefaultCreatedAt = eventDescCreatedAt.Default.(func() time.Time)
 	// eventDescShowTime is the schema descriptor for showTime field.
-	eventDescShowTime := eventFields[3].Descriptor()
+	eventDescShowTime := eventFields[4].Descriptor()
 	// event.DefaultShowTime holds the default value on creation for the showTime field.
 	event.DefaultShowTime = eventDescShowTime.Default.(bool)
 	userFields := schema.User{}.Fields()

@@ -21,6 +21,8 @@ type Event struct {
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// Date holds the value of the "date" field.
 	Date time.Time `json:"date,omitempty"`
+	// Type holds the value of the "type" field.
+	Type event.Type `json:"type,omitempty"`
 	// Time holds the value of the "time" field.
 	Time *string `json:"time,omitempty"`
 	// ShowTime holds the value of the "showTime" field.
@@ -42,7 +44,7 @@ func (*Event) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case event.FieldID:
 			values[i] = new(sql.NullInt64)
-		case event.FieldTime, event.FieldTitle, event.FieldDescription:
+		case event.FieldType, event.FieldTime, event.FieldTitle, event.FieldDescription:
 			values[i] = new(sql.NullString)
 		case event.FieldCreatedAt, event.FieldDate:
 			values[i] = new(sql.NullTime)
@@ -80,6 +82,12 @@ func (e *Event) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field date", values[i])
 			} else if value.Valid {
 				e.Date = value.Time
+			}
+		case event.FieldType:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field type", values[i])
+			} else if value.Valid {
+				e.Type = event.Type(value.String)
 			}
 		case event.FieldTime:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -156,6 +164,9 @@ func (e *Event) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("date=")
 	builder.WriteString(e.Date.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("type=")
+	builder.WriteString(fmt.Sprintf("%v", e.Type))
 	builder.WriteString(", ")
 	if v := e.Time; v != nil {
 		builder.WriteString("time=")
