@@ -59,7 +59,7 @@ func (r *mutationResolver) AddEvent(ctx context.Context, event model.TimelineEve
 		return nil, error
 	}
 
-	updatedEntity, error := r.Models.Event.Update(eventEntity.Update().SetTitle(*event.Title))
+	updatedEntity, error := r.Models.Event.Update(eventEntity.Update().SetTitle(*event.Title).SetDescription(*event.Description))
 	if error != nil {
 		return nil, error
 	}
@@ -82,7 +82,5 @@ func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 // Query returns QueryResolver implementation.
 func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
-type (
-	mutationResolver struct{ *Resolver }
-	queryResolver    struct{ *Resolver }
-)
+type mutationResolver struct{ *Resolver }
+type queryResolver struct{ *Resolver }
