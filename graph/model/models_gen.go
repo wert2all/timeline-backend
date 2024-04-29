@@ -25,9 +25,10 @@ type ShortUserTimeline struct {
 }
 
 type TimelineEvent struct {
-	ID   int          `json:"id"`
-	Date time.Time    `json:"date"`
-	Type TimelineType `json:"type"`
+	ID    int          `json:"id"`
+	Date  time.Time    `json:"date"`
+	Type  TimelineType `json:"type"`
+	Title *string      `json:"title,omitempty"`
 }
 
 type TimelineEventInput struct {
@@ -35,6 +36,7 @@ type TimelineEventInput struct {
 	TimelineID int           `json:"timelineId"`
 	Date       time.Time     `json:"date"`
 	Type       *TimelineType `json:"type,omitempty"`
+	Title      *string       `json:"title,omitempty"`
 }
 
 type Todo struct {

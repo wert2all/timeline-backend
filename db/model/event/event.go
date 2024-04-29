@@ -9,10 +9,16 @@ import (
 
 type Model interface {
 	Create(date time.Time, eventType entEvent.Type) (*ent.Event, error)
+	Update(*ent.EventUpdateOne) (*ent.Event, error)
 }
 
 type modelImpl struct {
 	repository event.Repository
+}
+
+// Update implements Model.
+func (m modelImpl) Update(event *ent.EventUpdateOne) (*ent.Event, error) {
+	return m.repository.UpdateEvent(event)
 }
 
 func (m modelImpl) Create(date time.Time, eventType entEvent.Type) (*ent.Event, error) {
