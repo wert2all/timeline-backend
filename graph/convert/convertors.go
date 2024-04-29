@@ -30,9 +30,10 @@ func converTimelines(timelines []*ent.Timeline) []*model.ShortUserTimeline {
 
 func ToEvent(event *ent.Event) *model.TimelineEvent {
 	return &model.TimelineEvent{
-		ID:    event.ID,
-		Date:  event.Date,
-		Type:  model.TimelineType(event.Type.String()),
-		Title: &event.Title,
+		ID:          event.ID,
+		Date:        event.Date,
+		Type:        model.TimelineType(event.Type.String()),
+		Title:       &event.Title,
+		Description: &event.Description,
 	}
 }

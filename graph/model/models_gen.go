@@ -25,18 +25,20 @@ type ShortUserTimeline struct {
 }
 
 type TimelineEvent struct {
-	ID    int          `json:"id"`
-	Date  time.Time    `json:"date"`
-	Type  TimelineType `json:"type"`
-	Title *string      `json:"title,omitempty"`
+	ID          int          `json:"id"`
+	Date        time.Time    `json:"date"`
+	Type        TimelineType `json:"type"`
+	Title       *string      `json:"title,omitempty"`
+	Description *string      `json:"description,omitempty"`
 }
 
 type TimelineEventInput struct {
-	ID         *int          `json:"id,omitempty"`
-	TimelineID int           `json:"timelineId"`
-	Date       time.Time     `json:"date"`
-	Type       *TimelineType `json:"type,omitempty"`
-	Title      *string       `json:"title,omitempty"`
+	ID          *int          `json:"id,omitempty"`
+	TimelineID  int           `json:"timelineId"`
+	Date        time.Time     `json:"date"`
+	Type        *TimelineType `json:"type,omitempty"`
+	Title       *string       `json:"title,omitempty"`
+	Description *string       `json:"description,omitempty"`
 }
 
 type Todo struct {
