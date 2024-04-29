@@ -15,9 +15,11 @@ func ToUser(user *ent.User, timelines []*ent.Timeline, isNew bool) *model.User {
 		Timelines: converTimelines(timelines),
 	}
 }
+
 func ToShortTimeline(timeline *ent.Timeline) *model.ShortUserTimeline {
 	return &model.ShortUserTimeline{ID: timeline.ID, Name: &timeline.Name}
 }
+
 func converTimelines(timelines []*ent.Timeline) []*model.ShortUserTimeline {
 	gqlTimelines := make([]*model.ShortUserTimeline, len(timelines))
 	for i, timeline := range timelines {
@@ -28,8 +30,9 @@ func converTimelines(timelines []*ent.Timeline) []*model.ShortUserTimeline {
 
 func ToEvent(event *ent.Event) *model.TimelineEvent {
 	return &model.TimelineEvent{
-		ID:   event.ID,
-		Date: event.Date,
-		Type: model.TimelineType(event.Type.String()),
+		ID:    event.ID,
+		Date:  event.Date,
+		Type:  model.TimelineType(event.Type.String()),
+		Title: &event.Title,
 	}
 }

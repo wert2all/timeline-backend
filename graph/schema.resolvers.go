@@ -59,11 +59,16 @@ func (r *mutationResolver) AddEvent(ctx context.Context, event model.TimelineEve
 		return nil, error
 	}
 
-	_, error = r.Models.Timeline.AttachEvent(timeline, eventEntity)
+	updatedEntity, error := r.Models.Event.Update(eventEntity.Update().SetTitle(*event.Title))
 	if error != nil {
 		return nil, error
 	}
-	return convert.ToEvent(eventEntity), nil
+
+	_, error = r.Models.Timeline.AttachEvent(timeline, updatedEntity)
+	if error != nil {
+		return nil, error
+	}
+	return convert.ToEvent(updatedEntity), nil
 }
 
 // Todos is the resolver for the todos field.
@@ -77,5 +82,7 @@ func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 // Query returns QueryResolver implementation.
 func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
-type mutationResolver struct{ *Resolver }
-type queryResolver struct{ *Resolver }
+type (
+	mutationResolver struct{ *Resolver }
+	queryResolver    struct{ *Resolver }
+)
