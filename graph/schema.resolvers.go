@@ -6,7 +6,6 @@ package graph
 
 import (
 	"context"
-	"fmt"
 	appContext "timeline/backend/app/context"
 	entEvent "timeline/backend/ent/event"
 	"timeline/backend/graph/convert"
@@ -71,9 +70,17 @@ func (r *mutationResolver) AddEvent(ctx context.Context, event model.TimelineEve
 	return convert.ToEvent(updatedEntity), nil
 }
 
-// Todos is the resolver for the todos field.
-func (r *queryResolver) Todos(ctx context.Context) ([]*model.Todo, error) {
-	panic(fmt.Errorf("not implemented: Todos - todos"))
+// TimelineEvents is the resolver for the timelineEvents field.
+func (r *queryResolver) TimelineEvents(ctx context.Context, timelineID int, limit *model.Limit) ([]*model.TimelineEvent, error) {
+	timeline, error := r.Models.Timeline.GetUserTimeline(appContext.GetUserID(ctx), timelineID)
+	if error != nil {
+		return nil, error
+	}
+	events, error := r.Models.Timeline.GetEvents(timeline, convert.ToLimit(limit))
+	if error != nil {
+		return nil, error
+	}
+	return convert.ToEvents(events), nil
 }
 
 // Mutation returns MutationResolver implementation.

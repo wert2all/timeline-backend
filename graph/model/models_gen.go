@@ -13,6 +13,11 @@ type AddTimeline struct {
 	Name *string `json:"name,omitempty"`
 }
 
+type Limit struct {
+	From *int `json:"from,omitempty"`
+	To   *int `json:"to,omitempty"`
+}
+
 type Mutation struct {
 }
 
@@ -39,13 +44,6 @@ type TimelineEventInput struct {
 	Type        *TimelineType `json:"type,omitempty"`
 	Title       *string       `json:"title,omitempty"`
 	Description *string       `json:"description,omitempty"`
-}
-
-type Todo struct {
-	ID   int    `json:"id"`
-	Text string `json:"text"`
-	Done bool   `json:"done"`
-	User *User  `json:"user"`
 }
 
 type User struct {

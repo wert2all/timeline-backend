@@ -1,6 +1,7 @@
 package timeline
 
 import (
+	"timeline/backend/db/query"
 	"timeline/backend/db/repository/timeline"
 	"timeline/backend/ent"
 )
@@ -10,10 +11,15 @@ type UserTimeline interface {
 	CreateTimeline(*string, *ent.User) (*ent.Timeline, error)
 	GetUserTimeline(userID int, timelineID int) (*ent.Timeline, error)
 	AttachEvent(*ent.Timeline, *ent.Event) (*ent.Timeline, error)
+	GetEvents(*ent.Timeline, query.Limit) ([]*ent.Event, error)
 }
 
 type timelineModelImpl struct {
 	repository timeline.TimelineRepository
+}
+
+func (t timelineModelImpl) GetEvents(timeline *ent.Timeline, limit query.Limit) ([]*ent.Event, error) {
+	return t.repository.GetTimelineEvents(timeline, limit)
 }
 
 func (t timelineModelImpl) AttachEvent(timeline *ent.Timeline, event *ent.Event) (*ent.Timeline, error) {
