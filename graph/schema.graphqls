@@ -3,20 +3,13 @@
 # https://gqlgen.com/getting-started/
 
 type Query {
-  todos: [Todo!]!
+  timelineEvents(timelineId: Int!, limit: Limit): [TimelineEvent!]!
 }
 
 type Mutation {
   authorize: User
   addTimeline(timeline: AddTimeline): ShortUserTimeline!
   addEvent(event: TimelineEventInput!): TimelineEvent!
-}
-
-type Todo {
-  id: Int!
-  text: String!
-  done: Boolean!
-  user: User!
 }
 
 type ShortUserTimeline {
@@ -52,6 +45,11 @@ input TimelineEventInput {
   type: TimelineType
   title: String
   description: String
+}
+
+input Limit{
+  from: Int
+  to: Int
 }
 
 scalar Time

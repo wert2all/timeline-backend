@@ -2,6 +2,7 @@ package timeline
 
 import (
 	"context"
+	"timeline/backend/db/query"
 	"timeline/backend/ent"
 	"timeline/backend/ent/timeline"
 	"timeline/backend/ent/user"
@@ -9,8 +10,11 @@ import (
 
 type TimelineRepository interface {
 	FindByID(ID int) (*ent.Timeline, error)
+
 	GetUserTimelines(*ent.User) ([]*ent.Timeline, error)
 	GetUserTimeline(userID int, timelineID int) (*ent.Timeline, error)
+	GetTimelineEvents(*ent.Timeline, query.Limit) ([]*ent.Event, error)
+
 	Create(name string, user *ent.User) (*ent.Timeline, error)
 	Save(*ent.TimelineUpdateOne) (*ent.Timeline, error)
 }
@@ -18,6 +22,10 @@ type TimelineRepository interface {
 type timelineRepositoryImpl struct {
 	client  *ent.Client
 	context context.Context
+}
+
+func (t timelineRepositoryImpl) GetTimelineEvents(timeline *ent.Timeline, limit query.Limit) ([]*ent.Event, error) {
+	return t.client.Timeline.QueryEvent(timeline).Offset(limit.Offset).Limit(limit.Limit).All(t.context)
 }
 
 func (t timelineRepositoryImpl) GetUserTimeline(userID int, timelineID int) (*ent.Timeline, error) {
