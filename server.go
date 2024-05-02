@@ -2,6 +2,9 @@ package main
 
 import (
 	"context"
+	"github.com/getsentry/sentry-go"
+	"log"
+	"time"
 	"timeline/backend/app"
 	"timeline/backend/db"
 	"timeline/backend/db/model"
@@ -20,6 +23,12 @@ func main() {
 	appConfig := readConfig()
 	client := db.NewClient(appConfig.Postgres)
 	defer client.Close()
+
+	error := sentry.Init(sentry.ClientOptions{Dsn: appConfig.SentryDsn, Debug: true})
+	if error != nil {
+		log.Fatalf("sentry.Init: %s", error)
+	}
+	defer sentry.Flush(time.Second)
 
 	ctx := context.Background()
 
@@ -47,5 +56,6 @@ func readConfig() app.AppConfig {
 			Database: genv.Key("POSTGRES_DB").String(),
 		},
 		GoogleClintID: genv.Key("GOOGLE_CLIENT_ID").String(),
+		SentryDsn:     genv.Key("SENTRY_DSN").String(),
 	}
 }

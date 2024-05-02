@@ -35,6 +35,7 @@ type AppConfig struct {
 	CORS          CORS
 	Postgres      Postgres
 	GoogleClintID string
+	SentryDsn     string
 }
 
 type AppState struct {
@@ -63,6 +64,7 @@ func (a *app) Start() {
 func (a *routerFactory) Create(state AppState) chi.Router {
 	router := chi.NewRouter()
 	router.Use(middleware.Cors(state.Config.CORS.AllowedOrigin, state.Config.CORS.Debug).Handler)
+	router.Use(middleware.Sentry())
 
 	router.Options("/graphql", a.handler)
 	router.Group(func(r chi.Router) {
