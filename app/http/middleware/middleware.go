@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	sentryhttp "github.com/getsentry/sentry-go/http"
 	"net/http"
 	"strings"
 	appContext "timeline/backend/app/context"
@@ -65,4 +66,8 @@ func Cors(allowedOrigin string, debug bool) *cors.Cors {
 		OptionsPassthrough: true,
 		Debug:              debug,
 	})
+}
+
+func Sentry() func(http.Handler) http.Handler {
+	return sentryhttp.New(sentryhttp.Options{Repanic: true}).Handle
 }
