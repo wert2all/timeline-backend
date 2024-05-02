@@ -5,6 +5,7 @@ go 1.21.9
 require (
 	entgo.io/ent v0.13.1
 	github.com/99designs/gqlgen v0.17.45
+	github.com/getsentry/sentry-go v0.27.0
 	github.com/go-chi/chi v1.5.5
 	github.com/lib/pq v1.10.9
 	github.com/rs/cors v1.10.1
@@ -23,7 +24,6 @@ require (
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.4 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
-	github.com/getsentry/sentry-go v0.27.0 // indirect
 	github.com/go-logr/logr v1.4.1 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-openapi/inflect v0.19.0 // indirect
