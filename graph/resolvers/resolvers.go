@@ -22,6 +22,7 @@ type Resolver[T any, K any] interface {
 
 type MutationResolvers struct {
 	AddTimeline Resolver[model.ShortUserTimeline, ValidAddTimelineArguments]
+	Authorize   Resolver[model.User, ValidAuthorizeArguments]
 }
 type QueryResolvers struct{}
 type Resolvers struct {
@@ -33,6 +34,7 @@ func New(users user.UserModel, timeline timeline.UserTimeline) Resolvers {
 	return Resolvers{
 		MutationResolvers: MutationResolvers{
 			NewAddTimelineResolver(users, timeline),
+			NewAutorizeResolver(timeline),
 		},
 		QueryResolvers: QueryResolvers{},
 	}
