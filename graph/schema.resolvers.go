@@ -15,20 +15,22 @@ import (
 
 // Authorize is the resolver for the authorize field.
 func (r *mutationResolver) Authorize(ctx context.Context) (*model.User, error) {
-	userEntity, error := r.Models.Users.Authorize(appContext.GetUserID(ctx))
-	if error != nil {
-		return nil, error
-	}
-	timelines, error := r.Models.Timeline.GetUserTimelines(userEntity)
-	if error != nil {
-		return nil, error
-	}
-	return convert.ToUser(userEntity, timelines, appContext.GetIsNew(ctx)), nil
+	return resolvers.Resolve(
+		ctx,
+		resolvers.NewAuthorizeArguments(),
+		resolvers.NewAuthorizeValidator(),
+		r.Resolvers.MutationResolvers.Authorize,
+	)
 }
 
 // AddTimeline is the resolver for the addTimeline field.
 func (r *mutationResolver) AddTimeline(ctx context.Context, timeline *model.AddTimeline) (*model.ShortUserTimeline, error) {
-	return resolvers.Resolve(ctx, resolvers.NewAddTimelineArguments(timeline), resolvers.NewAddtimelineValidator(), r.Resolvers.MutationResolvers.AddTimeline)
+	return resolvers.Resolve(
+		ctx,
+		resolvers.NewAddTimelineArguments(timeline),
+		resolvers.NewAddtimelineValidator(),
+		r.Resolvers.MutationResolvers.AddTimeline,
+	)
 }
 
 // AddEvent is the resolver for the addEvent field.
