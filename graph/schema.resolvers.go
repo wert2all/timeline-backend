@@ -6,6 +6,7 @@ package graph
 
 import (
 	"context"
+	"github.com/go-errors/errors"
 	appContext "timeline/backend/app/context"
 	entEvent "timeline/backend/ent/event"
 	"timeline/backend/graph/convert"
@@ -31,8 +32,13 @@ func (r *mutationResolver) AddTimeline(ctx context.Context, timeline *model.AddT
 	if error != nil {
 		return nil, error
 	}
-
-	created, error := r.Models.Timeline.CreateTimeline(timeline.Name, userEntity)
+	var name *string
+	if timeline != nil {
+		name = timeline.Name
+	} else {
+		return nil, errors.New(`missing required timeline`)
+	}
+	created, error := r.Models.Timeline.CreateTimeline(name, userEntity)
 	if error != nil {
 		return nil, error
 	}
