@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 	"github.com/getsentry/sentry-go"
+	"github.com/sakirsensoy/genv"
+	_ "github.com/sakirsensoy/genv/dotenv/autoload"
 	"log"
 	"time"
 	"timeline/backend/app"
@@ -14,9 +16,7 @@ import (
 	eventRepository "timeline/backend/db/repository/event"
 	timelineRepository "timeline/backend/db/repository/timeline"
 	userRepository "timeline/backend/db/repository/user"
-
-	"github.com/sakirsensoy/genv"
-	_ "github.com/sakirsensoy/genv/dotenv/autoload"
+	"timeline/backend/graph/resolvers"
 )
 
 func main() {
@@ -37,8 +37,8 @@ func main() {
 	eventModel := event.NewEventModel(eventRepository.NewRepository(ctx, client))
 
 	models := model.NewAllModels(userModel, timelineModel, eventModel)
-
-	app.NewApplication(app.NewAppState(models, appConfig)).Start()
+	resolvers := resolvers.New(userModel, timelineModel)
+	app.NewApplication(app.NewAppState(models, appConfig, resolvers)).Start()
 }
 
 func readConfig() app.AppConfig {
