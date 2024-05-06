@@ -37,7 +37,7 @@ func main() {
 	eventModel := event.NewEventModel(eventRepository.NewRepository(ctx, client))
 
 	models := model.NewAllModels(userModel, timelineModel, eventModel)
-	resolvers := resolvers.New(userModel, timelineModel)
+	resolvers := resolvers.New(eventModel, userModel, timelineModel)
 	app.NewApplication(app.NewAppState(models, appConfig, resolvers)).Start()
 }
 

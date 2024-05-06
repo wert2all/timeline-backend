@@ -7,7 +7,6 @@ require (
 	github.com/99designs/gqlgen v0.17.45
 	github.com/getsentry/sentry-go v0.27.0
 	github.com/go-chi/chi v1.5.5
-	github.com/go-errors/errors v1.4.2
 	github.com/lib/pq v1.10.9
 	github.com/rs/cors v1.10.1
 	github.com/sakirsensoy/genv v1.0.1
