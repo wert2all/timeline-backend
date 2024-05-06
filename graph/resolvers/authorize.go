@@ -33,7 +33,6 @@ func (a authorizeValidator) Validate(ctx context.Context, _ Arguments[AuthorizeA
 	}
 
 	return ValidAuthorizeArguments{User: userEntity, IsNew: appContext.GetIsNew(ctx)}, nil
-
 }
 
 func (a authorizeResolverImpl) Resolve(_ context.Context, arguments ValidArguments[ValidAuthorizeArguments]) (*model.User, error) {
@@ -60,8 +59,10 @@ func NewAuthorizeArguments() Arguments[AuthorizeArguments] {
 	return AuthorizeArguments{}
 }
 
-func NewAuthorizeValidator() Validator[AuthorizeArguments, ValidAuthorizeArguments] {
-	return authorizeValidator{}
+func NewAuthorizeValidator(userModel user.UserModel) Validator[AuthorizeArguments, ValidAuthorizeArguments] {
+	return authorizeValidator{
+		UsersModel: userModel,
+	}
 }
 
 func converTimelines(timelines []*ent.Timeline) []*model.ShortUserTimeline {
