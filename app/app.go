@@ -7,6 +7,7 @@ import (
 	"timeline/backend/db/model"
 	"timeline/backend/db/model/user"
 	"timeline/backend/graph"
+	"timeline/backend/graph/resolvers"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/go-chi/chi"
@@ -39,8 +40,9 @@ type AppConfig struct {
 }
 
 type AppState struct {
-	Config AppConfig
-	Models model.AppModels
+	Config    AppConfig
+	Models    model.AppModels
+	Resolvers resolvers.Resolvers
 }
 
 type app struct {
@@ -77,7 +79,7 @@ func (a *routerFactory) Create(state AppState) chi.Router {
 func (h *handlerFactory) Create(state AppState) http.HandlerFunc {
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{
 		Resolvers: &graph.Resolver{
-			Models: state.Models,
+			Models: state.Models, Resolvers: state.Resolvers,
 		},
 	}))
 
@@ -97,10 +99,11 @@ func getRouterFactory(handler http.HandlerFunc, userModel user.Authorize) *route
 	}
 }
 
-func NewAppState(models model.AppModels, config AppConfig) AppState {
+func NewAppState(models model.AppModels, config AppConfig, resolvers resolvers.Resolvers) AppState {
 	return AppState{
-		Config: config,
-		Models: models,
+		Config:    config,
+		Models:    models,
+		Resolvers: resolvers,
 	}
 }
 

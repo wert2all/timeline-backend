@@ -6,11 +6,11 @@ package graph
 
 import (
 	"context"
-	"github.com/go-errors/errors"
 	appContext "timeline/backend/app/context"
 	entEvent "timeline/backend/ent/event"
 	"timeline/backend/graph/convert"
 	"timeline/backend/graph/model"
+	"timeline/backend/graph/resolvers"
 )
 
 // Authorize is the resolver for the authorize field.
@@ -28,21 +28,7 @@ func (r *mutationResolver) Authorize(ctx context.Context) (*model.User, error) {
 
 // AddTimeline is the resolver for the addTimeline field.
 func (r *mutationResolver) AddTimeline(ctx context.Context, timeline *model.AddTimeline) (*model.ShortUserTimeline, error) {
-	userEntity, error := r.Models.Users.GetUser(appContext.GetUserID(ctx))
-	if error != nil {
-		return nil, error
-	}
-	var name *string
-	if timeline != nil {
-		name = timeline.Name
-	} else {
-		return nil, errors.New(`missing required timeline`)
-	}
-	created, error := r.Models.Timeline.CreateTimeline(name, userEntity)
-	if error != nil {
-		return nil, error
-	}
-	return convert.ToShortTimeline(created), nil
+	return r.Resolvers.MutationResolvers.AddTimeline.Resolve(ctx, resolvers.NewAddTimelineArguments(timeline))
 }
 
 // AddEvent is the resolver for the addEvent field.
