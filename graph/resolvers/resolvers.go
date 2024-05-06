@@ -1,6 +1,9 @@
 package resolvers
 
-import "context"
+import (
+	"context"
+	"timeline/backend/db/model/event"
+)
 import "timeline/backend/graph/model"
 import "timeline/backend/db/model/timeline"
 import "timeline/backend/db/model/user"
@@ -23,6 +26,7 @@ type Resolver[T any, K any] interface {
 type MutationResolvers struct {
 	AddTimeline Resolver[model.ShortUserTimeline, ValidAddTimelineArguments]
 	Authorize   Resolver[model.User, ValidAuthorizeArguments]
+	AddEvent    Resolver[model.TimelineEvent, ValidAddEventArguments]
 }
 type QueryResolvers struct{}
 type Resolvers struct {
@@ -30,11 +34,12 @@ type Resolvers struct {
 	QueryResolvers    QueryResolvers
 }
 
-func New(users user.UserModel, timeline timeline.UserTimeline) Resolvers {
+func New(event event.Model, users user.UserModel, timeline timeline.UserTimeline) Resolvers {
 	return Resolvers{
 		MutationResolvers: MutationResolvers{
 			NewAddTimelineResolver(users, timeline),
 			NewAutorizeResolver(timeline),
+			NewAddEventResolver(event, timeline),
 		},
 		QueryResolvers: QueryResolvers{},
 	}
