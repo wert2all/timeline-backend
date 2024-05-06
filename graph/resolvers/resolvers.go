@@ -8,11 +8,20 @@ import "timeline/backend/db/model/user"
 type Arguments[T any] interface {
 	GetArguments() T
 }
-type Resolver[T any, K any] interface {
-	Resolve(context.Context, Arguments[K]) (T, error)
+
+type ValidArguments[T any] interface {
+	GetArguments() T
 }
+
+type Validator[K any, N any] interface {
+	Validate(context.Context, Arguments[K]) (ValidArguments[N], error)
+}
+type Resolver[T any, K any] interface {
+	Resolve(context.Context, ValidArguments[K]) (*T, error)
+}
+
 type MutationResolvers struct {
-	AddTimeline Resolver[*model.ShortUserTimeline, AddTimelineArguments]
+	AddTimeline Resolver[model.ShortUserTimeline, ValidAddTimelineArguments]
 }
 type QueryResolvers struct{}
 type Resolvers struct {
@@ -27,4 +36,12 @@ func New(users user.UserModel, timeline timeline.UserTimeline) Resolvers {
 		},
 		QueryResolvers: QueryResolvers{},
 	}
+}
+
+func Resolve[T any, K any, N any](context context.Context, inputArguments Arguments[K], validator Validator[K, N], resolver Resolver[T, N]) (*T, error) {
+	valid, err := validator.Validate(context, inputArguments)
+	if err != nil {
+		return nil, err
+	}
+	return resolver.Resolve(context, valid)
 }

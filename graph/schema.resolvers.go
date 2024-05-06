@@ -28,7 +28,7 @@ func (r *mutationResolver) Authorize(ctx context.Context) (*model.User, error) {
 
 // AddTimeline is the resolver for the addTimeline field.
 func (r *mutationResolver) AddTimeline(ctx context.Context, timeline *model.AddTimeline) (*model.ShortUserTimeline, error) {
-	return r.Resolvers.MutationResolvers.AddTimeline.Resolve(ctx, resolvers.NewAddTimelineArguments(timeline))
+	return resolvers.Resolve(ctx, resolvers.NewAddTimelineArguments(timeline), resolvers.NewAddtimelineValidator(), r.Resolvers.MutationResolvers.AddTimeline)
 }
 
 // AddEvent is the resolver for the addEvent field.
