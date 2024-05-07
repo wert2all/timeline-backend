@@ -1,14 +1,17 @@
 package di
 
 import (
-	"golang.org/x/net/context"
+	"timeline/backend/db/model/event"
 	"timeline/backend/db/model/timeline"
 	"timeline/backend/db/model/user"
+	eventRepository "timeline/backend/db/repository/event"
 	timelineRepository "timeline/backend/db/repository/timeline"
 	userRepository "timeline/backend/db/repository/user"
 	"timeline/backend/ent"
 	"timeline/backend/graph/model"
 	"timeline/backend/graph/resolvers"
+
+	"golang.org/x/net/context"
 )
 
 type QueryResolversServiceLocator interface{}
@@ -22,6 +25,7 @@ type ResolverOperationServiceLocator[T any, V any, R any, F any] interface {
 type MutationResolversServiceLocator interface {
 	Authorize() ResolverOperationServiceLocator[resolvers.AuthorizeArguments, resolvers.ValidAuthorizeArguments, model.User, resolvers.AuthorizeArgumentFactory]
 	AddTimeline() ResolverOperationServiceLocator[resolvers.AddTimelineArguments, resolvers.ValidAddTimelineArguments, model.ShortUserTimeline, resolvers.AddTimelineArgumentFactory]
+	AddEvent() ResolverOperationServiceLocator[resolvers.AddEventArguments, resolvers.ValidAddEventArguments, model.TimelineEvent, resolvers.AddEventArgumentFactory]
 }
 
 type ResolversServiceLocator interface {
@@ -32,11 +36,13 @@ type ResolversServiceLocator interface {
 type ModelsServiceLocator interface {
 	Users() user.UserModel
 	Timeline() timeline.UserTimeline
+	Events() event.Model
 }
 
 type RepositoriesServiceLocator interface {
 	User() userRepository.Repository
 	Timeline() timelineRepository.Repository
+	Event() eventRepository.Repository
 }
 
 type ServiceLocator interface {
@@ -58,10 +64,17 @@ type resolversServiceLocator struct {
 	queryResolver                   QueryResolversServiceLocator
 	mutationResolversServiceLocator MutationResolversServiceLocator
 }
-type queryResolverServiceLocator struct{}
-type mutationResolversServiceLocator struct {
-	authorizeServiceLocator   ResolverOperationServiceLocator[resolvers.AuthorizeArguments, resolvers.ValidAuthorizeArguments, model.User, resolvers.AuthorizeArgumentFactory]
-	addTimelineServiceLocator ResolverOperationServiceLocator[resolvers.AddTimelineArguments, resolvers.ValidAddTimelineArguments, model.ShortUserTimeline, resolvers.AddTimelineArgumentFactory]
+type (
+	queryResolverServiceLocator     struct{}
+	mutationResolversServiceLocator struct {
+		authorizeServiceLocator   ResolverOperationServiceLocator[resolvers.AuthorizeArguments, resolvers.ValidAuthorizeArguments, model.User, resolvers.AuthorizeArgumentFactory]
+		addTimelineServiceLocator ResolverOperationServiceLocator[resolvers.AddTimelineArguments, resolvers.ValidAddTimelineArguments, model.ShortUserTimeline, resolvers.AddTimelineArgumentFactory]
+		addEventServiceLocator    ResolverOperationServiceLocator[resolvers.AddEventArguments, resolvers.ValidAddEventArguments, model.TimelineEvent, resolvers.AddEventArgumentFactory]
+	}
+)
+
+func (m mutationResolversServiceLocator) AddEvent() ResolverOperationServiceLocator[resolvers.AddEventArguments, resolvers.ValidAddEventArguments, model.TimelineEvent, resolvers.AddEventArgumentFactory] {
+	return m.addEventServiceLocator
 }
 
 func (m mutationResolversServiceLocator) Authorize() ResolverOperationServiceLocator[resolvers.AuthorizeArguments, resolvers.ValidAuthorizeArguments, model.User, resolvers.AuthorizeArgumentFactory] {
@@ -76,12 +89,40 @@ type modelsServiceLocator struct {
 	locator ServiceLocator
 }
 
+func (m modelsServiceLocator) Users() user.UserModel {
+	return user.NewUserModel(m.locator.Repositories().User())
+}
+
+func (m modelsServiceLocator) Timeline() timeline.UserTimeline {
+	return timeline.NewTimelineModel(m.locator.Repositories().Timeline())
+}
+
+func (m modelsServiceLocator) Events() event.Model {
+	return event.NewEventModel(m.locator.Repositories().Event())
+}
+
 type authorizeServiceLocator struct {
 	locator ServiceLocator
 }
 
 type addTimelineServiceLocator struct {
 	locator ServiceLocator
+}
+
+type addEventServiceLocator struct {
+	locator ServiceLocator
+}
+
+func (a addEventServiceLocator) ArgumentFactory() resolvers.AddEventArgumentFactory {
+	return resolvers.AddEventArgumentFactory{}
+}
+
+func (a addEventServiceLocator) Validator() resolvers.Validator[resolvers.AddEventArguments, resolvers.ValidAddEventArguments] {
+	return resolvers.NewAddEventValidator(a.locator.Models().Timeline())
+}
+
+func (a addEventServiceLocator) Resolver() resolvers.Resolver[model.TimelineEvent, resolvers.ValidAddEventArguments] {
+	return resolvers.NewAddEventResolver(a.locator.Models().Events(), a.locator.Models().Timeline())
 }
 
 func (a addTimelineServiceLocator) ArgumentFactory() resolvers.AddTimelineArgumentFactory {
@@ -100,6 +141,10 @@ type repositoriesServiceLocator struct {
 	locator ServiceLocator
 }
 
+func (r repositoriesServiceLocator) Event() eventRepository.Repository {
+	return eventRepository.NewRepository(r.locator.Context(), r.locator.DbClient())
+}
+
 func (r repositoriesServiceLocator) Timeline() timelineRepository.Repository {
 	return timelineRepository.NewTimelineRepository(r.locator.Context(), r.locator.DbClient())
 }
@@ -108,14 +153,9 @@ func (r repositoriesServiceLocator) User() userRepository.Repository {
 	return userRepository.NewUserRepository(r.locator.Context(), r.locator.DbClient())
 }
 
-func (m modelsServiceLocator) Users() user.UserModel {
-	return user.NewUserModel(m.locator.Repositories().User())
+func (s serviceLocator) Repositories() RepositoriesServiceLocator {
+	return s.repositoriesServiceLocator
 }
-
-func (m modelsServiceLocator) Timeline() timeline.UserTimeline {
-	return timeline.NewTimelineModel(m.locator.Repositories().Timeline())
-}
-func (s serviceLocator) Repositories() RepositoriesServiceLocator { return s.repositoriesServiceLocator }
 
 func (s serviceLocator) Models() ModelsServiceLocator { return s.modelsServiceLocator }
 
@@ -154,6 +194,7 @@ func NewServiceLocator(context context.Context, client *ent.Client) ServiceLocat
 func newRepositoriesServiceLocator(locator ServiceLocator) RepositoriesServiceLocator {
 	return repositoriesServiceLocator{locator: locator}
 }
+
 func newModelsServiceLocator(locator ServiceLocator) ModelsServiceLocator {
 	return modelsServiceLocator{locator: locator}
 }
@@ -166,8 +207,9 @@ func newQueryResolver() QueryResolversServiceLocator { return queryResolverServi
 
 func newMutationResolversServiceLocator(locator ServiceLocator) MutationResolversServiceLocator {
 	return mutationResolversServiceLocator{
-		newAuthorizeServiceLocator(locator),
-		newAddTimelineServiceLocator(locator),
+		authorizeServiceLocator:   newAuthorizeServiceLocator(locator),
+		addTimelineServiceLocator: newAddTimelineServiceLocator(locator),
+		addEventServiceLocator:    newAddEventServiceLocator(locator),
 	}
 }
 
@@ -177,4 +219,8 @@ func newAddTimelineServiceLocator(locator ServiceLocator) ResolverOperationServi
 
 func newAuthorizeServiceLocator(locator ServiceLocator) ResolverOperationServiceLocator[resolvers.AuthorizeArguments, resolvers.ValidAuthorizeArguments, model.User, resolvers.AuthorizeArgumentFactory] {
 	return authorizeServiceLocator{locator: locator}
+}
+
+func newAddEventServiceLocator(locator ServiceLocator) ResolverOperationServiceLocator[resolvers.AddEventArguments, resolvers.ValidAddEventArguments, model.TimelineEvent, resolvers.AddEventArgumentFactory] {
+	return addEventServiceLocator{locator: locator}
 }

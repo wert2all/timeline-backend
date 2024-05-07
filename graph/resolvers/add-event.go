@@ -11,6 +11,12 @@ import (
 	"timeline/backend/graph/model"
 )
 
+type AddEventArgumentFactory struct{}
+
+func (f AddEventArgumentFactory) New(input model.TimelineEventInput) Arguments[AddEventArguments] {
+	return AddEventArguments{eventInput: input}
+}
+
 type ValidAddEventArguments struct {
 	timeline    *ent.Timeline
 	eventType   entEvent.Type
@@ -94,8 +100,4 @@ func NewAddEventResolver(event event.Model, timeline timeline.UserTimeline) Reso
 
 func NewAddEventValidator(timeline timeline.UserTimeline) Validator[AddEventArguments, ValidAddEventArguments] {
 	return addEventvalidatorImpl{timeline}
-}
-
-func NewAddEventArguments(event model.TimelineEventInput) Arguments[AddEventArguments] {
-	return AddEventArguments{eventInput: event}
 }
