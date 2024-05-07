@@ -19,26 +19,8 @@ type Factory[T any] interface {
 	Create(state State) T
 }
 
-type CORS struct {
-	AllowedOrigin string
-	Debug         bool
-}
-
-type Postgres struct {
-	Host, User, Password, Database string
-	Port                           int
-}
-
-type Config struct {
-	Port          string
-	CORS          CORS
-	Postgres      Postgres
-	GoogleClintID string
-	SentryDsn     string
-}
-
 type State struct {
-	Config    Config
+	Config    di.Config
 	Models    di.Models
 	Resolvers di.Resolvers
 }
@@ -97,7 +79,7 @@ func getRouterFactory(handler http.HandlerFunc, userModel user.Authorize) *route
 	}
 }
 
-func NewAppState(models di.Models, config Config, resolvers di.Resolvers) State {
+func NewAppState(models di.Models, config di.Config, resolvers di.Resolvers) State {
 	return State{
 		Config:    config,
 		Models:    models,
