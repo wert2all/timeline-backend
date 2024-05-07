@@ -2,11 +2,7 @@ package resolvers
 
 import (
 	"context"
-	"timeline/backend/db/model/event"
 )
-import "timeline/backend/graph/model"
-import "timeline/backend/db/model/timeline"
-import "timeline/backend/db/model/user"
 
 type Arguments[T any] interface {
 	GetArguments() T
@@ -21,28 +17,6 @@ type Validator[K any, N any] interface {
 }
 type Resolver[T any, K any] interface {
 	Resolve(context.Context, ValidArguments[K]) (*T, error)
-}
-
-type MutationResolvers struct {
-	AddTimeline Resolver[model.ShortUserTimeline, ValidAddTimelineArguments]
-	Authorize   Resolver[model.User, ValidAuthorizeArguments]
-	AddEvent    Resolver[model.TimelineEvent, ValidAddEventArguments]
-}
-type QueryResolvers struct{}
-type Resolvers struct {
-	MutationResolvers MutationResolvers
-	QueryResolvers    QueryResolvers
-}
-
-func New(event event.Model, users user.UserModel, timeline timeline.UserTimeline) Resolvers {
-	return Resolvers{
-		MutationResolvers: MutationResolvers{
-			NewAddTimelineResolver(users, timeline),
-			NewAutorizeResolver(timeline),
-			NewAddEventResolver(event, timeline),
-		},
-		QueryResolvers: QueryResolvers{},
-	}
 }
 
 func Resolve[T any, K any, N any](context context.Context, inputArguments Arguments[K], validator Validator[K, N], resolver Resolver[T, N]) (*T, error) {

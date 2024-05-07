@@ -9,14 +9,13 @@ import (
 	"time"
 	"timeline/backend/app"
 	"timeline/backend/db"
-	"timeline/backend/db/model"
 	"timeline/backend/db/model/event"
 	"timeline/backend/db/model/timeline"
 	"timeline/backend/db/model/user"
 	eventRepository "timeline/backend/db/repository/event"
 	timelineRepository "timeline/backend/db/repository/timeline"
 	userRepository "timeline/backend/db/repository/user"
-	"timeline/backend/graph/resolvers"
+	"timeline/backend/di"
 )
 
 func main() {
@@ -36,13 +35,13 @@ func main() {
 	timelineModel := timeline.NewTimelineModel(timelineRepository.NewTimelineRepository(ctx, client))
 	eventModel := event.NewEventModel(eventRepository.NewRepository(ctx, client))
 
-	models := model.NewAllModels(userModel, timelineModel, eventModel)
-	resolvers := resolvers.New(eventModel, userModel, timelineModel)
+	models := di.NewAllModels(userModel, timelineModel, eventModel)
+	resolvers := di.NewResolvers(eventModel, userModel, timelineModel)
 	app.NewApplication(app.NewAppState(models, appConfig, resolvers)).Start()
 }
 
-func readConfig() app.AppConfig {
-	return app.AppConfig{
+func readConfig() app.Config {
+	return app.Config{
 		Port: genv.Key("PORT").Default("8000").String(),
 		CORS: app.CORS{
 			Debug:         genv.Key("CORS_DEBUG").Default(false).Bool(),

@@ -1,16 +1,14 @@
 package app
 
 import (
+	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/go-chi/chi"
 	"log"
 	"net/http"
 	"timeline/backend/app/http/middleware"
-	"timeline/backend/db/model"
 	"timeline/backend/db/model/user"
+	"timeline/backend/di"
 	"timeline/backend/graph"
-	"timeline/backend/graph/resolvers"
-
-	"github.com/99designs/gqlgen/graphql/handler"
-	"github.com/go-chi/chi"
 )
 
 type Application interface {
@@ -18,7 +16,7 @@ type Application interface {
 }
 
 type Factory[T any] interface {
-	Create(state AppState) T
+	Create(state State) T
 }
 
 type CORS struct {
@@ -31,7 +29,7 @@ type Postgres struct {
 	Port                           int
 }
 
-type AppConfig struct {
+type Config struct {
 	Port          string
 	CORS          CORS
 	Postgres      Postgres
@@ -39,15 +37,15 @@ type AppConfig struct {
 	SentryDsn     string
 }
 
-type AppState struct {
-	Config    AppConfig
-	Models    model.AppModels
-	Resolvers resolvers.Resolvers
+type State struct {
+	Config    Config
+	Models    di.Models
+	Resolvers di.Resolvers
 }
 
 type app struct {
 	router chi.Router
-	state  AppState
+	state  State
 }
 
 type routerFactory struct {
@@ -62,8 +60,8 @@ func (a *app) Start() {
 	log.Fatal(http.ListenAndServe(":"+a.state.Config.Port, a.router))
 }
 
-// Start implements Factory.
-func (a *routerFactory) Create(state AppState) chi.Router {
+// Create implements Factory.
+func (a *routerFactory) Create(state State) chi.Router {
 	router := chi.NewRouter()
 	router.Use(middleware.Cors(state.Config.CORS.AllowedOrigin, state.Config.CORS.Debug).Handler)
 	router.Use(middleware.Sentry())
@@ -76,7 +74,7 @@ func (a *routerFactory) Create(state AppState) chi.Router {
 	return router
 }
 
-func (h *handlerFactory) Create(state AppState) http.HandlerFunc {
+func (h *handlerFactory) Create(state State) http.HandlerFunc {
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{
 		Resolvers: &graph.Resolver{
 			Models: state.Models, Resolvers: state.Resolvers,
@@ -99,18 +97,17 @@ func getRouterFactory(handler http.HandlerFunc, userModel user.Authorize) *route
 	}
 }
 
-func NewAppState(models model.AppModels, config AppConfig, resolvers resolvers.Resolvers) AppState {
-	return AppState{
+func NewAppState(models di.Models, config Config, resolvers di.Resolvers) State {
+	return State{
 		Config:    config,
 		Models:    models,
 		Resolvers: resolvers,
 	}
 }
 
-func NewApplication(state AppState) Application {
-	handler := getHandlerFactory().Create(state)
-
-	router := getRouterFactory(handler, state.Models.Users).Create(state)
-
-	return &app{router: router, state: state}
+func NewApplication(state State) Application {
+	return &app{
+		router: getRouterFactory(getHandlerFactory().Create(state), state.Models.Users).Create(state),
+		state:  state,
+	}
 }
