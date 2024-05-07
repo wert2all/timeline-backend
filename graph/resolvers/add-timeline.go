@@ -60,6 +60,6 @@ func NewAddTimelineArguments(timeline *model.AddTimeline) Arguments[AddTimelineA
 	return AddTimelineArguments{timeline: timeline}
 }
 
-func NewAddtimelineValidator() Validator[AddTimelineArguments, ValidAddTimelineArguments] {
-	return addTimelineValidator{}
+func NewAddtimelineValidator(userModel user.UserModel) Validator[AddTimelineArguments, ValidAddTimelineArguments] {
+	return addTimelineValidator{UsersModel: userModel}
 }
