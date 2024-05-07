@@ -10,6 +10,12 @@ import (
 	"timeline/backend/graph/model"
 )
 
+type AddTimelineArgumentFactory struct{}
+
+func (f AddTimelineArgumentFactory) New(timeline *model.AddTimeline) Arguments[AddTimelineArguments] {
+	return AddTimelineArguments{timeline: timeline}
+}
+
 type AddTimelineArguments struct {
 	timeline *model.AddTimeline
 }
@@ -54,10 +60,6 @@ func (a addTimelimeMutation) Resolve(_ context.Context, arguments ValidArguments
 
 func NewAddTimelineResolver(users user.UserModel, timeline timeline.UserTimeline) Resolver[model.ShortUserTimeline, ValidAddTimelineArguments] {
 	return addTimelimeMutation{Users: users, Timeline: timeline}
-}
-
-func NewAddTimelineArguments(timeline *model.AddTimeline) Arguments[AddTimelineArguments] {
-	return AddTimelineArguments{timeline: timeline}
 }
 
 func NewAddtimelineValidator(userModel user.UserModel) Validator[AddTimelineArguments, ValidAddTimelineArguments] {

@@ -26,9 +26,9 @@ func (r *mutationResolver) Authorize(ctx context.Context) (*model.User, error) {
 func (r *mutationResolver) AddTimeline(ctx context.Context, timeline *model.AddTimeline) (*model.ShortUserTimeline, error) {
 	return resolvers.Resolve(
 		ctx,
-		resolvers.NewAddTimelineArguments(timeline),
-		resolvers.NewAddtimelineValidator(r.Models.Users),
-		r.Resolvers.MutationResolvers.AddTimeline,
+		r.ServiceLocator.Resolvers().Mutation().AddTimeline().ArgumentFactory().New(timeline),
+		r.ServiceLocator.Resolvers().Mutation().AddTimeline().Validator(),
+		r.ServiceLocator.Resolvers().Mutation().AddTimeline().Resolver(),
 	)
 }
 
