@@ -1,8 +1,7 @@
 package graph
 
 import (
-	"timeline/backend/db/model"
-	"timeline/backend/graph/resolvers"
+	"timeline/backend/di"
 )
 
 //go:generate go run github.com/99designs/gqlgen generate
@@ -12,6 +11,6 @@ import (
 // It serves as dependency injection for your app, add any dependencies you require here.
 
 type Resolver struct {
-	Models    model.AppModels
-	Resolvers resolvers.Resolvers
+	Models    di.Models
+	Resolvers di.Resolvers
 }
