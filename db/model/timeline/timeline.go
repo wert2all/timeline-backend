@@ -15,7 +15,7 @@ type UserTimeline interface {
 }
 
 type timelineModelImpl struct {
-	repository timeline.TimelineRepository
+	repository timeline.Repository
 }
 
 func (t timelineModelImpl) GetEvents(timeline *ent.Timeline, limit query.Limit) ([]*ent.Event, error) {
@@ -44,6 +44,6 @@ func (t timelineModelImpl) GetUserTimelines(user *ent.User) ([]*ent.Timeline, er
 	return t.repository.GetUserTimelines(user)
 }
 
-func NewTimelineModel(repository timeline.TimelineRepository) UserTimeline {
+func NewTimelineModel(repository timeline.Repository) UserTimeline {
 	return timelineModelImpl{repository: repository}
 }

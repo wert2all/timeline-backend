@@ -10,7 +10,7 @@ import (
 	"timeline/backend/ent/user"
 )
 
-type TimelineRepository interface {
+type Repository interface {
 	FindByID(ID int) (*ent.Timeline, error)
 
 	GetUserTimelines(*ent.User) ([]*ent.Timeline, error)
@@ -68,6 +68,6 @@ func (t timelineRepositoryImpl) GetUserTimelines(user *ent.User) ([]*ent.Timelin
 	return t.client.User.QueryTimeline(user).All(t.context)
 }
 
-func NewTimelineRepository(ctx context.Context, client *ent.Client) TimelineRepository {
+func NewTimelineRepository(ctx context.Context, client *ent.Client) Repository {
 	return timelineRepositoryImpl{client: client, context: ctx}
 }

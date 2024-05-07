@@ -26,7 +26,7 @@ type UserModel interface {
 }
 
 type userModelImp struct {
-	repository user.UserRepository
+	repository user.Repository
 }
 
 func (u userModelImp) GetUser(userID int) (*ent.User, error) {
@@ -64,7 +64,7 @@ func NewSomeUser(uuid, name, email, avatar string) SomeUser {
 	return SomeUser{UUID: uuid, Name: name, Email: email, Avatar: avatar}
 }
 
-func NewUserModel(repository user.UserRepository) UserModel {
+func NewUserModel(repository user.Repository) UserModel {
 	return userModelImp{
 		repository: repository,
 	}
