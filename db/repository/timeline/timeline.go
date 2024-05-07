@@ -2,8 +2,10 @@ package timeline
 
 import (
 	"context"
+	"entgo.io/ent/dialect/sql"
 	"timeline/backend/db/query"
 	"timeline/backend/ent"
+	"timeline/backend/ent/event"
 	"timeline/backend/ent/timeline"
 	"timeline/backend/ent/user"
 )
@@ -25,15 +27,24 @@ type timelineRepositoryImpl struct {
 }
 
 func (t timelineRepositoryImpl) GetTimelineEvents(timeline *ent.Timeline, limit query.Limit) ([]*ent.Event, error) {
-	return t.client.Timeline.QueryEvent(timeline).Offset(limit.Offset).Limit(limit.Limit).All(t.context)
+	return t.client.Timeline.QueryEvent(timeline).
+		Offset(limit.Offset).
+		Limit(limit.Limit).
+		Order(
+			event.ByDate(sql.OrderDesc()),
+			event.ByID(sql.OrderDesc()),
+		).
+		All(t.context)
 }
 
 func (t timelineRepositoryImpl) GetUserTimeline(userID int, timelineID int) (*ent.Timeline, error) {
-	return t.client.Timeline.Query().Where(
-		timeline.And(
-			timeline.ID(timelineID),
-			timeline.HasUserWith(user.ID(userID)),
-		)).Only(t.context)
+	return t.client.Timeline.Query().
+		Where(
+			timeline.And(
+				timeline.ID(timelineID),
+				timeline.HasUserWith(user.ID(userID)),
+			)).
+		Only(t.context)
 }
 
 func (t timelineRepositoryImpl) Save(timeline *ent.TimelineUpdateOne) (*ent.Timeline, error) {
