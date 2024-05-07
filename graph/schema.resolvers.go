@@ -27,7 +27,7 @@ func (r *mutationResolver) AddTimeline(ctx context.Context, timeline *model.AddT
 	return resolvers.Resolve(
 		ctx,
 		resolvers.NewAddTimelineArguments(timeline),
-		resolvers.NewAddtimelineValidator(),
+		resolvers.NewAddtimelineValidator(r.Models.Users),
 		r.Resolvers.MutationResolvers.AddTimeline,
 	)
 }
