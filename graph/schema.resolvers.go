@@ -36,9 +36,9 @@ func (r *mutationResolver) AddTimeline(ctx context.Context, timeline *model.AddT
 func (r *mutationResolver) AddEvent(ctx context.Context, event model.TimelineEventInput) (*model.TimelineEvent, error) {
 	return resolvers.Resolve(
 		ctx,
-		resolvers.NewAddEventArguments(event),
-		resolvers.NewAddEventValidator(r.Models.Timeline),
-		r.Resolvers.MutationResolvers.AddEvent,
+		r.ServiceLocator.Resolvers().Mutation().AddEvent().ArgumentFactory().New(event),
+		r.ServiceLocator.Resolvers().Mutation().AddEvent().Validator(),
+		r.ServiceLocator.Resolvers().Mutation().AddEvent().Resolver(),
 	)
 }
 
@@ -61,5 +61,7 @@ func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 // Query returns QueryResolver implementation.
 func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
-type mutationResolver struct{ *Resolver }
-type queryResolver struct{ *Resolver }
+type (
+	mutationResolver struct{ *Resolver }
+	queryResolver    struct{ *Resolver }
+)
