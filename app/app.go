@@ -56,10 +56,10 @@ func (a *routerFactory) Create(state State) chi.Router {
 	return router
 }
 
-func (h *handlerFactory) Create(state State) http.HandlerFunc {
+func (h *handlerFactory) Create(state State, locator di.ServiceLocator) http.HandlerFunc {
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{
 		Resolvers: &graph.Resolver{
-			Models: state.Models, Resolvers: state.Resolvers,
+			Models: state.Models, Resolvers: state.Resolvers, ServiceLocator: locator,
 		},
 	}))
 
@@ -87,9 +87,9 @@ func NewAppState(models di.Models, config di.Config, resolvers di.Resolvers) Sta
 	}
 }
 
-func NewApplication(state State) Application {
+func NewApplication(state State, locator di.ServiceLocator) Application {
 	return &app{
-		router: getRouterFactory(getHandlerFactory().Create(state), state.Models.Users).Create(state),
+		router: getRouterFactory(getHandlerFactory().Create(state, locator), state.Models.Users).Create(state),
 		state:  state,
 	}
 }

@@ -22,6 +22,8 @@ type authorizeValidator struct {
 	UsersModel user.UserModel
 }
 
+type AuthorizeArgumentFactory struct{}
+
 type AuthorizeArguments struct{}
 
 func (v ValidAuthorizeArguments) GetArguments() ValidAuthorizeArguments { return v }
@@ -50,19 +52,13 @@ func (a authorizeResolverImpl) Resolve(_ context.Context, arguments ValidArgumen
 		Timelines: converTimelines(timelines),
 	}, nil
 }
-
+func (a AuthorizeArgumentFactory) New() Arguments[AuthorizeArguments] { return AuthorizeArguments{} }
 func NewAutorizeResolver(timeline timeline.UserTimeline) Resolver[model.User, ValidAuthorizeArguments] {
 	return authorizeResolverImpl{Timeline: timeline}
 }
 
-func NewAuthorizeArguments() Arguments[AuthorizeArguments] {
-	return AuthorizeArguments{}
-}
-
 func NewAuthorizeValidator(userModel user.UserModel) Validator[AuthorizeArguments, ValidAuthorizeArguments] {
-	return authorizeValidator{
-		UsersModel: userModel,
-	}
+	return authorizeValidator{UsersModel: userModel}
 }
 
 func converTimelines(timelines []*ent.Timeline) []*model.ShortUserTimeline {
