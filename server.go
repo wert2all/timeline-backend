@@ -23,9 +23,9 @@ func main() {
 	client := db.NewClient(appConfig.Postgres)
 	defer client.Close()
 
-	error := sentry.Init(sentry.ClientOptions{Dsn: appConfig.SentryDsn, Debug: true})
-	if error != nil {
-		log.Fatalf("sentry.Init: %s", error)
+	err := sentry.Init(sentry.ClientOptions{Dsn: appConfig.SentryDsn, Debug: true})
+	if err != nil {
+		log.Fatalf("sentry.Init: %s", err)
 	}
 	defer sentry.Flush(time.Second)
 
@@ -40,14 +40,14 @@ func main() {
 	app.NewApplication(app.NewAppState(models, appConfig, resolvers)).Start()
 }
 
-func readConfig() app.Config {
-	return app.Config{
+func readConfig() di.Config {
+	return di.Config{
 		Port: genv.Key("PORT").Default("8000").String(),
-		CORS: app.CORS{
+		CORS: di.CORS{
 			Debug:         genv.Key("CORS_DEBUG").Default(false).Bool(),
 			AllowedOrigin: genv.Key("CORS_ALLOWED_ORIGIN").String(),
 		},
-		Postgres: app.Postgres{
+		Postgres: di.Postgres{
 			Host:     genv.Key("POSTGRES_HOST").Default("localhost").String(),
 			Port:     genv.Key("POSTGRES_PORT").Default(5432).Int(),
 			User:     genv.Key("POSTGRES_USER").String(),

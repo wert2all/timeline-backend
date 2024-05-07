@@ -8,6 +8,22 @@ import (
 	"timeline/backend/graph/resolvers"
 )
 
+type CORS struct {
+	AllowedOrigin string
+	Debug         bool
+}
+type Postgres struct {
+	Host, User, Password, Database string
+	Port                           int
+}
+type Config struct {
+	Port          string
+	CORS          CORS
+	Postgres      Postgres
+	GoogleClintID string
+	SentryDsn     string
+}
+
 // Models todo refactor
 type Models struct {
 	Users    user.UserModel

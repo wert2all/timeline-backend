@@ -5,13 +5,13 @@ import (
 	"log"
 	"strconv"
 	"strings"
-	"timeline/backend/app"
+	"timeline/backend/di"
 	"timeline/backend/ent"
 
 	_ "github.com/lib/pq"
 )
 
-func NewClient(config app.Postgres) *ent.Client {
+func NewClient(config di.Postgres) *ent.Client {
 	client, err := ent.Open("postgres", createConnectionURL(config))
 	if err != nil {
 		log.Fatalf("failed opening connection to postgres: %v", err)
@@ -22,7 +22,7 @@ func NewClient(config app.Postgres) *ent.Client {
 	return client
 }
 
-func createConnectionURL(config app.Postgres) string {
+func createConnectionURL(config di.Postgres) string {
 	var sb strings.Builder
 
 	optionsMap := map[string]string{
