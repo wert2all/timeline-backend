@@ -11,6 +11,7 @@ import (
 // It serves as dependency injection for your app, add any dependencies you require here.
 
 type Resolver struct {
-	Models    di.Models
-	Resolvers di.Resolvers
+	Models         di.Models
+	Resolvers      di.Resolvers
+	ServiceLocator di.ServiceLocator
 }

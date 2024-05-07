@@ -16,9 +16,9 @@ import (
 func (r *mutationResolver) Authorize(ctx context.Context) (*model.User, error) {
 	return resolvers.Resolve(
 		ctx,
-		resolvers.NewAuthorizeArguments(),
-		resolvers.NewAuthorizeValidator(r.Models.Users),
-		r.Resolvers.MutationResolvers.Authorize,
+		r.ServiceLocator.Resolvers().Mutation().Authorize().ArgumentFactory().New(),
+		r.ServiceLocator.Resolvers().Mutation().Authorize().Validator(),
+		r.ServiceLocator.Resolvers().Mutation().Authorize().Resolver(),
 	)
 }
 

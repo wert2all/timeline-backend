@@ -37,7 +37,7 @@ func main() {
 
 	models := di.NewAllModels(userModel, timelineModel, eventModel)
 	resolvers := di.NewResolvers(eventModel, userModel, timelineModel)
-	app.NewApplication(app.NewAppState(models, appConfig, resolvers)).Start()
+	app.NewApplication(app.NewAppState(models, appConfig, resolvers), di.NewServiceLocator(ctx, client)).Start()
 }
 
 func readConfig() di.Config {
