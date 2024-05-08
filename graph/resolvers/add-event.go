@@ -94,7 +94,7 @@ func derefString(s *string) string {
 	return ""
 }
 
-func NewAddEventResolver(event event.Model, timeline timeline.UserTimeline) Resolver[model.TimelineEvent, ValidAddEventArguments] {
+func NewAddEventResolver(event event.Model, timeline timeline.UserTimeline) Resolver[*model.TimelineEvent, ValidAddEventArguments] {
 	return addEventResolverImpl{event, timeline}
 }
 

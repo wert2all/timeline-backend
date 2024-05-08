@@ -58,7 +58,7 @@ func (a addTimelimeMutation) Resolve(_ context.Context, arguments ValidArguments
 	return &model.ShortUserTimeline{ID: created.ID, Name: &created.Name}, nil
 }
 
-func NewAddTimelineResolver(users user.UserModel, timeline timeline.UserTimeline) Resolver[model.ShortUserTimeline, ValidAddTimelineArguments] {
+func NewAddTimelineResolver(users user.UserModel, timeline timeline.UserTimeline) Resolver[*model.ShortUserTimeline, ValidAddTimelineArguments] {
 	return addTimelimeMutation{Users: users, Timeline: timeline}
 }
 

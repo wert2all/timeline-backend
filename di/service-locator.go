@@ -23,9 +23,9 @@ type ResolverOperationServiceLocator[T any, V any, R any, F any] interface {
 }
 
 type MutationResolversServiceLocator interface {
-	Authorize() ResolverOperationServiceLocator[resolvers.AuthorizeArguments, resolvers.ValidAuthorizeArguments, model.User, resolvers.AuthorizeArgumentFactory]
-	AddTimeline() ResolverOperationServiceLocator[resolvers.AddTimelineArguments, resolvers.ValidAddTimelineArguments, model.ShortUserTimeline, resolvers.AddTimelineArgumentFactory]
-	AddEvent() ResolverOperationServiceLocator[resolvers.AddEventArguments, resolvers.ValidAddEventArguments, model.TimelineEvent, resolvers.AddEventArgumentFactory]
+	Authorize() ResolverOperationServiceLocator[resolvers.AuthorizeArguments, resolvers.ValidAuthorizeArguments, *model.User, resolvers.AuthorizeArgumentFactory]
+	AddTimeline() ResolverOperationServiceLocator[resolvers.AddTimelineArguments, resolvers.ValidAddTimelineArguments, *model.ShortUserTimeline, resolvers.AddTimelineArgumentFactory]
+	AddEvent() ResolverOperationServiceLocator[resolvers.AddEventArguments, resolvers.ValidAddEventArguments, *model.TimelineEvent, resolvers.AddEventArgumentFactory]
 }
 
 type ResolversServiceLocator interface {
@@ -67,21 +67,21 @@ type resolversServiceLocator struct {
 type (
 	queryResolverServiceLocator     struct{}
 	mutationResolversServiceLocator struct {
-		authorizeServiceLocator   ResolverOperationServiceLocator[resolvers.AuthorizeArguments, resolvers.ValidAuthorizeArguments, model.User, resolvers.AuthorizeArgumentFactory]
-		addTimelineServiceLocator ResolverOperationServiceLocator[resolvers.AddTimelineArguments, resolvers.ValidAddTimelineArguments, model.ShortUserTimeline, resolvers.AddTimelineArgumentFactory]
-		addEventServiceLocator    ResolverOperationServiceLocator[resolvers.AddEventArguments, resolvers.ValidAddEventArguments, model.TimelineEvent, resolvers.AddEventArgumentFactory]
+		authorizeServiceLocator   ResolverOperationServiceLocator[resolvers.AuthorizeArguments, resolvers.ValidAuthorizeArguments, *model.User, resolvers.AuthorizeArgumentFactory]
+		addTimelineServiceLocator ResolverOperationServiceLocator[resolvers.AddTimelineArguments, resolvers.ValidAddTimelineArguments, *model.ShortUserTimeline, resolvers.AddTimelineArgumentFactory]
+		addEventServiceLocator    ResolverOperationServiceLocator[resolvers.AddEventArguments, resolvers.ValidAddEventArguments, *model.TimelineEvent, resolvers.AddEventArgumentFactory]
 	}
 )
 
-func (m mutationResolversServiceLocator) AddEvent() ResolverOperationServiceLocator[resolvers.AddEventArguments, resolvers.ValidAddEventArguments, model.TimelineEvent, resolvers.AddEventArgumentFactory] {
+func (m mutationResolversServiceLocator) AddEvent() ResolverOperationServiceLocator[resolvers.AddEventArguments, resolvers.ValidAddEventArguments, *model.TimelineEvent, resolvers.AddEventArgumentFactory] {
 	return m.addEventServiceLocator
 }
 
-func (m mutationResolversServiceLocator) Authorize() ResolverOperationServiceLocator[resolvers.AuthorizeArguments, resolvers.ValidAuthorizeArguments, model.User, resolvers.AuthorizeArgumentFactory] {
+func (m mutationResolversServiceLocator) Authorize() ResolverOperationServiceLocator[resolvers.AuthorizeArguments, resolvers.ValidAuthorizeArguments, *model.User, resolvers.AuthorizeArgumentFactory] {
 	return m.authorizeServiceLocator
 }
 
-func (m mutationResolversServiceLocator) AddTimeline() ResolverOperationServiceLocator[resolvers.AddTimelineArguments, resolvers.ValidAddTimelineArguments, model.ShortUserTimeline, resolvers.AddTimelineArgumentFactory] {
+func (m mutationResolversServiceLocator) AddTimeline() ResolverOperationServiceLocator[resolvers.AddTimelineArguments, resolvers.ValidAddTimelineArguments, *model.ShortUserTimeline, resolvers.AddTimelineArgumentFactory] {
 	return m.addTimelineServiceLocator
 }
 
@@ -121,7 +121,7 @@ func (a addEventServiceLocator) Validator() resolvers.Validator[resolvers.AddEve
 	return resolvers.NewAddEventValidator(a.locator.Models().Timeline())
 }
 
-func (a addEventServiceLocator) Resolver() resolvers.Resolver[model.TimelineEvent, resolvers.ValidAddEventArguments] {
+func (a addEventServiceLocator) Resolver() resolvers.Resolver[*model.TimelineEvent, resolvers.ValidAddEventArguments] {
 	return resolvers.NewAddEventResolver(a.locator.Models().Events(), a.locator.Models().Timeline())
 }
 
@@ -133,7 +133,7 @@ func (a addTimelineServiceLocator) Validator() resolvers.Validator[resolvers.Add
 	return resolvers.NewAddtimelineValidator(a.locator.Models().Users())
 }
 
-func (a addTimelineServiceLocator) Resolver() resolvers.Resolver[model.ShortUserTimeline, resolvers.ValidAddTimelineArguments] {
+func (a addTimelineServiceLocator) Resolver() resolvers.Resolver[*model.ShortUserTimeline, resolvers.ValidAddTimelineArguments] {
 	return resolvers.NewAddTimelineResolver(a.locator.Models().Users(), a.locator.Models().Timeline())
 }
 
@@ -171,7 +171,7 @@ func (a authorizeServiceLocator) Validator() resolvers.Validator[resolvers.Autho
 	return resolvers.NewAuthorizeValidator(a.locator.Models().Users())
 }
 
-func (a authorizeServiceLocator) Resolver() resolvers.Resolver[model.User, resolvers.ValidAuthorizeArguments] {
+func (a authorizeServiceLocator) Resolver() resolvers.Resolver[*model.User, resolvers.ValidAuthorizeArguments] {
 	return resolvers.NewAutorizeResolver(a.locator.Models().Timeline())
 }
 
@@ -213,14 +213,14 @@ func newMutationResolversServiceLocator(locator ServiceLocator) MutationResolver
 	}
 }
 
-func newAddTimelineServiceLocator(locator ServiceLocator) ResolverOperationServiceLocator[resolvers.AddTimelineArguments, resolvers.ValidAddTimelineArguments, model.ShortUserTimeline, resolvers.AddTimelineArgumentFactory] {
+func newAddTimelineServiceLocator(locator ServiceLocator) ResolverOperationServiceLocator[resolvers.AddTimelineArguments, resolvers.ValidAddTimelineArguments, *model.ShortUserTimeline, resolvers.AddTimelineArgumentFactory] {
 	return addTimelineServiceLocator{locator: locator}
 }
 
-func newAuthorizeServiceLocator(locator ServiceLocator) ResolverOperationServiceLocator[resolvers.AuthorizeArguments, resolvers.ValidAuthorizeArguments, model.User, resolvers.AuthorizeArgumentFactory] {
+func newAuthorizeServiceLocator(locator ServiceLocator) ResolverOperationServiceLocator[resolvers.AuthorizeArguments, resolvers.ValidAuthorizeArguments, *model.User, resolvers.AuthorizeArgumentFactory] {
 	return authorizeServiceLocator{locator: locator}
 }
 
-func newAddEventServiceLocator(locator ServiceLocator) ResolverOperationServiceLocator[resolvers.AddEventArguments, resolvers.ValidAddEventArguments, model.TimelineEvent, resolvers.AddEventArgumentFactory] {
+func newAddEventServiceLocator(locator ServiceLocator) ResolverOperationServiceLocator[resolvers.AddEventArguments, resolvers.ValidAddEventArguments, *model.TimelineEvent, resolvers.AddEventArgumentFactory] {
 	return addEventServiceLocator{locator: locator}
 }
