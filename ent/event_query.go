@@ -8,6 +8,7 @@ import (
 	"math"
 	"timeline/backend/ent/event"
 	"timeline/backend/ent/predicate"
+	"timeline/backend/ent/timeline"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -17,11 +18,12 @@ import (
 // EventQuery is the builder for querying Event entities.
 type EventQuery struct {
 	config
-	ctx        *QueryContext
-	order      []event.OrderOption
-	inters     []Interceptor
-	predicates []predicate.Event
-	withFKs    bool
+	ctx          *QueryContext
+	order        []event.OrderOption
+	inters       []Interceptor
+	predicates   []predicate.Event
+	withTimeline *TimelineQuery
+	withFKs      bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -56,6 +58,28 @@ func (eq *EventQuery) Unique(unique bool) *EventQuery {
 func (eq *EventQuery) Order(o ...event.OrderOption) *EventQuery {
 	eq.order = append(eq.order, o...)
 	return eq
+}
+
+// QueryTimeline chains the current query on the "timeline" edge.
+func (eq *EventQuery) QueryTimeline() *TimelineQuery {
+	query := (&TimelineClient{config: eq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := eq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := eq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(event.Table, event.FieldID, selector),
+			sqlgraph.To(timeline.Table, timeline.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, event.TimelineTable, event.TimelineColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(eq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
 }
 
 // First returns the first Event entity from the query.
@@ -245,15 +269,27 @@ func (eq *EventQuery) Clone() *EventQuery {
 		return nil
 	}
 	return &EventQuery{
-		config:     eq.config,
-		ctx:        eq.ctx.Clone(),
-		order:      append([]event.OrderOption{}, eq.order...),
-		inters:     append([]Interceptor{}, eq.inters...),
-		predicates: append([]predicate.Event{}, eq.predicates...),
+		config:       eq.config,
+		ctx:          eq.ctx.Clone(),
+		order:        append([]event.OrderOption{}, eq.order...),
+		inters:       append([]Interceptor{}, eq.inters...),
+		predicates:   append([]predicate.Event{}, eq.predicates...),
+		withTimeline: eq.withTimeline.Clone(),
 		// clone intermediate query.
 		sql:  eq.sql.Clone(),
 		path: eq.path,
 	}
+}
+
+// WithTimeline tells the query-builder to eager-load the nodes that are connected to
+// the "timeline" edge. The optional arguments are used to configure the query builder of the edge.
+func (eq *EventQuery) WithTimeline(opts ...func(*TimelineQuery)) *EventQuery {
+	query := (&TimelineClient{config: eq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	eq.withTimeline = query
+	return eq
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -332,10 +368,16 @@ func (eq *EventQuery) prepareQuery(ctx context.Context) error {
 
 func (eq *EventQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Event, error) {
 	var (
-		nodes   = []*Event{}
-		withFKs = eq.withFKs
-		_spec   = eq.querySpec()
+		nodes       = []*Event{}
+		withFKs     = eq.withFKs
+		_spec       = eq.querySpec()
+		loadedTypes = [1]bool{
+			eq.withTimeline != nil,
+		}
 	)
+	if eq.withTimeline != nil {
+		withFKs = true
+	}
 	if withFKs {
 		_spec.Node.Columns = append(_spec.Node.Columns, event.ForeignKeys...)
 	}
@@ -345,6 +387,7 @@ func (eq *EventQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Event,
 	_spec.Assign = func(columns []string, values []any) error {
 		node := &Event{config: eq.config}
 		nodes = append(nodes, node)
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	for i := range hooks {
@@ -356,7 +399,46 @@ func (eq *EventQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Event,
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+	if query := eq.withTimeline; query != nil {
+		if err := eq.loadTimeline(ctx, query, nodes, nil,
+			func(n *Event, e *Timeline) { n.Edges.Timeline = e }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
+}
+
+func (eq *EventQuery) loadTimeline(ctx context.Context, query *TimelineQuery, nodes []*Event, init func(*Event), assign func(*Event, *Timeline)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Event)
+	for i := range nodes {
+		if nodes[i].timeline_event == nil {
+			continue
+		}
+		fk := *nodes[i].timeline_event
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(timeline.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "timeline_event" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
 }
 
 func (eq *EventQuery) sqlCount(ctx context.Context) (int, error) {

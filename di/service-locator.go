@@ -26,6 +26,7 @@ type MutationResolversServiceLocator interface {
 	Authorize() ResolverOperationServiceLocator[resolvers.AuthorizeArguments, resolvers.ValidAuthorizeArguments, *model.User, resolvers.AuthorizeArgumentFactory]
 	AddTimeline() ResolverOperationServiceLocator[resolvers.AddTimelineArguments, resolvers.ValidAddTimelineArguments, *model.ShortUserTimeline, resolvers.AddTimelineArgumentFactory]
 	AddEvent() ResolverOperationServiceLocator[resolvers.AddEventArguments, resolvers.ValidAddEventArguments, *model.TimelineEvent, resolvers.AddEventArgumentFactory]
+	DeleteEvent() ResolverOperationServiceLocator[resolvers.DeleteEventArguments, resolvers.ValidDeleteEventArguments, model.Status, resolvers.DeleteEventArgumentFactory]
 }
 
 type ResolversServiceLocator interface {
@@ -70,6 +71,7 @@ type (
 		authorizeServiceLocator   ResolverOperationServiceLocator[resolvers.AuthorizeArguments, resolvers.ValidAuthorizeArguments, *model.User, resolvers.AuthorizeArgumentFactory]
 		addTimelineServiceLocator ResolverOperationServiceLocator[resolvers.AddTimelineArguments, resolvers.ValidAddTimelineArguments, *model.ShortUserTimeline, resolvers.AddTimelineArgumentFactory]
 		addEventServiceLocator    ResolverOperationServiceLocator[resolvers.AddEventArguments, resolvers.ValidAddEventArguments, *model.TimelineEvent, resolvers.AddEventArgumentFactory]
+		deleteEventServiceLocator ResolverOperationServiceLocator[resolvers.DeleteEventArguments, resolvers.ValidDeleteEventArguments, model.Status, resolvers.DeleteEventArgumentFactory]
 	}
 )
 
@@ -83,6 +85,10 @@ func (m mutationResolversServiceLocator) Authorize() ResolverOperationServiceLoc
 
 func (m mutationResolversServiceLocator) AddTimeline() ResolverOperationServiceLocator[resolvers.AddTimelineArguments, resolvers.ValidAddTimelineArguments, *model.ShortUserTimeline, resolvers.AddTimelineArgumentFactory] {
 	return m.addTimelineServiceLocator
+}
+
+func (m mutationResolversServiceLocator) DeleteEvent() ResolverOperationServiceLocator[resolvers.DeleteEventArguments, resolvers.ValidDeleteEventArguments, model.Status, resolvers.DeleteEventArgumentFactory] {
+	return m.deleteEventServiceLocator
 }
 
 type modelsServiceLocator struct {
@@ -107,6 +113,22 @@ type authorizeServiceLocator struct {
 
 type addTimelineServiceLocator struct {
 	locator ServiceLocator
+}
+
+type deleteEventServiceLocator struct {
+	locator ServiceLocator
+}
+
+func (d deleteEventServiceLocator) ArgumentFactory() resolvers.DeleteEventArgumentFactory {
+	return resolvers.DeleteEventArgumentFactory{}
+}
+
+func (d deleteEventServiceLocator) Validator() resolvers.Validator[resolvers.DeleteEventArguments, resolvers.ValidDeleteEventArguments] {
+	return resolvers.NewDeleteEventValidator(d.locator.Models().Users(), d.locator.Models().Events())
+}
+
+func (d deleteEventServiceLocator) Resolver() resolvers.Resolver[model.Status, resolvers.ValidDeleteEventArguments] {
+	return resolvers.NewDeleteEventResolver(d.locator.Repositories().Event())
 }
 
 type addEventServiceLocator struct {
@@ -210,9 +232,9 @@ func newMutationResolversServiceLocator(locator ServiceLocator) MutationResolver
 		authorizeServiceLocator:   newAuthorizeServiceLocator(locator),
 		addTimelineServiceLocator: newAddTimelineServiceLocator(locator),
 		addEventServiceLocator:    newAddEventServiceLocator(locator),
+		deleteEventServiceLocator: newDeleteEventServiceLocator(locator),
 	}
 }
-
 func newAddTimelineServiceLocator(locator ServiceLocator) ResolverOperationServiceLocator[resolvers.AddTimelineArguments, resolvers.ValidAddTimelineArguments, *model.ShortUserTimeline, resolvers.AddTimelineArgumentFactory] {
 	return addTimelineServiceLocator{locator: locator}
 }
@@ -223,4 +245,8 @@ func newAuthorizeServiceLocator(locator ServiceLocator) ResolverOperationService
 
 func newAddEventServiceLocator(locator ServiceLocator) ResolverOperationServiceLocator[resolvers.AddEventArguments, resolvers.ValidAddEventArguments, *model.TimelineEvent, resolvers.AddEventArgumentFactory] {
 	return addEventServiceLocator{locator: locator}
+}
+
+func newDeleteEventServiceLocator(locator ServiceLocator) ResolverOperationServiceLocator[resolvers.DeleteEventArguments, resolvers.ValidDeleteEventArguments, model.Status, resolvers.DeleteEventArgumentFactory] {
+	return deleteEventServiceLocator{locator: locator}
 }

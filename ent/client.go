@@ -326,6 +326,22 @@ func (c *EventClient) GetX(ctx context.Context, id int) *Event {
 	return obj
 }
 
+// QueryTimeline queries the timeline edge of a Event.
+func (c *EventClient) QueryTimeline(e *Event) *TimelineQuery {
+	query := (&TimelineClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := e.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(event.Table, event.FieldID, id),
+			sqlgraph.To(timeline.Table, timeline.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, event.TimelineTable, event.TimelineColumn),
+		)
+		fromV = sqlgraph.Neighbors(e.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *EventClient) Hooks() []Hook {
 	return c.hooks.Event

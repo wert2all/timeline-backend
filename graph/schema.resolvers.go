@@ -42,6 +42,16 @@ func (r *mutationResolver) AddEvent(ctx context.Context, event model.TimelineEve
 	)
 }
 
+// DeleteEvent is the resolver for the deleteEvent field.
+func (r *mutationResolver) DeleteEvent(ctx context.Context, eventID int) (model.Status, error) {
+	return resolvers.Resolve(
+		ctx,
+		r.ServiceLocator.Resolvers().Mutation().DeleteEvent().ArgumentFactory().New(eventID),
+		r.ServiceLocator.Resolvers().Mutation().DeleteEvent().Validator(),
+		r.ServiceLocator.Resolvers().Mutation().DeleteEvent().Resolver(),
+	)
+}
+
 // TimelineEvents is the resolver for the timelineEvents field.
 func (r *queryResolver) TimelineEvents(ctx context.Context, timelineID int, limit *model.Limit) ([]*model.TimelineEvent, error) {
 	timeline, error := r.Models.Timeline.GetUserTimeline(appContext.GetUserID(ctx), timelineID)
@@ -61,7 +71,5 @@ func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 // Query returns QueryResolver implementation.
 func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
-type (
-	mutationResolver struct{ *Resolver }
-	queryResolver    struct{ *Resolver }
-)
+type mutationResolver struct{ *Resolver }
+type queryResolver struct{ *Resolver }

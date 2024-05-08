@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 const (
@@ -28,8 +29,17 @@ const (
 	FieldTitle = "title"
 	// FieldDescription holds the string denoting the description field in the database.
 	FieldDescription = "description"
+	// EdgeTimeline holds the string denoting the timeline edge name in mutations.
+	EdgeTimeline = "timeline"
 	// Table holds the table name of the event in the database.
 	Table = "events"
+	// TimelineTable is the table that holds the timeline relation/edge.
+	TimelineTable = "events"
+	// TimelineInverseTable is the table name for the Timeline entity.
+	// It exists in this package in order to avoid circular dependency with the "timeline" package.
+	TimelineInverseTable = "timelines"
+	// TimelineColumn is the table column denoting the timeline relation/edge.
+	TimelineColumn = "timeline_event"
 )
 
 // Columns holds all SQL columns for event fields.
@@ -139,4 +149,18 @@ func ByTitle(opts ...sql.OrderTermOption) OrderOption {
 // ByDescription orders the results by the description field.
 func ByDescription(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDescription, opts...).ToFunc()
+}
+
+// ByTimelineField orders the results by timeline field.
+func ByTimelineField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newTimelineStep(), sql.OrderByField(field, opts...))
+	}
+}
+func newTimelineStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(TimelineInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, TimelineTable, TimelineColumn),
+	)
 }
