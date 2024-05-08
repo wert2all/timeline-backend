@@ -35,9 +35,9 @@ type Resolvers struct {
 	QueryResolvers    QueryResolvers
 }
 type MutationResolvers struct {
-	AddTimeline resolvers.Resolver[model.ShortUserTimeline, resolvers.ValidAddTimelineArguments]
-	Authorize   resolvers.Resolver[model.User, resolvers.ValidAuthorizeArguments]
-	AddEvent    resolvers.Resolver[model.TimelineEvent, resolvers.ValidAddEventArguments]
+	AddTimeline resolvers.Resolver[*model.ShortUserTimeline, resolvers.ValidAddTimelineArguments]
+	Authorize   resolvers.Resolver[*model.User, resolvers.ValidAuthorizeArguments]
+	AddEvent    resolvers.Resolver[*model.TimelineEvent, resolvers.ValidAddEventArguments]
 }
 type QueryResolvers struct{}
 
