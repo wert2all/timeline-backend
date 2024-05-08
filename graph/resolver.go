@@ -12,6 +12,5 @@ import (
 
 type Resolver struct {
 	Models         di.Models
-	Resolvers      di.Resolvers
 	ServiceLocator di.ServiceLocator
 }

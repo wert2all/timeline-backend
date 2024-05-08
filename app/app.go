@@ -20,9 +20,8 @@ type Factory[T any] interface {
 }
 
 type State struct {
-	Config    di.Config
-	Models    di.Models
-	Resolvers di.Resolvers
+	Config di.Config
+	Models di.Models
 }
 
 type app struct {
@@ -59,7 +58,7 @@ func (a *routerFactory) Create(state State) chi.Router {
 func (h *handlerFactory) Create(state State, locator di.ServiceLocator) http.HandlerFunc {
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{
 		Resolvers: &graph.Resolver{
-			Models: state.Models, Resolvers: state.Resolvers, ServiceLocator: locator,
+			Models: state.Models, ServiceLocator: locator,
 		},
 	}))
 
@@ -79,12 +78,8 @@ func getRouterFactory(handler http.HandlerFunc, userModel user.Authorize) *route
 	}
 }
 
-func NewAppState(models di.Models, config di.Config, resolvers di.Resolvers) State {
-	return State{
-		Config:    config,
-		Models:    models,
-		Resolvers: resolvers,
-	}
+func NewAppState(models di.Models, config di.Config) State {
+	return State{Config: config, Models: models}
 }
 
 func NewApplication(state State, locator di.ServiceLocator) Application {
