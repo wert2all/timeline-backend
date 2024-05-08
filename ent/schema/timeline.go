@@ -21,9 +21,7 @@ func (Timeline) Fields() []ent.Field {
 // Edges of the Timeline.
 func (Timeline) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("user", User.Type).
-			Ref("timeline").
-			Unique(),
+		edge.From("user", User.Type).Ref("timeline").Unique(),
 		edge.To("event", Event.Type),
 	}
 }

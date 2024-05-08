@@ -34,20 +34,22 @@ const (
 // EventMutation represents an operation that mutates the Event nodes in the graph.
 type EventMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *int
-	created_at    *time.Time
-	date          *time.Time
-	_type         *event.Type
-	time          *string
-	showTime      *bool
-	title         *string
-	description   *string
-	clearedFields map[string]struct{}
-	done          bool
-	oldValue      func(context.Context) (*Event, error)
-	predicates    []predicate.Event
+	op              Op
+	typ             string
+	id              *int
+	created_at      *time.Time
+	date            *time.Time
+	_type           *event.Type
+	time            *string
+	showTime        *bool
+	title           *string
+	description     *string
+	clearedFields   map[string]struct{}
+	timeline        *int
+	clearedtimeline bool
+	done            bool
+	oldValue        func(context.Context) (*Event, error)
+	predicates      []predicate.Event
 }
 
 var _ ent.Mutation = (*EventMutation)(nil)
@@ -439,6 +441,45 @@ func (m *EventMutation) ResetDescription() {
 	delete(m.clearedFields, event.FieldDescription)
 }
 
+// SetTimelineID sets the "timeline" edge to the Timeline entity by id.
+func (m *EventMutation) SetTimelineID(id int) {
+	m.timeline = &id
+}
+
+// ClearTimeline clears the "timeline" edge to the Timeline entity.
+func (m *EventMutation) ClearTimeline() {
+	m.clearedtimeline = true
+}
+
+// TimelineCleared reports if the "timeline" edge to the Timeline entity was cleared.
+func (m *EventMutation) TimelineCleared() bool {
+	return m.clearedtimeline
+}
+
+// TimelineID returns the "timeline" edge ID in the mutation.
+func (m *EventMutation) TimelineID() (id int, exists bool) {
+	if m.timeline != nil {
+		return *m.timeline, true
+	}
+	return
+}
+
+// TimelineIDs returns the "timeline" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// TimelineID instead. It exists only for internal usage by the builders.
+func (m *EventMutation) TimelineIDs() (ids []int) {
+	if id := m.timeline; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetTimeline resets all changes to the "timeline" edge.
+func (m *EventMutation) ResetTimeline() {
+	m.timeline = nil
+	m.clearedtimeline = false
+}
+
 // Where appends a list predicates to the EventMutation builder.
 func (m *EventMutation) Where(ps ...predicate.Event) {
 	m.predicates = append(m.predicates, ps...)
@@ -695,19 +736,28 @@ func (m *EventMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *EventMutation) AddedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.timeline != nil {
+		edges = append(edges, event.EdgeTimeline)
+	}
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
 func (m *EventMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case event.EdgeTimeline:
+		if id := m.timeline; id != nil {
+			return []ent.Value{*id}
+		}
+	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *EventMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
 	return edges
 }
 
@@ -719,25 +769,42 @@ func (m *EventMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *EventMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.clearedtimeline {
+		edges = append(edges, event.EdgeTimeline)
+	}
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
 func (m *EventMutation) EdgeCleared(name string) bool {
+	switch name {
+	case event.EdgeTimeline:
+		return m.clearedtimeline
+	}
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
 func (m *EventMutation) ClearEdge(name string) error {
+	switch name {
+	case event.EdgeTimeline:
+		m.ClearTimeline()
+		return nil
+	}
 	return fmt.Errorf("unknown Event unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
 func (m *EventMutation) ResetEdge(name string) error {
+	switch name {
+	case event.EdgeTimeline:
+		m.ResetTimeline()
+		return nil
+	}
 	return fmt.Errorf("unknown Event edge %s", name)
 }
 

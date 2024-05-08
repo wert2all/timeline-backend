@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"time"
 	"timeline/backend/ent/event"
+	"timeline/backend/ent/timeline"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -108,6 +109,25 @@ func (ec *EventCreate) SetNillableDescription(s *string) *EventCreate {
 		ec.SetDescription(*s)
 	}
 	return ec
+}
+
+// SetTimelineID sets the "timeline" edge to the Timeline entity by ID.
+func (ec *EventCreate) SetTimelineID(id int) *EventCreate {
+	ec.mutation.SetTimelineID(id)
+	return ec
+}
+
+// SetNillableTimelineID sets the "timeline" edge to the Timeline entity by ID if the given value is not nil.
+func (ec *EventCreate) SetNillableTimelineID(id *int) *EventCreate {
+	if id != nil {
+		ec = ec.SetTimelineID(*id)
+	}
+	return ec
+}
+
+// SetTimeline sets the "timeline" edge to the Timeline entity.
+func (ec *EventCreate) SetTimeline(t *Timeline) *EventCreate {
+	return ec.SetTimelineID(t.ID)
 }
 
 // Mutation returns the EventMutation object of the builder.
@@ -231,6 +251,23 @@ func (ec *EventCreate) createSpec() (*Event, *sqlgraph.CreateSpec) {
 	if value, ok := ec.mutation.Description(); ok {
 		_spec.SetField(event.FieldDescription, field.TypeString, value)
 		_node.Description = value
+	}
+	if nodes := ec.mutation.TimelineIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   event.TimelineTable,
+			Columns: []string{event.TimelineColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(timeline.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.timeline_event = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

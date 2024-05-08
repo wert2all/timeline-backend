@@ -11,11 +11,16 @@ type Repository interface {
 	FindByID(ID int) (*ent.Event, error)
 	CreateEvent(date time.Time, eventType event.Type) (*ent.Event, error)
 	UpdateEvent(*ent.EventUpdateOne) (*ent.Event, error)
+	Delete(context.Context, *ent.Event) error
 }
 
 type repositoryImpl struct {
 	client  *ent.Client
 	context context.Context
+}
+
+func (r repositoryImpl) Delete(ctx context.Context, event *ent.Event) error {
+	return r.client.Event.DeleteOne(event).Exec(ctx)
 }
 
 func (r repositoryImpl) UpdateEvent(event *ent.EventUpdateOne) (*ent.Event, error) {

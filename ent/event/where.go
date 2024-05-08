@@ -7,6 +7,7 @@ import (
 	"timeline/backend/ent/predicate"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // ID filters vertices based on their ID field.
@@ -417,6 +418,29 @@ func DescriptionEqualFold(v string) predicate.Event {
 // DescriptionContainsFold applies the ContainsFold predicate on the "description" field.
 func DescriptionContainsFold(v string) predicate.Event {
 	return predicate.Event(sql.FieldContainsFold(FieldDescription, v))
+}
+
+// HasTimeline applies the HasEdge predicate on the "timeline" edge.
+func HasTimeline() predicate.Event {
+	return predicate.Event(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, TimelineTable, TimelineColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasTimelineWith applies the HasEdge predicate on the "timeline" edge with a given conditions (other predicates).
+func HasTimelineWith(preds ...predicate.Timeline) predicate.Event {
+	return predicate.Event(func(s *sql.Selector) {
+		step := newTimelineStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
 }
 
 // And groups predicates with the AND operator between them.

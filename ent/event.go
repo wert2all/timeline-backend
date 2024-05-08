@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 	"timeline/backend/ent/event"
+	"timeline/backend/ent/timeline"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -30,9 +31,32 @@ type Event struct {
 	// Title holds the value of the "title" field.
 	Title string `json:"title,omitempty"`
 	// Description holds the value of the "description" field.
-	Description    string `json:"description,omitempty"`
+	Description string `json:"description,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the EventQuery when eager-loading is set.
+	Edges          EventEdges `json:"edges"`
 	timeline_event *int
 	selectValues   sql.SelectValues
+}
+
+// EventEdges holds the relations/edges for other nodes in the graph.
+type EventEdges struct {
+	// Timeline holds the value of the timeline edge.
+	Timeline *Timeline `json:"timeline,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+}
+
+// TimelineOrErr returns the Timeline value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e EventEdges) TimelineOrErr() (*Timeline, error) {
+	if e.Timeline != nil {
+		return e.Timeline, nil
+	} else if e.loadedTypes[0] {
+		return nil, &NotFoundError{label: timeline.Label}
+	}
+	return nil, &NotLoadedError{edge: "timeline"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -131,6 +155,11 @@ func (e *Event) assignValues(columns []string, values []any) error {
 // This includes values selected through modifiers, order, etc.
 func (e *Event) Value(name string) (ent.Value, error) {
 	return e.selectValues.Get(name)
+}
+
+// QueryTimeline queries the "timeline" edge of the Event entity.
+func (e *Event) QueryTimeline() *TimelineQuery {
+	return NewEventClient(e.config).QueryTimeline(e)
 }
 
 // Update returns a builder for updating this Event.

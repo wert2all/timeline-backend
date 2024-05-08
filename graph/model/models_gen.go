@@ -55,6 +55,47 @@ type User struct {
 	Timelines []*ShortUserTimeline `json:"timelines"`
 }
 
+type Status string
+
+const (
+	StatusSuccess Status = "success"
+	StatusError   Status = "error"
+)
+
+var AllStatus = []Status{
+	StatusSuccess,
+	StatusError,
+}
+
+func (e Status) IsValid() bool {
+	switch e {
+	case StatusSuccess, StatusError:
+		return true
+	}
+	return false
+}
+
+func (e Status) String() string {
+	return string(e)
+}
+
+func (e *Status) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = Status(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid Status", str)
+	}
+	return nil
+}
+
+func (e Status) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
 type TimelineType string
 
 const (

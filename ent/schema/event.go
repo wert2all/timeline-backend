@@ -1,6 +1,7 @@
 package schema
 
 import (
+	"entgo.io/ent/schema/edge"
 	"time"
 
 	"entgo.io/ent"
@@ -27,5 +28,7 @@ func (Event) Fields() []ent.Field {
 
 // Edges of the Event.
 func (Event) Edges() []ent.Edge {
-	return nil
+	return []ent.Edge{
+		edge.From("timeline", Timeline.Type).Ref("event").Unique(),
+	}
 }
