@@ -34,6 +34,7 @@ type TimelineEvent {
   type: TimelineType!
   title: String
   description: String
+  showTime: Boolean
 }
 
 input AddTimeline {
@@ -47,6 +48,7 @@ input TimelineEventInput {
   type: TimelineType
   title: String
   description: String
+  showTime: Boolean
 }
 
 input Limit {
