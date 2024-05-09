@@ -13,6 +13,7 @@ func ToEvent(event *ent.Event) *model.TimelineEvent {
 		Type:        model.TimelineType(event.Type.String()),
 		Title:       &event.Title,
 		Description: &event.Description,
+		ShowTime:    &event.ShowTime,
 	}
 }
 

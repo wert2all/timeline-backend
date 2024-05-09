@@ -23,6 +23,7 @@ type ValidAddEventArguments struct {
 	date        time.Time
 	title       string
 	description string
+	showTime    bool
 }
 
 type AddEventArguments struct {
@@ -42,7 +43,12 @@ func (a addEventResolverImpl) Resolve(ctx context.Context, arguments ValidArgume
 		return nil, eventErr
 	}
 
-	updatedEntity, updateErr := a.event.Update(eventEntity.Update().SetTitle(arguments.GetArguments().title).SetDescription(arguments.GetArguments().description))
+	updatedEntity, updateErr := a.event.
+		Update(eventEntity.Update().
+			SetTitle(arguments.GetArguments().title).
+			SetDescription(arguments.GetArguments().description).
+			SetShowTime(arguments.GetArguments().showTime))
+
 	if updateErr != nil {
 		return nil, updateErr
 	}
@@ -66,15 +72,16 @@ type addEventvalidatorImpl struct {
 }
 
 func (a addEventvalidatorImpl) Validate(ctx context.Context, arguments Arguments[AddEventArguments]) (ValidArguments[ValidAddEventArguments], error) {
-	timelineEntity, err := a.Timeline.GetUserTimeline(appContext.GetUserID(ctx), arguments.GetArguments().eventInput.TimelineID)
+	input := arguments.GetArguments().eventInput
+	timelineEntity, err := a.Timeline.GetUserTimeline(appContext.GetUserID(ctx), input.TimelineID)
 	if err != nil {
 		return nil, err
 	}
 	var eventType entEvent.Type
-	if arguments.GetArguments().eventInput.Type == nil {
+	if input.Type == nil {
 		eventType = entEvent.Type(model.TimelineTypeDefault)
 	} else {
-		eventType = entEvent.Type(arguments.GetArguments().eventInput.Type.String())
+		eventType = entEvent.Type(input.Type.String())
 	}
 
 	return ValidAddEventArguments{
@@ -83,6 +90,7 @@ func (a addEventvalidatorImpl) Validate(ctx context.Context, arguments Arguments
 		date:        arguments.GetArguments().eventInput.Date,
 		title:       derefString(arguments.GetArguments().eventInput.Title),
 		description: derefString(arguments.GetArguments().eventInput.Description),
+		showTime:    *input.ShowTime,
 	}, err
 }
 
@@ -90,7 +98,6 @@ func derefString(s *string) string {
 	if s != nil {
 		return *s
 	}
-
 	return ""
 }
 

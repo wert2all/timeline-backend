@@ -35,6 +35,7 @@ type TimelineEvent struct {
 	Type        TimelineType `json:"type"`
 	Title       *string      `json:"title,omitempty"`
 	Description *string      `json:"description,omitempty"`
+	ShowTime    *bool        `json:"showTime,omitempty"`
 }
 
 type TimelineEventInput struct {
@@ -44,6 +45,7 @@ type TimelineEventInput struct {
 	Type        *TimelineType `json:"type,omitempty"`
 	Title       *string       `json:"title,omitempty"`
 	Description *string       `json:"description,omitempty"`
+	ShowTime    *bool         `json:"showTime,omitempty"`
 }
 
 type User struct {
