@@ -8,7 +8,7 @@ import (
 
 type UserTimeline interface {
 	GetUserTimelines(*ent.User) ([]*ent.Timeline, error)
-	CreateTimeline(*string, *ent.User) (*ent.Timeline, error)
+	CreateTimeline(string, *ent.User) (*ent.Timeline, error)
 	GetUserTimeline(userID int, timelineID int) (*ent.Timeline, error)
 	AttachEvent(*ent.Timeline, *ent.Event) (*ent.Timeline, error)
 	GetEvents(*ent.Timeline, query.Limit) ([]*ent.Event, error)
@@ -30,14 +30,8 @@ func (t timelineModelImpl) GetUserTimeline(userID int, timelineID int) (*ent.Tim
 	return t.repository.GetUserTimeline(userID, timelineID)
 }
 
-func (t timelineModelImpl) CreateTimeline(timelineName *string, user *ent.User) (*ent.Timeline, error) {
-	var name string
-	if timelineName != nil {
-		name = *timelineName
-	} else {
-		name = ""
-	}
-	return t.repository.Create(name, user)
+func (t timelineModelImpl) CreateTimeline(timelineName string, user *ent.User) (*ent.Timeline, error) {
+	return t.repository.Create(timelineName, user)
 }
 
 func (t timelineModelImpl) GetUserTimelines(user *ent.User) ([]*ent.Timeline, error) {
