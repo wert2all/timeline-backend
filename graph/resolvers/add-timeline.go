@@ -3,11 +3,13 @@ package resolvers
 import (
 	"context"
 	"errors"
+	"github.com/microcosm-cc/bluemonday"
 	appContext "timeline/backend/app/context"
 	"timeline/backend/db/model/timeline"
 	"timeline/backend/db/model/user"
 	"timeline/backend/ent"
 	"timeline/backend/graph/model"
+	"timeline/backend/lib/utils"
 )
 
 type AddTimelineArgumentFactory struct{}
@@ -21,7 +23,7 @@ type AddTimelineArguments struct {
 }
 
 type ValidAddTimelineArguments struct {
-	name *string
+	name string
 	User *ent.User
 }
 
@@ -35,17 +37,18 @@ type addTimelimeMutation struct {
 }
 
 func (a addTimelineValidator) Validate(ctx context.Context, input Arguments[AddTimelineArguments]) (ValidArguments[ValidAddTimelineArguments], error) {
+	p := bluemonday.StrictPolicy()
 	userEntity, error := a.UsersModel.GetUser(appContext.GetUserID(ctx))
 	if error != nil {
 		return nil, error
 	}
-	var name *string
+	var name string
 	if input.GetArguments().timeline != nil {
-		name = input.GetArguments().timeline.Name
+		name = utils.DerefString(input.GetArguments().timeline.Name)
 	} else {
 		return nil, errors.New(`missing required timeline`)
 	}
-	return ValidAddTimelineArguments{name: name, User: userEntity}, nil
+	return ValidAddTimelineArguments{name: p.Sanitize(name), User: userEntity}, nil
 }
 func (a AddTimelineArguments) GetArguments() AddTimelineArguments           { return a }
 func (v ValidAddTimelineArguments) GetArguments() ValidAddTimelineArguments { return v }

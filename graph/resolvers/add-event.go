@@ -2,6 +2,7 @@ package resolvers
 
 import (
 	"context"
+	"github.com/microcosm-cc/bluemonday"
 	"time"
 	appContext "timeline/backend/app/context"
 	"timeline/backend/db/model/event"
@@ -9,6 +10,7 @@ import (
 	"timeline/backend/ent"
 	entEvent "timeline/backend/ent/event"
 	"timeline/backend/graph/model"
+	"timeline/backend/lib/utils"
 )
 
 type AddEventArgumentFactory struct{}
@@ -72,6 +74,7 @@ type addEventvalidatorImpl struct {
 }
 
 func (a addEventvalidatorImpl) Validate(ctx context.Context, arguments Arguments[AddEventArguments]) (ValidArguments[ValidAddEventArguments], error) {
+	p := bluemonday.StrictPolicy()
 	input := arguments.GetArguments().eventInput
 	timelineEntity, err := a.Timeline.GetUserTimeline(appContext.GetUserID(ctx), input.TimelineID)
 	if err != nil {
@@ -88,17 +91,10 @@ func (a addEventvalidatorImpl) Validate(ctx context.Context, arguments Arguments
 		timeline:    timelineEntity,
 		eventType:   eventType,
 		date:        arguments.GetArguments().eventInput.Date,
-		title:       derefString(arguments.GetArguments().eventInput.Title),
-		description: derefString(arguments.GetArguments().eventInput.Description),
+		title:       p.Sanitize(utils.DerefString(arguments.GetArguments().eventInput.Title)),
+		description: p.Sanitize(utils.DerefString(arguments.GetArguments().eventInput.Description)),
 		showTime:    *input.ShowTime,
 	}, err
-}
-
-func derefString(s *string) string {
-	if s != nil {
-		return *s
-	}
-	return ""
 }
 
 func NewAddEventResolver(event event.Model, timeline timeline.UserTimeline) Resolver[*model.TimelineEvent, ValidAddEventArguments] {
