@@ -3,6 +3,7 @@ package resolvers
 import (
 	"context"
 	"github.com/microcosm-cc/bluemonday"
+	"net/url"
 	"time"
 	appContext "timeline/backend/app/context"
 	"timeline/backend/db/model/event"
@@ -26,6 +27,7 @@ type ValidAddEventArguments struct {
 	title       string
 	description string
 	showTime    bool
+	url         *url.URL
 }
 
 type AddEventArguments struct {
@@ -49,7 +51,8 @@ func (a addEventResolverImpl) Resolve(ctx context.Context, arguments ValidArgume
 		Update(eventEntity.Update().
 			SetTitle(arguments.GetArguments().title).
 			SetDescription(arguments.GetArguments().description).
-			SetShowTime(arguments.GetArguments().showTime))
+			SetShowTime(arguments.GetArguments().showTime).
+			SetURL(arguments.GetArguments().url.String()))
 
 	if updateErr != nil {
 		return nil, updateErr
@@ -87,6 +90,11 @@ func (a addEventvalidatorImpl) Validate(ctx context.Context, arguments Arguments
 		eventType = entEvent.Type(input.Type.String())
 	}
 
+	link, err := url.ParseRequestURI(utils.DerefString(arguments.GetArguments().eventInput.URL))
+	if err != nil {
+		panic(err)
+	}
+
 	return ValidAddEventArguments{
 		timeline:    timelineEntity,
 		eventType:   eventType,
@@ -94,6 +102,7 @@ func (a addEventvalidatorImpl) Validate(ctx context.Context, arguments Arguments
 		title:       p.Sanitize(utils.DerefString(arguments.GetArguments().eventInput.Title)),
 		description: p.Sanitize(utils.DerefString(arguments.GetArguments().eventInput.Description)),
 		showTime:    *input.ShowTime,
+		url:         link,
 	}, err
 }
 
