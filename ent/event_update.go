@@ -131,6 +131,26 @@ func (eu *EventUpdate) ClearDescription() *EventUpdate {
 	return eu
 }
 
+// SetURL sets the "url" field.
+func (eu *EventUpdate) SetURL(s string) *EventUpdate {
+	eu.mutation.SetURL(s)
+	return eu
+}
+
+// SetNillableURL sets the "url" field if the given value is not nil.
+func (eu *EventUpdate) SetNillableURL(s *string) *EventUpdate {
+	if s != nil {
+		eu.SetURL(*s)
+	}
+	return eu
+}
+
+// ClearURL clears the value of the "url" field.
+func (eu *EventUpdate) ClearURL() *EventUpdate {
+	eu.mutation.ClearURL()
+	return eu
+}
+
 // SetTimelineID sets the "timeline" edge to the Timeline entity by ID.
 func (eu *EventUpdate) SetTimelineID(id int) *EventUpdate {
 	eu.mutation.SetTimelineID(id)
@@ -236,6 +256,12 @@ func (eu *EventUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if eu.mutation.DescriptionCleared() {
 		_spec.ClearField(event.FieldDescription, field.TypeString)
+	}
+	if value, ok := eu.mutation.URL(); ok {
+		_spec.SetField(event.FieldURL, field.TypeString, value)
+	}
+	if eu.mutation.URLCleared() {
+		_spec.ClearField(event.FieldURL, field.TypeString)
 	}
 	if eu.mutation.TimelineCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -388,6 +414,26 @@ func (euo *EventUpdateOne) ClearDescription() *EventUpdateOne {
 	return euo
 }
 
+// SetURL sets the "url" field.
+func (euo *EventUpdateOne) SetURL(s string) *EventUpdateOne {
+	euo.mutation.SetURL(s)
+	return euo
+}
+
+// SetNillableURL sets the "url" field if the given value is not nil.
+func (euo *EventUpdateOne) SetNillableURL(s *string) *EventUpdateOne {
+	if s != nil {
+		euo.SetURL(*s)
+	}
+	return euo
+}
+
+// ClearURL clears the value of the "url" field.
+func (euo *EventUpdateOne) ClearURL() *EventUpdateOne {
+	euo.mutation.ClearURL()
+	return euo
+}
+
 // SetTimelineID sets the "timeline" edge to the Timeline entity by ID.
 func (euo *EventUpdateOne) SetTimelineID(id int) *EventUpdateOne {
 	euo.mutation.SetTimelineID(id)
@@ -523,6 +569,12 @@ func (euo *EventUpdateOne) sqlSave(ctx context.Context) (_node *Event, err error
 	}
 	if euo.mutation.DescriptionCleared() {
 		_spec.ClearField(event.FieldDescription, field.TypeString)
+	}
+	if value, ok := euo.mutation.URL(); ok {
+		_spec.SetField(event.FieldURL, field.TypeString, value)
+	}
+	if euo.mutation.URLCleared() {
+		_spec.ClearField(event.FieldURL, field.TypeString)
 	}
 	if euo.mutation.TimelineCleared() {
 		edge := &sqlgraph.EdgeSpec{

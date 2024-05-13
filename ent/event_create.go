@@ -111,6 +111,20 @@ func (ec *EventCreate) SetNillableDescription(s *string) *EventCreate {
 	return ec
 }
 
+// SetURL sets the "url" field.
+func (ec *EventCreate) SetURL(s string) *EventCreate {
+	ec.mutation.SetURL(s)
+	return ec
+}
+
+// SetNillableURL sets the "url" field if the given value is not nil.
+func (ec *EventCreate) SetNillableURL(s *string) *EventCreate {
+	if s != nil {
+		ec.SetURL(*s)
+	}
+	return ec
+}
+
 // SetTimelineID sets the "timeline" edge to the Timeline entity by ID.
 func (ec *EventCreate) SetTimelineID(id int) *EventCreate {
 	ec.mutation.SetTimelineID(id)
@@ -251,6 +265,10 @@ func (ec *EventCreate) createSpec() (*Event, *sqlgraph.CreateSpec) {
 	if value, ok := ec.mutation.Description(); ok {
 		_spec.SetField(event.FieldDescription, field.TypeString, value)
 		_node.Description = value
+	}
+	if value, ok := ec.mutation.URL(); ok {
+		_spec.SetField(event.FieldURL, field.TypeString, value)
+		_node.URL = value
 	}
 	if nodes := ec.mutation.TimelineIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

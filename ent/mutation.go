@@ -44,6 +44,7 @@ type EventMutation struct {
 	showTime        *bool
 	title           *string
 	description     *string
+	url             *string
 	clearedFields   map[string]struct{}
 	timeline        *int
 	clearedtimeline bool
@@ -441,6 +442,55 @@ func (m *EventMutation) ResetDescription() {
 	delete(m.clearedFields, event.FieldDescription)
 }
 
+// SetURL sets the "url" field.
+func (m *EventMutation) SetURL(s string) {
+	m.url = &s
+}
+
+// URL returns the value of the "url" field in the mutation.
+func (m *EventMutation) URL() (r string, exists bool) {
+	v := m.url
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldURL returns the old "url" field's value of the Event entity.
+// If the Event object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventMutation) OldURL(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldURL is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldURL requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldURL: %w", err)
+	}
+	return oldValue.URL, nil
+}
+
+// ClearURL clears the value of the "url" field.
+func (m *EventMutation) ClearURL() {
+	m.url = nil
+	m.clearedFields[event.FieldURL] = struct{}{}
+}
+
+// URLCleared returns if the "url" field was cleared in this mutation.
+func (m *EventMutation) URLCleared() bool {
+	_, ok := m.clearedFields[event.FieldURL]
+	return ok
+}
+
+// ResetURL resets all changes to the "url" field.
+func (m *EventMutation) ResetURL() {
+	m.url = nil
+	delete(m.clearedFields, event.FieldURL)
+}
+
 // SetTimelineID sets the "timeline" edge to the Timeline entity by id.
 func (m *EventMutation) SetTimelineID(id int) {
 	m.timeline = &id
@@ -514,7 +564,7 @@ func (m *EventMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *EventMutation) Fields() []string {
-	fields := make([]string, 0, 7)
+	fields := make([]string, 0, 8)
 	if m.created_at != nil {
 		fields = append(fields, event.FieldCreatedAt)
 	}
@@ -535,6 +585,9 @@ func (m *EventMutation) Fields() []string {
 	}
 	if m.description != nil {
 		fields = append(fields, event.FieldDescription)
+	}
+	if m.url != nil {
+		fields = append(fields, event.FieldURL)
 	}
 	return fields
 }
@@ -558,6 +611,8 @@ func (m *EventMutation) Field(name string) (ent.Value, bool) {
 		return m.Title()
 	case event.FieldDescription:
 		return m.Description()
+	case event.FieldURL:
+		return m.URL()
 	}
 	return nil, false
 }
@@ -581,6 +636,8 @@ func (m *EventMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldTitle(ctx)
 	case event.FieldDescription:
 		return m.OldDescription(ctx)
+	case event.FieldURL:
+		return m.OldURL(ctx)
 	}
 	return nil, fmt.Errorf("unknown Event field %s", name)
 }
@@ -639,6 +696,13 @@ func (m *EventMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetDescription(v)
 		return nil
+	case event.FieldURL:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetURL(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Event field %s", name)
 }
@@ -678,6 +742,9 @@ func (m *EventMutation) ClearedFields() []string {
 	if m.FieldCleared(event.FieldDescription) {
 		fields = append(fields, event.FieldDescription)
 	}
+	if m.FieldCleared(event.FieldURL) {
+		fields = append(fields, event.FieldURL)
+	}
 	return fields
 }
 
@@ -700,6 +767,9 @@ func (m *EventMutation) ClearField(name string) error {
 		return nil
 	case event.FieldDescription:
 		m.ClearDescription()
+		return nil
+	case event.FieldURL:
+		m.ClearURL()
 		return nil
 	}
 	return fmt.Errorf("unknown Event nullable field %s", name)
@@ -729,6 +799,9 @@ func (m *EventMutation) ResetField(name string) error {
 		return nil
 	case event.FieldDescription:
 		m.ResetDescription()
+		return nil
+	case event.FieldURL:
+		m.ResetURL()
 		return nil
 	}
 	return fmt.Errorf("unknown Event field %s", name)
