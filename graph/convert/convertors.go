@@ -14,6 +14,7 @@ func ToEvent(event *ent.Event) *model.TimelineEvent {
 		Title:       &event.Title,
 		Description: &event.Description,
 		ShowTime:    &event.ShowTime,
+		URL:         &event.URL,
 	}
 }
 
