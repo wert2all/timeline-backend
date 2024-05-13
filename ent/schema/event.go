@@ -23,6 +23,7 @@ func (Event) Fields() []ent.Field {
 		field.Bool("showTime").Default(true),
 		field.String("title").Optional(),
 		field.String("description").Optional(),
+		field.String("url").Optional(),
 	}
 }
 

@@ -29,6 +29,8 @@ const (
 	FieldTitle = "title"
 	// FieldDescription holds the string denoting the description field in the database.
 	FieldDescription = "description"
+	// FieldURL holds the string denoting the url field in the database.
+	FieldURL = "url"
 	// EdgeTimeline holds the string denoting the timeline edge name in mutations.
 	EdgeTimeline = "timeline"
 	// Table holds the table name of the event in the database.
@@ -52,6 +54,7 @@ var Columns = []string{
 	FieldShowTime,
 	FieldTitle,
 	FieldDescription,
+	FieldURL,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "events"
@@ -149,6 +152,11 @@ func ByTitle(opts ...sql.OrderTermOption) OrderOption {
 // ByDescription orders the results by the description field.
 func ByDescription(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDescription, opts...).ToFunc()
+}
+
+// ByURL orders the results by the url field.
+func ByURL(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldURL, opts...).ToFunc()
 }
 
 // ByTimelineField orders the results by timeline field.
