@@ -35,6 +35,17 @@ var (
 			},
 		},
 	}
+	// TagsColumns holds the columns for the "tags" table.
+	TagsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "tag", Type: field.TypeString},
+	}
+	// TagsTable holds the schema information for the "tags" table.
+	TagsTable = &schema.Table{
+		Name:       "tags",
+		Columns:    TagsColumns,
+		PrimaryKey: []*schema.Column{TagsColumns[0]},
+	}
 	// TimelinesColumns holds the columns for the "timelines" table.
 	TimelinesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -73,15 +84,44 @@ var (
 		Columns:    UsersColumns,
 		PrimaryKey: []*schema.Column{UsersColumns[0]},
 	}
+	// TagEventColumns holds the columns for the "tag_event" table.
+	TagEventColumns = []*schema.Column{
+		{Name: "tag_id", Type: field.TypeInt},
+		{Name: "event_id", Type: field.TypeInt},
+	}
+	// TagEventTable holds the schema information for the "tag_event" table.
+	TagEventTable = &schema.Table{
+		Name:       "tag_event",
+		Columns:    TagEventColumns,
+		PrimaryKey: []*schema.Column{TagEventColumns[0], TagEventColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "tag_event_tag_id",
+				Columns:    []*schema.Column{TagEventColumns[0]},
+				RefColumns: []*schema.Column{TagsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "tag_event_event_id",
+				Columns:    []*schema.Column{TagEventColumns[1]},
+				RefColumns: []*schema.Column{EventsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		EventsTable,
+		TagsTable,
 		TimelinesTable,
 		UsersTable,
+		TagEventTable,
 	}
 )
 
 func init() {
 	EventsTable.ForeignKeys[0].RefTable = TimelinesTable
 	TimelinesTable.ForeignKeys[0].RefTable = UsersTable
+	TagEventTable.ForeignKeys[0].RefTable = TagsTable
+	TagEventTable.ForeignKeys[1].RefTable = EventsTable
 }

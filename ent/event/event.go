@@ -33,6 +33,8 @@ const (
 	FieldURL = "url"
 	// EdgeTimeline holds the string denoting the timeline edge name in mutations.
 	EdgeTimeline = "timeline"
+	// EdgeTags holds the string denoting the tags edge name in mutations.
+	EdgeTags = "tags"
 	// Table holds the table name of the event in the database.
 	Table = "events"
 	// TimelineTable is the table that holds the timeline relation/edge.
@@ -42,6 +44,11 @@ const (
 	TimelineInverseTable = "timelines"
 	// TimelineColumn is the table column denoting the timeline relation/edge.
 	TimelineColumn = "timeline_event"
+	// TagsTable is the table that holds the tags relation/edge. The primary key declared below.
+	TagsTable = "tag_event"
+	// TagsInverseTable is the table name for the Tag entity.
+	// It exists in this package in order to avoid circular dependency with the "tag" package.
+	TagsInverseTable = "tags"
 )
 
 // Columns holds all SQL columns for event fields.
@@ -62,6 +69,12 @@ var Columns = []string{
 var ForeignKeys = []string{
 	"timeline_event",
 }
+
+var (
+	// TagsPrimaryKey and TagsColumn2 are the table columns denoting the
+	// primary key for the tags relation (M2M).
+	TagsPrimaryKey = []string{"tag_id", "event_id"}
+)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
@@ -165,10 +178,31 @@ func ByTimelineField(field string, opts ...sql.OrderTermOption) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newTimelineStep(), sql.OrderByField(field, opts...))
 	}
 }
+
+// ByTagsCount orders the results by tags count.
+func ByTagsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newTagsStep(), opts...)
+	}
+}
+
+// ByTags orders the results by tags terms.
+func ByTags(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newTagsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newTimelineStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(TimelineInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, true, TimelineTable, TimelineColumn),
+	)
+}
+func newTagsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(TagsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, true, TagsTable, TagsPrimaryKey...),
 	)
 }
