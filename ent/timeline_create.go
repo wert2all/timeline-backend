@@ -10,6 +10,7 @@ import (
 	"timeline/backend/ent/timeline"
 	"timeline/backend/ent/user"
 
+	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 )
@@ -19,6 +20,7 @@ type TimelineCreate struct {
 	config
 	mutation *TimelineMutation
 	hooks    []Hook
+	conflict []sql.ConflictOption
 }
 
 // SetName sets the "name" field.
@@ -124,6 +126,7 @@ func (tc *TimelineCreate) createSpec() (*Timeline, *sqlgraph.CreateSpec) {
 		_node = &Timeline{config: tc.config}
 		_spec = sqlgraph.NewCreateSpec(timeline.Table, sqlgraph.NewFieldSpec(timeline.FieldID, field.TypeInt))
 	)
+	_spec.OnConflict = tc.conflict
 	if value, ok := tc.mutation.Name(); ok {
 		_spec.SetField(timeline.FieldName, field.TypeString, value)
 		_node.Name = value
@@ -164,11 +167,160 @@ func (tc *TimelineCreate) createSpec() (*Timeline, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
+// OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
+// of the `INSERT` statement. For example:
+//
+//	client.Timeline.Create().
+//		SetName(v).
+//		OnConflict(
+//			// Update the row with the new values
+//			// the was proposed for insertion.
+//			sql.ResolveWithNewValues(),
+//		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.TimelineUpsert) {
+//			SetName(v+v).
+//		}).
+//		Exec(ctx)
+func (tc *TimelineCreate) OnConflict(opts ...sql.ConflictOption) *TimelineUpsertOne {
+	tc.conflict = opts
+	return &TimelineUpsertOne{
+		create: tc,
+	}
+}
+
+// OnConflictColumns calls `OnConflict` and configures the columns
+// as conflict target. Using this option is equivalent to using:
+//
+//	client.Timeline.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
+func (tc *TimelineCreate) OnConflictColumns(columns ...string) *TimelineUpsertOne {
+	tc.conflict = append(tc.conflict, sql.ConflictColumns(columns...))
+	return &TimelineUpsertOne{
+		create: tc,
+	}
+}
+
+type (
+	// TimelineUpsertOne is the builder for "upsert"-ing
+	//  one Timeline node.
+	TimelineUpsertOne struct {
+		create *TimelineCreate
+	}
+
+	// TimelineUpsert is the "OnConflict" setter.
+	TimelineUpsert struct {
+		*sql.UpdateSet
+	}
+)
+
+// SetName sets the "name" field.
+func (u *TimelineUpsert) SetName(v string) *TimelineUpsert {
+	u.Set(timeline.FieldName, v)
+	return u
+}
+
+// UpdateName sets the "name" field to the value that was provided on create.
+func (u *TimelineUpsert) UpdateName() *TimelineUpsert {
+	u.SetExcluded(timeline.FieldName)
+	return u
+}
+
+// UpdateNewValues updates the mutable fields using the new values that were set on create.
+// Using this option is equivalent to using:
+//
+//	client.Timeline.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//		).
+//		Exec(ctx)
+func (u *TimelineUpsertOne) UpdateNewValues() *TimelineUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	return u
+}
+
+// Ignore sets each column to itself in case of conflict.
+// Using this option is equivalent to using:
+//
+//	client.Timeline.Create().
+//	    OnConflict(sql.ResolveWithIgnore()).
+//	    Exec(ctx)
+func (u *TimelineUpsertOne) Ignore() *TimelineUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
+	return u
+}
+
+// DoNothing configures the conflict_action to `DO NOTHING`.
+// Supported only by SQLite and PostgreSQL.
+func (u *TimelineUpsertOne) DoNothing() *TimelineUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.DoNothing())
+	return u
+}
+
+// Update allows overriding fields `UPDATE` values. See the TimelineCreate.OnConflict
+// documentation for more info.
+func (u *TimelineUpsertOne) Update(set func(*TimelineUpsert)) *TimelineUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
+		set(&TimelineUpsert{UpdateSet: update})
+	}))
+	return u
+}
+
+// SetName sets the "name" field.
+func (u *TimelineUpsertOne) SetName(v string) *TimelineUpsertOne {
+	return u.Update(func(s *TimelineUpsert) {
+		s.SetName(v)
+	})
+}
+
+// UpdateName sets the "name" field to the value that was provided on create.
+func (u *TimelineUpsertOne) UpdateName() *TimelineUpsertOne {
+	return u.Update(func(s *TimelineUpsert) {
+		s.UpdateName()
+	})
+}
+
+// Exec executes the query.
+func (u *TimelineUpsertOne) Exec(ctx context.Context) error {
+	if len(u.create.conflict) == 0 {
+		return errors.New("ent: missing options for TimelineCreate.OnConflict")
+	}
+	return u.create.Exec(ctx)
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (u *TimelineUpsertOne) ExecX(ctx context.Context) {
+	if err := u.create.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
+// Exec executes the UPSERT query and returns the inserted/updated ID.
+func (u *TimelineUpsertOne) ID(ctx context.Context) (id int, err error) {
+	node, err := u.create.Save(ctx)
+	if err != nil {
+		return id, err
+	}
+	return node.ID, nil
+}
+
+// IDX is like ID, but panics if an error occurs.
+func (u *TimelineUpsertOne) IDX(ctx context.Context) int {
+	id, err := u.ID(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return id
+}
+
 // TimelineCreateBulk is the builder for creating many Timeline entities in bulk.
 type TimelineCreateBulk struct {
 	config
 	err      error
 	builders []*TimelineCreate
+	conflict []sql.ConflictOption
 }
 
 // Save creates the Timeline entities in the database.
@@ -197,6 +349,7 @@ func (tcb *TimelineCreateBulk) Save(ctx context.Context) ([]*Timeline, error) {
 					_, err = mutators[i+1].Mutate(root, tcb.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
+					spec.OnConflict = tcb.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
 					if err = sqlgraph.BatchCreate(ctx, tcb.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
@@ -247,6 +400,124 @@ func (tcb *TimelineCreateBulk) Exec(ctx context.Context) error {
 // ExecX is like Exec, but panics if an error occurs.
 func (tcb *TimelineCreateBulk) ExecX(ctx context.Context) {
 	if err := tcb.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
+// OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
+// of the `INSERT` statement. For example:
+//
+//	client.Timeline.CreateBulk(builders...).
+//		OnConflict(
+//			// Update the row with the new values
+//			// the was proposed for insertion.
+//			sql.ResolveWithNewValues(),
+//		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.TimelineUpsert) {
+//			SetName(v+v).
+//		}).
+//		Exec(ctx)
+func (tcb *TimelineCreateBulk) OnConflict(opts ...sql.ConflictOption) *TimelineUpsertBulk {
+	tcb.conflict = opts
+	return &TimelineUpsertBulk{
+		create: tcb,
+	}
+}
+
+// OnConflictColumns calls `OnConflict` and configures the columns
+// as conflict target. Using this option is equivalent to using:
+//
+//	client.Timeline.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
+func (tcb *TimelineCreateBulk) OnConflictColumns(columns ...string) *TimelineUpsertBulk {
+	tcb.conflict = append(tcb.conflict, sql.ConflictColumns(columns...))
+	return &TimelineUpsertBulk{
+		create: tcb,
+	}
+}
+
+// TimelineUpsertBulk is the builder for "upsert"-ing
+// a bulk of Timeline nodes.
+type TimelineUpsertBulk struct {
+	create *TimelineCreateBulk
+}
+
+// UpdateNewValues updates the mutable fields using the new values that
+// were set on create. Using this option is equivalent to using:
+//
+//	client.Timeline.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//		).
+//		Exec(ctx)
+func (u *TimelineUpsertBulk) UpdateNewValues() *TimelineUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	return u
+}
+
+// Ignore sets each column to itself in case of conflict.
+// Using this option is equivalent to using:
+//
+//	client.Timeline.Create().
+//		OnConflict(sql.ResolveWithIgnore()).
+//		Exec(ctx)
+func (u *TimelineUpsertBulk) Ignore() *TimelineUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
+	return u
+}
+
+// DoNothing configures the conflict_action to `DO NOTHING`.
+// Supported only by SQLite and PostgreSQL.
+func (u *TimelineUpsertBulk) DoNothing() *TimelineUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.DoNothing())
+	return u
+}
+
+// Update allows overriding fields `UPDATE` values. See the TimelineCreateBulk.OnConflict
+// documentation for more info.
+func (u *TimelineUpsertBulk) Update(set func(*TimelineUpsert)) *TimelineUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
+		set(&TimelineUpsert{UpdateSet: update})
+	}))
+	return u
+}
+
+// SetName sets the "name" field.
+func (u *TimelineUpsertBulk) SetName(v string) *TimelineUpsertBulk {
+	return u.Update(func(s *TimelineUpsert) {
+		s.SetName(v)
+	})
+}
+
+// UpdateName sets the "name" field to the value that was provided on create.
+func (u *TimelineUpsertBulk) UpdateName() *TimelineUpsertBulk {
+	return u.Update(func(s *TimelineUpsert) {
+		s.UpdateName()
+	})
+}
+
+// Exec executes the query.
+func (u *TimelineUpsertBulk) Exec(ctx context.Context) error {
+	if u.create.err != nil {
+		return u.create.err
+	}
+	for i, b := range u.create.builders {
+		if len(b.conflict) != 0 {
+			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the TimelineCreateBulk instead", i)
+		}
+	}
+	if len(u.create.conflict) == 0 {
+		return errors.New("ent: missing options for TimelineCreateBulk.OnConflict")
+	}
+	return u.create.Exec(ctx)
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (u *TimelineUpsertBulk) ExecX(ctx context.Context) {
+	if err := u.create.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
