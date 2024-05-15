@@ -45,9 +45,11 @@ type Event struct {
 type EventEdges struct {
 	// Timeline holds the value of the timeline edge.
 	Timeline *Timeline `json:"timeline,omitempty"`
+	// Tags holds the value of the tags edge.
+	Tags []*Tag `json:"tags,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 }
 
 // TimelineOrErr returns the Timeline value or an error if the edge
@@ -59,6 +61,15 @@ func (e EventEdges) TimelineOrErr() (*Timeline, error) {
 		return nil, &NotFoundError{label: timeline.Label}
 	}
 	return nil, &NotLoadedError{edge: "timeline"}
+}
+
+// TagsOrErr returns the Tags value or an error if the edge
+// was not loaded in eager-loading.
+func (e EventEdges) TagsOrErr() ([]*Tag, error) {
+	if e.loadedTypes[1] {
+		return e.Tags, nil
+	}
+	return nil, &NotLoadedError{edge: "tags"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -168,6 +179,11 @@ func (e *Event) Value(name string) (ent.Value, error) {
 // QueryTimeline queries the "timeline" edge of the Event entity.
 func (e *Event) QueryTimeline() *TimelineQuery {
 	return NewEventClient(e.config).QueryTimeline(e)
+}
+
+// QueryTags queries the "tags" edge of the Event entity.
+func (e *Event) QueryTags() *TagQuery {
+	return NewEventClient(e.config).QueryTags(e)
 }
 
 // Update returns a builder for updating this Event.

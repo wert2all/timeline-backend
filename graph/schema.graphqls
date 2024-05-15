@@ -51,6 +51,7 @@ input TimelineEventInput {
   description: String
   showTime: Boolean
   url: String
+  tags: [String!]
 }
 
 input Limit {

@@ -31,5 +31,6 @@ func (Event) Fields() []ent.Field {
 func (Event) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("timeline", Timeline.Type).Ref("event").Unique(),
+		edge.From("tags", Tag.Type).Ref("event"),
 	}
 }

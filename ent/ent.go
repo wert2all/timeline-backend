@@ -9,6 +9,7 @@ import (
 	"reflect"
 	"sync"
 	"timeline/backend/ent/event"
+	"timeline/backend/ent/tag"
 	"timeline/backend/ent/timeline"
 	"timeline/backend/ent/user"
 
@@ -76,6 +77,7 @@ func checkColumn(table, column string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
 			event.Table:    event.ValidColumn,
+			tag.Table:      tag.ValidColumn,
 			timeline.Table: timeline.ValidColumn,
 			user.Table:     user.ValidColumn,
 		})

@@ -9,6 +9,7 @@ import (
 	"time"
 	"timeline/backend/ent/event"
 	"timeline/backend/ent/predicate"
+	"timeline/backend/ent/tag"
 	"timeline/backend/ent/timeline"
 
 	"entgo.io/ent/dialect/sql"
@@ -170,6 +171,21 @@ func (eu *EventUpdate) SetTimeline(t *Timeline) *EventUpdate {
 	return eu.SetTimelineID(t.ID)
 }
 
+// AddTagIDs adds the "tags" edge to the Tag entity by IDs.
+func (eu *EventUpdate) AddTagIDs(ids ...int) *EventUpdate {
+	eu.mutation.AddTagIDs(ids...)
+	return eu
+}
+
+// AddTags adds the "tags" edges to the Tag entity.
+func (eu *EventUpdate) AddTags(t ...*Tag) *EventUpdate {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return eu.AddTagIDs(ids...)
+}
+
 // Mutation returns the EventMutation object of the builder.
 func (eu *EventUpdate) Mutation() *EventMutation {
 	return eu.mutation
@@ -179,6 +195,27 @@ func (eu *EventUpdate) Mutation() *EventMutation {
 func (eu *EventUpdate) ClearTimeline() *EventUpdate {
 	eu.mutation.ClearTimeline()
 	return eu
+}
+
+// ClearTags clears all "tags" edges to the Tag entity.
+func (eu *EventUpdate) ClearTags() *EventUpdate {
+	eu.mutation.ClearTags()
+	return eu
+}
+
+// RemoveTagIDs removes the "tags" edge to Tag entities by IDs.
+func (eu *EventUpdate) RemoveTagIDs(ids ...int) *EventUpdate {
+	eu.mutation.RemoveTagIDs(ids...)
+	return eu
+}
+
+// RemoveTags removes "tags" edges to Tag entities.
+func (eu *EventUpdate) RemoveTags(t ...*Tag) *EventUpdate {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return eu.RemoveTagIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -285,6 +322,51 @@ func (eu *EventUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(timeline.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if eu.mutation.TagsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   event.TagsTable,
+			Columns: event.TagsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tag.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := eu.mutation.RemovedTagsIDs(); len(nodes) > 0 && !eu.mutation.TagsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   event.TagsTable,
+			Columns: event.TagsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tag.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := eu.mutation.TagsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   event.TagsTable,
+			Columns: event.TagsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tag.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -453,6 +535,21 @@ func (euo *EventUpdateOne) SetTimeline(t *Timeline) *EventUpdateOne {
 	return euo.SetTimelineID(t.ID)
 }
 
+// AddTagIDs adds the "tags" edge to the Tag entity by IDs.
+func (euo *EventUpdateOne) AddTagIDs(ids ...int) *EventUpdateOne {
+	euo.mutation.AddTagIDs(ids...)
+	return euo
+}
+
+// AddTags adds the "tags" edges to the Tag entity.
+func (euo *EventUpdateOne) AddTags(t ...*Tag) *EventUpdateOne {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return euo.AddTagIDs(ids...)
+}
+
 // Mutation returns the EventMutation object of the builder.
 func (euo *EventUpdateOne) Mutation() *EventMutation {
 	return euo.mutation
@@ -462,6 +559,27 @@ func (euo *EventUpdateOne) Mutation() *EventMutation {
 func (euo *EventUpdateOne) ClearTimeline() *EventUpdateOne {
 	euo.mutation.ClearTimeline()
 	return euo
+}
+
+// ClearTags clears all "tags" edges to the Tag entity.
+func (euo *EventUpdateOne) ClearTags() *EventUpdateOne {
+	euo.mutation.ClearTags()
+	return euo
+}
+
+// RemoveTagIDs removes the "tags" edge to Tag entities by IDs.
+func (euo *EventUpdateOne) RemoveTagIDs(ids ...int) *EventUpdateOne {
+	euo.mutation.RemoveTagIDs(ids...)
+	return euo
+}
+
+// RemoveTags removes "tags" edges to Tag entities.
+func (euo *EventUpdateOne) RemoveTags(t ...*Tag) *EventUpdateOne {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return euo.RemoveTagIDs(ids...)
 }
 
 // Where appends a list predicates to the EventUpdate builder.
@@ -598,6 +716,51 @@ func (euo *EventUpdateOne) sqlSave(ctx context.Context) (_node *Event, err error
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(timeline.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if euo.mutation.TagsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   event.TagsTable,
+			Columns: event.TagsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tag.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := euo.mutation.RemovedTagsIDs(); len(nodes) > 0 && !euo.mutation.TagsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   event.TagsTable,
+			Columns: event.TagsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tag.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := euo.mutation.TagsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   event.TagsTable,
+			Columns: event.TagsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tag.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
