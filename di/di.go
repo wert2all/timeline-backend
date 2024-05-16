@@ -31,6 +31,6 @@ type Models struct {
 	Tag      tag.Model
 }
 
-func NewAllModels(user user.UserModel, timeline timeline.UserTimeline, event event.Model) Models {
-	return Models{Users: user, Timeline: timeline, Event: event}
+func NewAllModels(user user.UserModel, timeline timeline.UserTimeline, event event.Model, tag tag.Model) Models {
+	return Models{Users: user, Timeline: timeline, Event: event, Tag: tag}
 }

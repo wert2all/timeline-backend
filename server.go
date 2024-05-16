@@ -7,11 +7,13 @@ import (
 	"timeline/backend/app"
 	"timeline/backend/db"
 	"timeline/backend/db/model/event"
+	"timeline/backend/db/model/tag"
 	"timeline/backend/db/model/timeline"
 	"timeline/backend/db/model/user"
 	eventRepository "timeline/backend/db/repository/event"
 	timelineRepository "timeline/backend/db/repository/timeline"
 	userRepository "timeline/backend/db/repository/user"
+	tagRepository "timeline/backend/db/repository/tag"
 	"timeline/backend/di"
 
 	"github.com/getsentry/sentry-go"
@@ -35,8 +37,9 @@ func main() {
 	userModel := user.NewUserModel(userRepository.NewUserRepository(ctx, client))
 	timelineModel := timeline.NewTimelineModel(timelineRepository.NewTimelineRepository(ctx, client))
 	eventModel := event.NewEventModel(eventRepository.NewRepository(ctx, client))
+	tagModel := tag.NewTagModel(tagRepository.NewRepository(ctx, client))
 
-	models := di.NewAllModels(userModel, timelineModel, eventModel)
+	models := di.NewAllModels(userModel, timelineModel, eventModel, tagModel)
 	app.NewApplication(app.NewAppState(models, appConfig), di.NewServiceLocator(ctx, client)).Start()
 }
 
