@@ -2,7 +2,6 @@ package resolvers
 
 import (
 	"context"
-	"github.com/microcosm-cc/bluemonday"
 	"net/url"
 	"time"
 	appContext "timeline/backend/app/context"
@@ -12,6 +11,9 @@ import (
 	entEvent "timeline/backend/ent/event"
 	"timeline/backend/graph/model"
 	"timeline/backend/lib/utils"
+
+	"github.com/microcosm-cc/bluemonday"
+	"golang.org/x/exp/maps"
 )
 
 type AddEventArgumentFactory struct{}
@@ -28,6 +30,7 @@ type ValidAddEventArguments struct {
 	description string
 	showTime    bool
 	url         *url.URL
+	tags        []string
 }
 
 type AddEventArguments struct {
@@ -95,6 +98,11 @@ func (a addEventvalidatorImpl) Validate(ctx context.Context, arguments Arguments
 		panic(err)
 	}
 
+	groupedTags := make(map[string]string)
+	for _, tag := range input.Tags {
+		groupedTags[p.Sanitize(tag)] = p.Sanitize(tag)
+	}
+
 	return ValidAddEventArguments{
 		timeline:    timelineEntity,
 		eventType:   eventType,
@@ -103,6 +111,7 @@ func (a addEventvalidatorImpl) Validate(ctx context.Context, arguments Arguments
 		description: p.Sanitize(utils.DerefString(arguments.GetArguments().eventInput.Description)),
 		showTime:    *input.ShowTime,
 		url:         link,
+		tags:        maps.Values(groupedTags),
 	}, err
 }
 
