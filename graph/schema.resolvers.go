@@ -63,7 +63,7 @@ func (r *queryResolver) TimelineEvents(ctx context.Context, timelineID int, limi
 		return nil, error
 	}
 
-	var tags = make(map[int][]string)
+	tags := make(map[int][]string)
 	for _, event := range events {
 		tagsEntities := r.Models.Tag.GetEventTags(event)
 		entityTags := make([]string, len(tagsEntities))
@@ -72,6 +72,7 @@ func (r *queryResolver) TimelineEvents(ctx context.Context, timelineID int, limi
 		}
 		tags[event.ID] = entityTags
 	}
+
 	return convert.ToEvents(events, tags), nil
 }
 
