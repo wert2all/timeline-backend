@@ -2,6 +2,7 @@ package di
 
 import (
 	"timeline/backend/db/model/event"
+	"timeline/backend/db/model/tag"
 	"timeline/backend/db/model/timeline"
 	"timeline/backend/db/model/user"
 )
@@ -27,6 +28,7 @@ type Models struct {
 	Users    user.UserModel
 	Timeline timeline.UserTimeline
 	Event    event.Model
+	Tag      tag.Model
 }
 
 func NewAllModels(user user.UserModel, timeline timeline.UserTimeline, event event.Model) Models {

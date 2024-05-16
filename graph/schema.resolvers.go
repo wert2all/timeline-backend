@@ -62,7 +62,17 @@ func (r *queryResolver) TimelineEvents(ctx context.Context, timelineID int, limi
 	if error != nil {
 		return nil, error
 	}
-	return convert.ToEvents(events), nil
+
+	var tags = make(map[int][]string)
+	for _, event := range events {
+		tagsEntities := r.Models.Tag.GetEventTags(event)
+		entityTags := make([]string, len(tagsEntities))
+		for _, tagEntity := range tagsEntities {
+			entityTags = append(entityTags, tagEntity.Tag)
+		}
+		tags[event.ID] = entityTags
+	}
+	return convert.ToEvents(events, tags), nil
 }
 
 // Mutation returns MutationResolver implementation.
