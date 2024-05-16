@@ -6,7 +6,7 @@ import (
 	"timeline/backend/graph/model"
 )
 
-func ToEvent(event *ent.Event) *model.TimelineEvent {
+func ToEvent(event *ent.Event, tags []string) *model.TimelineEvent {
 	return &model.TimelineEvent{
 		ID:          event.ID,
 		Date:        event.Date,
@@ -15,13 +15,14 @@ func ToEvent(event *ent.Event) *model.TimelineEvent {
 		Description: &event.Description,
 		ShowTime:    &event.ShowTime,
 		URL:         &event.URL,
+		Tags:        tags,
 	}
 }
 
-func ToEvents(events []*ent.Event) []*model.TimelineEvent {
+func ToEvents(events []*ent.Event, tags map[int][]string) []*model.TimelineEvent {
 	converted := make([]*model.TimelineEvent, len(events))
 	for i, event := range events {
-		converted[i] = ToEvent(event)
+		converted[i] = ToEvent(event, tags[event.ID])
 	}
 	return converted
 }
