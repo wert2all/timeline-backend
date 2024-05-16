@@ -3,6 +3,7 @@ package tag
 import (
 	"context"
 	"timeline/backend/ent"
+	"timeline/backend/ent/event"
 	"timeline/backend/ent/tag"
 
 	"entgo.io/ent/dialect/sql"
@@ -11,11 +12,20 @@ import (
 type Repository interface {
 	FindByID(ID int) (*ent.Tag, error)
 	Upset(string) (*ent.Tag, error)
+	GetEventTags(int) []*ent.Tag
 }
 
 type repositoryImpl struct {
 	context context.Context
 	client  *ent.Client
+}
+
+func (r repositoryImpl) GetEventTags(eventID int) []*ent.Tag {
+	tags, err := r.client.Tag.Query().Where(tag.HasEventWith(event.ID(eventID))).All(r.context)
+	if err != nil {
+		return make([]*ent.Tag, 0)
+	}
+	return tags
 }
 
 func (r repositoryImpl) FindByID(ID int) (*ent.Tag, error) {

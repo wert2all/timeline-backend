@@ -37,6 +37,7 @@ type TimelineEvent struct {
 	Description *string      `json:"description,omitempty"`
 	ShowTime    *bool        `json:"showTime,omitempty"`
 	URL         *string      `json:"url,omitempty"`
+	Tags        []string     `json:"tags"`
 }
 
 type TimelineEventInput struct {
