@@ -5,6 +5,7 @@ import (
 	"timeline/backend/db/model/timeline"
 	"timeline/backend/db/model/user"
 	eventRepository "timeline/backend/db/repository/event"
+	tagRepository "timeline/backend/db/repository/tag"
 	timelineRepository "timeline/backend/db/repository/timeline"
 	userRepository "timeline/backend/db/repository/user"
 	"timeline/backend/ent"
@@ -44,6 +45,7 @@ type RepositoriesServiceLocator interface {
 	User() userRepository.Repository
 	Timeline() timelineRepository.Repository
 	Event() eventRepository.Repository
+	Tag() tagRepository.Repository
 }
 
 type ServiceLocator interface {
@@ -104,7 +106,7 @@ func (m modelsServiceLocator) Timeline() timeline.UserTimeline {
 }
 
 func (m modelsServiceLocator) Events() event.Model {
-	return event.NewEventModel(m.locator.Repositories().Event())
+	return event.NewEventModel(m.locator.Repositories().Event(), m.locator.Repositories().Tag())
 }
 
 type authorizeServiceLocator struct {
@@ -161,6 +163,10 @@ func (a addTimelineServiceLocator) Resolver() resolvers.Resolver[*model.ShortUse
 
 type repositoriesServiceLocator struct {
 	locator ServiceLocator
+}
+
+func (r repositoriesServiceLocator) Tag() tagRepository.Repository {
+	return tagRepository.NewRepository(r.locator.Context(), r.locator.DbClient())
 }
 
 func (r repositoriesServiceLocator) Event() eventRepository.Repository {
