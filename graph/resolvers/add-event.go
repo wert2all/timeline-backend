@@ -112,11 +112,6 @@ func (a addEventvalidatorImpl) Validate(ctx context.Context, arguments Arguments
 		eventType = entEvent.Type(input.Type.String())
 	}
 
-	link, err := url.ParseRequestURI(utils.DerefString(arguments.GetArguments().eventInput.URL))
-	if err != nil {
-		panic(err)
-	}
-
 	groupedTags := make(map[string]string)
 	for _, tag := range input.Tags {
 		groupedTags[p.Sanitize(tag)] = p.Sanitize(tag)
@@ -129,9 +124,22 @@ func (a addEventvalidatorImpl) Validate(ctx context.Context, arguments Arguments
 		title:       p.Sanitize(utils.DerefString(arguments.GetArguments().eventInput.Title)),
 		description: p.Sanitize(utils.DerefString(arguments.GetArguments().eventInput.Description)),
 		showTime:    *input.ShowTime,
-		url:         link,
+		url:         a.getLink(arguments.GetArguments().eventInput.URL),
 		tags:        maps.Values(groupedTags),
 	}, err
+}
+
+func (a addEventvalidatorImpl) getLink(link *string) *url.URL {
+	linkString := utils.DerefString(link)
+	if linkString != "" {
+		link, err := url.ParseRequestURI(linkString)
+		if err != nil {
+			panic(err)
+		}
+		return link
+	} else {
+		return nil
+	}
 }
 
 func NewAddEventResolver(event event.Model, timeline timeline.UserTimeline, tag tag.Model) Resolver[*model.TimelineEvent, ValidAddEventArguments] {
