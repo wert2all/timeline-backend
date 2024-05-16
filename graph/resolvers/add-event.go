@@ -6,6 +6,7 @@ import (
 	"time"
 	appContext "timeline/backend/app/context"
 	"timeline/backend/db/model/event"
+	"timeline/backend/db/model/tag"
 	"timeline/backend/db/model/timeline"
 	"timeline/backend/ent"
 	entEvent "timeline/backend/ent/event"
@@ -39,6 +40,7 @@ type AddEventArguments struct {
 type addEventResolverImpl struct {
 	event    event.Model
 	timeline timeline.UserTimeline
+	tag      tag.Model
 }
 
 func (a AddEventArguments) GetArguments() AddEventArguments           { return a }
@@ -50,12 +52,21 @@ func (a addEventResolverImpl) Resolve(ctx context.Context, arguments ValidArgume
 		return nil, eventErr
 	}
 
+	tags := make([]*ent.Tag, len(arguments.GetArguments().tags))
+	for i, tag := range arguments.GetArguments().tags {
+		tagEntity, err := a.tag.UpsertTag(tag)
+		if err == nil {
+			tags[i] = tagEntity
+		}
+	}
+
 	updatedEntity, updateErr := a.event.
 		Update(eventEntity.Update().
 			SetTitle(arguments.GetArguments().title).
 			SetDescription(arguments.GetArguments().description).
 			SetShowTime(arguments.GetArguments().showTime).
-			SetURL(arguments.GetArguments().url.String()))
+			SetURL(arguments.GetArguments().url.String()).
+			AddTags(tags...))
 
 	if updateErr != nil {
 		return nil, updateErr
@@ -115,8 +126,8 @@ func (a addEventvalidatorImpl) Validate(ctx context.Context, arguments Arguments
 	}, err
 }
 
-func NewAddEventResolver(event event.Model, timeline timeline.UserTimeline) Resolver[*model.TimelineEvent, ValidAddEventArguments] {
-	return addEventResolverImpl{event, timeline}
+func NewAddEventResolver(event event.Model, timeline timeline.UserTimeline, tag tag.Model) Resolver[*model.TimelineEvent, ValidAddEventArguments] {
+	return addEventResolverImpl{event, timeline, tag}
 }
 
 func NewAddEventValidator(timeline timeline.UserTimeline) Validator[AddEventArguments, ValidAddEventArguments] {

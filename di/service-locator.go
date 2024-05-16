@@ -2,6 +2,7 @@ package di
 
 import (
 	"timeline/backend/db/model/event"
+	"timeline/backend/db/model/tag"
 	"timeline/backend/db/model/timeline"
 	"timeline/backend/db/model/user"
 	eventRepository "timeline/backend/db/repository/event"
@@ -39,6 +40,7 @@ type ModelsServiceLocator interface {
 	Users() user.UserModel
 	Timeline() timeline.UserTimeline
 	Events() event.Model
+	Tag() tag.Model
 }
 
 type RepositoriesServiceLocator interface {
@@ -97,6 +99,11 @@ type modelsServiceLocator struct {
 	locator ServiceLocator
 }
 
+// Tag implements ModelsServiceLocator.
+func (m modelsServiceLocator) Tag() tag.Model {
+	return tag.NewTagModel(m.locator.Repositories().Tag())
+}
+
 func (m modelsServiceLocator) Users() user.UserModel {
 	return user.NewUserModel(m.locator.Repositories().User())
 }
@@ -106,7 +113,7 @@ func (m modelsServiceLocator) Timeline() timeline.UserTimeline {
 }
 
 func (m modelsServiceLocator) Events() event.Model {
-	return event.NewEventModel(m.locator.Repositories().Event(), m.locator.Repositories().Tag())
+	return event.NewEventModel(m.locator.Repositories().Event())
 }
 
 type authorizeServiceLocator struct {
@@ -146,7 +153,7 @@ func (a addEventServiceLocator) Validator() resolvers.Validator[resolvers.AddEve
 }
 
 func (a addEventServiceLocator) Resolver() resolvers.Resolver[*model.TimelineEvent, resolvers.ValidAddEventArguments] {
-	return resolvers.NewAddEventResolver(a.locator.Models().Events(), a.locator.Models().Timeline())
+	return resolvers.NewAddEventResolver(a.locator.Models().Events(), a.locator.Models().Timeline(), a.locator.Models().Tag())
 }
 
 func (a addTimelineServiceLocator) ArgumentFactory() resolvers.AddTimelineArgumentFactory {
@@ -241,6 +248,7 @@ func newMutationResolversServiceLocator(locator ServiceLocator) MutationResolver
 		deleteEventServiceLocator: newDeleteEventServiceLocator(locator),
 	}
 }
+
 func newAddTimelineServiceLocator(locator ServiceLocator) ResolverOperationServiceLocator[resolvers.AddTimelineArguments, resolvers.ValidAddTimelineArguments, *model.ShortUserTimeline, resolvers.AddTimelineArgumentFactory] {
 	return addTimelineServiceLocator{locator: locator}
 }
