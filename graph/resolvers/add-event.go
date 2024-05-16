@@ -77,12 +77,20 @@ func (a addEventResolverImpl) Resolve(ctx context.Context, arguments ValidArgume
 		return nil, err
 	}
 
+	tagEntities := a.tag.GetEventTags(updatedEntity)
+	entityTags := make([]string, len(tagEntities))
+
+	for _, tagEntity := range tagEntities {
+		entityTags = append(entityTags, tagEntity.Tag)
+	}
+
 	return &model.TimelineEvent{
 		ID:          updatedEntity.ID,
 		Date:        updatedEntity.Date,
 		Type:        model.TimelineType(updatedEntity.Type.String()),
 		Title:       &updatedEntity.Title,
 		Description: &updatedEntity.Description,
+		Tags:        entityTags,
 	}, nil
 }
 

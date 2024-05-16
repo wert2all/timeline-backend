@@ -7,10 +7,15 @@ import (
 
 type Model interface {
 	UpsertTag(string) (*ent.Tag, error)
+	GetEventTags(*ent.Event) []*ent.Tag
 }
 
 type tagModelImpl struct {
 	repository tag.Repository
+}
+
+func (t tagModelImpl) GetEventTags(event *ent.Event) []*ent.Tag {
+	return t.repository.GetEventTags(event.ID)
 }
 
 // UpsertTag implements Model.

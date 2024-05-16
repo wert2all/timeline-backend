@@ -36,6 +36,7 @@ type TimelineEvent {
   description: String
   showTime: Boolean
   url: String
+  tags: [String!]!
 }
 
 input AddTimeline {
