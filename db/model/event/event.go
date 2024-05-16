@@ -3,7 +3,6 @@ package event
 import (
 	"time"
 	"timeline/backend/db/repository/event"
-	"timeline/backend/db/repository/tag"
 	"timeline/backend/ent"
 	entEvent "timeline/backend/ent/event"
 )
@@ -16,7 +15,6 @@ type Model interface {
 
 type modelImpl struct {
 	eventRepository event.Repository
-	tagRepository   tag.Repository
 }
 
 func (m modelImpl) GetEventByID(id int) (*ent.Event, error) { return m.eventRepository.FindByID(id) }
@@ -30,6 +28,6 @@ func (m modelImpl) Create(date time.Time, eventType entEvent.Type) (*ent.Event, 
 	return m.eventRepository.CreateEvent(date, eventType)
 }
 
-func NewEventModel(eventRepository event.Repository, tagRepository tag.Repository) Model {
-	return modelImpl{eventRepository: eventRepository, tagRepository: tagRepository}
+func NewEventModel(eventRepository event.Repository) Model {
+	return modelImpl{eventRepository: eventRepository}
 }

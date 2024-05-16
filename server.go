@@ -2,9 +2,6 @@ package main
 
 import (
 	"context"
-	"github.com/getsentry/sentry-go"
-	"github.com/sakirsensoy/genv"
-	_ "github.com/sakirsensoy/genv/dotenv/autoload"
 	"log"
 	"time"
 	"timeline/backend/app"
@@ -15,8 +12,11 @@ import (
 	eventRepository "timeline/backend/db/repository/event"
 	timelineRepository "timeline/backend/db/repository/timeline"
 	userRepository "timeline/backend/db/repository/user"
-	tagRepository "timeline/backend/db/repository/tag"
 	"timeline/backend/di"
+
+	"github.com/getsentry/sentry-go"
+	"github.com/sakirsensoy/genv"
+	_ "github.com/sakirsensoy/genv/dotenv/autoload"
 )
 
 func main() {
@@ -34,7 +34,7 @@ func main() {
 
 	userModel := user.NewUserModel(userRepository.NewUserRepository(ctx, client))
 	timelineModel := timeline.NewTimelineModel(timelineRepository.NewTimelineRepository(ctx, client))
-	eventModel := event.NewEventModel(eventRepository.NewRepository(ctx, client), tagRepository.NewRepository(ctx, client))
+	eventModel := event.NewEventModel(eventRepository.NewRepository(ctx, client))
 
 	models := di.NewAllModels(userModel, timelineModel, eventModel)
 	app.NewApplication(app.NewAppState(models, appConfig), di.NewServiceLocator(ctx, client)).Start()
