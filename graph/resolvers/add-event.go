@@ -83,7 +83,7 @@ func (a addEventResolverImpl) Resolve(ctx context.Context, arguments ValidArgume
 	}
 
 	tagEntities := a.tag.GetEventTags(updatedEntity)
-	entityTags := make([]string, len(tagEntities))
+	entityTags := make([]string, 0)
 
 	for _, tagEntity := range tagEntities {
 		entityTags = append(entityTags, tagEntity.Tag)
