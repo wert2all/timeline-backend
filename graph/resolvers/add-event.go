@@ -52,21 +52,26 @@ func (a addEventResolverImpl) Resolve(ctx context.Context, arguments ValidArgume
 		return nil, eventErr
 	}
 
-	tags := make([]*ent.Tag, len(arguments.GetArguments().tags))
-	for i, tag := range arguments.GetArguments().tags {
+	tags := make([]*ent.Tag, 0)
+	for _, tag := range arguments.GetArguments().tags {
 		tagEntity, err := a.tag.UpsertTag(tag)
 		if err == nil {
-			tags[i] = tagEntity
+			tags = append(tags, tagEntity)
 		}
 	}
 
-	updatedEntity, updateErr := a.event.
-		Update(eventEntity.Update().
-			SetTitle(arguments.GetArguments().title).
-			SetDescription(arguments.GetArguments().description).
-			SetShowTime(arguments.GetArguments().showTime).
-			SetURL(arguments.GetArguments().url.String()).
-			AddTags(tags...))
+	var shouldUpdateEntity *ent.EventUpdateOne
+	shouldUpdateEntity = eventEntity.Update().
+		SetTitle(arguments.GetArguments().title).
+		SetDescription(arguments.GetArguments().description).
+		SetShowTime(arguments.GetArguments().showTime).
+		AddTags(tags...)
+
+	if arguments.GetArguments().url != nil {
+		shouldUpdateEntity = shouldUpdateEntity.SetURL(arguments.GetArguments().url.String())
+	}
+
+	updatedEntity, updateErr := a.event.Update(shouldUpdateEntity)
 
 	if updateErr != nil {
 		return nil, updateErr
