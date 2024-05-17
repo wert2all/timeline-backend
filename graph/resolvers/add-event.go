@@ -53,8 +53,8 @@ func (a addEventResolverImpl) Resolve(ctx context.Context, arguments ValidArgume
 	}
 
 	tags := make([]*ent.Tag, 0)
-	for _, tag := range arguments.GetArguments().tags {
-		tagEntity, err := a.tag.UpsertTag(tag)
+	for _, tagArgument := range arguments.GetArguments().tags {
+		tagEntity, err := a.tag.UpsertTag(tagArgument)
 		if err == nil {
 			tags = append(tags, tagEntity)
 		}
@@ -118,8 +118,14 @@ func (a addEventvalidatorImpl) Validate(ctx context.Context, arguments Arguments
 	}
 
 	groupedTags := make(map[string]string)
-	for _, tag := range input.Tags {
-		groupedTags[p.Sanitize(tag)] = p.Sanitize(tag)
+	for _, tagInput := range input.Tags {
+		groupedTags[p.Sanitize(tagInput)] = p.Sanitize(tagInput)
+	}
+	var showTime bool
+	if input.ShowTime != nil {
+		showTime = *input.ShowTime
+	} else {
+		showTime = true
 	}
 
 	return ValidAddEventArguments{
@@ -128,7 +134,7 @@ func (a addEventvalidatorImpl) Validate(ctx context.Context, arguments Arguments
 		date:        arguments.GetArguments().eventInput.Date,
 		title:       p.Sanitize(utils.DerefString(arguments.GetArguments().eventInput.Title)),
 		description: p.Sanitize(utils.DerefString(arguments.GetArguments().eventInput.Description)),
-		showTime:    *input.ShowTime,
+		showTime:    showTime,
 		url:         a.getLink(arguments.GetArguments().eventInput.URL),
 		tags:        maps.Values(groupedTags),
 	}, err
