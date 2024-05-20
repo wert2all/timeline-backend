@@ -17,7 +17,6 @@ type Postgres struct {
 
 type Config struct {
 	App struct {
-		Port string `yaml:"port"`
 		Cors struct {
 			Debug         bool   `yaml:"debug"`
 			AllowedOrigin string `yaml:"allowedOrigin"`

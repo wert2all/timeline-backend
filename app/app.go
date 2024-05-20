@@ -38,7 +38,7 @@ type handlerFactory struct{}
 
 // Start implements Application.
 func (a *app) Start() {
-	log.Fatal(http.ListenAndServe(":"+a.state.Config.App.Port, a.router))
+	log.Fatal(http.ListenAndServe(":8000", a.router))
 }
 
 // Create implements Factory.
