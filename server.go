@@ -2,7 +2,10 @@ package main
 
 import (
 	"context"
+	"github.com/getsentry/sentry-go"
+	"gopkg.in/yaml.v2"
 	"log"
+	"os"
 	"time"
 	"timeline/backend/app"
 	"timeline/backend/db"
@@ -11,14 +14,10 @@ import (
 	"timeline/backend/db/model/timeline"
 	"timeline/backend/db/model/user"
 	eventRepository "timeline/backend/db/repository/event"
+	tagRepository "timeline/backend/db/repository/tag"
 	timelineRepository "timeline/backend/db/repository/timeline"
 	userRepository "timeline/backend/db/repository/user"
-	tagRepository "timeline/backend/db/repository/tag"
 	"timeline/backend/di"
-
-	"github.com/getsentry/sentry-go"
-	"github.com/sakirsensoy/genv"
-	_ "github.com/sakirsensoy/genv/dotenv/autoload"
 )
 
 func main() {
@@ -26,7 +25,7 @@ func main() {
 	client := db.NewClient(appConfig.Postgres)
 	defer client.Close()
 
-	err := sentry.Init(sentry.ClientOptions{Dsn: appConfig.SentryDsn, Debug: true})
+	err := sentry.Init(sentry.ClientOptions{Dsn: appConfig.Sentry.Dsn, Debug: true})
 	if err != nil {
 		log.Fatalf("sentry.Init: %s", err)
 	}
@@ -44,20 +43,18 @@ func main() {
 }
 
 func readConfig() di.Config {
-	return di.Config{
-		Port: genv.Key("PORT").Default("8000").String(),
-		CORS: di.CORS{
-			Debug:         genv.Key("CORS_DEBUG").Default(false).Bool(),
-			AllowedOrigin: genv.Key("CORS_ALLOWED_ORIGIN").String(),
-		},
-		Postgres: di.Postgres{
-			Host:     genv.Key("POSTGRES_HOST").Default("localhost").String(),
-			Port:     genv.Key("POSTGRES_PORT").Default(5432).Int(),
-			User:     genv.Key("POSTGRES_USER").String(),
-			Password: genv.Key("POSTGRES_PASSWORD").String(),
-			Database: genv.Key("POSTGRES_DB").String(),
-		},
-		GoogleClintID: genv.Key("GOOGLE_CLIENT_ID").String(),
-		SentryDsn:     genv.Key("SENTRY_DSN").String(),
+	f, err := os.Open("config.yaml")
+	if err != nil {
+		panic("cannot open config file")
 	}
+	defer f.Close()
+
+	var cfg di.Config
+	decoder := yaml.NewDecoder(f)
+	err = decoder.Decode(&cfg)
+	if err != nil {
+		panic("cannot parse config ")
+	}
+
+	return cfg
 }

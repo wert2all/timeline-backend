@@ -1,0 +1,19 @@
+app:
+    port: 8000
+    cors:
+        debug: true
+        allowedOrigin: "http://localhost:4200"
+
+google:
+    clientId: ""
+
+postgres:
+    host: "localhost"
+    port: 5432
+    db: "timeline"
+    user: "timeline"
+    password: "timeline"
+
+sentry:
+    dsn: ""
+ 

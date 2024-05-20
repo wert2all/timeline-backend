@@ -38,18 +38,18 @@ type handlerFactory struct{}
 
 // Start implements Application.
 func (a *app) Start() {
-	log.Fatal(http.ListenAndServe(":"+a.state.Config.Port, a.router))
+	log.Fatal(http.ListenAndServe(":"+a.state.Config.App.Port, a.router))
 }
 
 // Create implements Factory.
 func (a *routerFactory) Create(state State) chi.Router {
 	router := chi.NewRouter()
-	router.Use(middleware.Cors(state.Config.CORS.AllowedOrigin, state.Config.CORS.Debug).Handler)
+	router.Use(middleware.Cors(state.Config.App.Cors.AllowedOrigin, state.Config.App.Cors.Debug).Handler)
 	router.Use(middleware.Sentry())
 
 	router.Options("/graphql", a.handler)
 	router.Group(func(r chi.Router) {
-		r.Use(middleware.AuthMiddleware(a.userModel, state.Config.GoogleClintID))
+		r.Use(middleware.AuthMiddleware(a.userModel, state.Config.Google.ClientId))
 		r.Post("/graphql", a.handler)
 	})
 	return router
