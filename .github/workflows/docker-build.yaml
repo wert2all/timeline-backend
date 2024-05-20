@@ -3,7 +3,11 @@ name: Docker
 on:
   push:
     tags:
-      - "*" # Push events to every tag not containing
+      - "*"
+
+env:
+  REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
+  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   docker:
@@ -17,8 +21,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: |
-             wert2all.nsupdate.info:5000/timeline/timeline-backend
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -29,7 +32,7 @@ jobs:
       - name: Login to Hub
         uses: docker/login-action@v3
         with:
-          registry: wert2all.nsupdate.info:5000
+          registry: ${{ env.REGISTRY }}
           username: ${{ secrets.DOCKER_REGISTRY_USERNAME }}
           password: ${{ secrets.DOCKER_REGISTRY_PASSWORD }}
 
@@ -38,4 +41,3 @@ jobs:
         with:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
-#          tags: wert2all.nsupdate.info:5000/timeline/timeline-backend:latest
