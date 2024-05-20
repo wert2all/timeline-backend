@@ -3,7 +3,6 @@ package db
 import (
 	"context"
 	"log"
-	"strconv"
 	"strings"
 	"timeline/backend/di"
 	"timeline/backend/ent"
@@ -27,10 +26,10 @@ func createConnectionURL(config di.Postgres) string {
 
 	optionsMap := map[string]string{
 		"host":     config.Host,
-		"port":     strconv.Itoa(config.Port),
+		"port":     config.Port,
 		"user":     config.User,
 		"password": config.Password,
-		"dbname":   config.Database,
+		"dbname":   config.Db,
 		"sslmode":  "disable",
 	}
 

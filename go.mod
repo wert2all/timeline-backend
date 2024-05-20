@@ -9,7 +9,6 @@ require (
 	github.com/go-chi/chi v1.5.5
 	github.com/lib/pq v1.10.9
 	github.com/rs/cors v1.10.1
-	github.com/sakirsensoy/genv v1.0.1
 	github.com/vektah/gqlparser/v2 v2.5.11
 	golang.org/x/net v0.25.0
 	google.golang.org/api v0.173.0
@@ -19,6 +18,7 @@ require (
 require (
 	github.com/microcosm-cc/bluemonday v1.0.23
 	golang.org/x/exp v0.0.0-20240506185415-9bf2ced13842
+	gopkg.in/yaml.v2 v2.4.0
 )
 
 require (

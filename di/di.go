@@ -7,20 +7,32 @@ import (
 	"timeline/backend/db/model/user"
 )
 
-type CORS struct {
-	AllowedOrigin string
-	Debug         bool
-}
 type Postgres struct {
-	Host, User, Password, Database string
-	Port                           int
+	Port     string `yaml:"port"`
+	Host     string `yaml:"host"`
+	Db       string `yaml:"db"`
+	User     string `yaml:"user"`
+	Password string `yaml:"password"`
 }
+
 type Config struct {
-	Port          string
-	CORS          CORS
-	Postgres      Postgres
-	GoogleClintID string
-	SentryDsn     string
+	App struct {
+		Port string `yaml:"port"`
+		Cors struct {
+			Debug         bool   `yaml:"debug"`
+			AllowedOrigin string `yaml:"allowedOrigin"`
+		} `yaml:"cors"`
+	} `yaml:"app"`
+
+	Google struct {
+		ClientId string `yaml:"clientId"`
+	} `yaml:"google"`
+
+	Postgres Postgres `yaml:"postgres"`
+
+	Sentry struct {
+		Dsn string `yaml:"dsn"`
+	} `yaml:"sentry"`
 }
 
 // Models todo refactor
