@@ -1,5 +1,4 @@
 app:
-    port: 8000
     cors:
         debug: true
         allowedOrigin: "http://localhost:4200"
