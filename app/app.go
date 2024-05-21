@@ -3,6 +3,7 @@ package app
 import (
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/go-chi/chi"
+	chiMiddleware "github.com/go-chi/chi/middleware"
 	"log"
 	"net/http"
 	"timeline/backend/app/http/middleware"
@@ -45,6 +46,7 @@ func (a *app) Start() {
 func (a *routerFactory) Create(state State) chi.Router {
 	router := chi.NewRouter()
 	router.Use(middleware.Cors(state.Config.App.Cors.AllowedOrigin, state.Config.App.Cors.Debug).Handler)
+	router.Use(chiMiddleware.Recoverer)
 	router.Use(middleware.Sentry())
 
 	router.Options("/graphql", a.handler)
