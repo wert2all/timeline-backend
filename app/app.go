@@ -18,16 +18,11 @@ type Application interface {
 }
 
 type Factory[T any] interface {
-	Create(state State) T
-}
-
-type State struct {
-	Config di.Config
+	Create(di.Config) T
 }
 
 type app struct {
 	router chi.Router
-	state  State
 }
 
 type routerFactory struct {
@@ -43,21 +38,21 @@ func (a *app) Start() {
 }
 
 // Create implements Factory.
-func (a *routerFactory) Create(state State) chi.Router {
+func (a *routerFactory) Create(config di.Config) chi.Router {
 	router := chi.NewRouter()
-	router.Use(middleware.Cors(state.Config.App.Cors.AllowedOrigin, state.Config.App.Cors.Debug).Handler)
+	router.Use(middleware.Cors(config.App.Cors.AllowedOrigin, config.App.Cors.Debug).Handler)
 	router.Use(chiMiddleware.Recoverer)
 	router.Use(middleware.Sentry())
 
 	router.Options("/graphql", a.handler)
 	router.Group(func(r chi.Router) {
-		r.Use(middleware.AuthMiddleware(a.userModel, state.Config.Google.ClientId))
+		r.Use(middleware.AuthMiddleware(a.userModel, config.Google.ClientId))
 		r.Post("/graphql", a.handler)
 	})
 	return router
 }
 
-func (h *handlerFactory) Create(state State, locator di.ServiceLocator) http.HandlerFunc {
+func (h *handlerFactory) Create(config di.Config, locator di.ServiceLocator) http.HandlerFunc {
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{
 		Resolvers: &graph.Resolver{ServiceLocator: locator},
 	}))
@@ -78,13 +73,8 @@ func getRouterFactory(handler http.HandlerFunc, userModel user.Authorize) *route
 	}
 }
 
-func NewAppState(config di.Config) State {
-	return State{Config: config}
-}
-
-func NewApplication(state State, locator di.ServiceLocator) Application {
+func NewApplication(config di.Config, locator di.ServiceLocator) Application {
 	return &app{
-		router: getRouterFactory(getHandlerFactory().Create(state, locator), locator.Models().Users()).Create(state),
-		state:  state,
+		router: getRouterFactory(getHandlerFactory().Create(config, locator), locator.Models().Users()).Create(config),
 	}
 }
