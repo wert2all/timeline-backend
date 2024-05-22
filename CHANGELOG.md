@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.1.0](https://github.com/wert2all/timeline-backend/compare/v1.0.0...v1.1.0) (2024-05-22)
+
+
+### Features
+
+* add chi Recoverer middleware ([3b0d73f](https://github.com/wert2all/timeline-backend/commit/3b0d73fbe412b3e015473c99db5b1fe9ca97c841))
+* add dumper ([a6d95b5](https://github.com/wert2all/timeline-backend/commit/a6d95b58de519629f745790e4d269270c5389796))
+* add tags to docker image ([fd670a3](https://github.com/wert2all/timeline-backend/commit/fd670a334dd0e279bc55f4af9f7e56be0eb11ad2))
+* refactor config to yaml ([061f49c](https://github.com/wert2all/timeline-backend/commit/061f49cad42ea5000c263daa05dfe58bdac913ed))
+
+
+### Bug Fixes
+
+* add registry to docker image ([b48afab](https://github.com/wert2all/timeline-backend/commit/b48afabfff83b58ba782bc6063a7991b5f8ceca1))
+* fix build ([d8697e1](https://github.com/wert2all/timeline-backend/commit/d8697e1ee08885f51799705a3d8161be299416a9))
+* fix go.sum ([322bbe3](https://github.com/wert2all/timeline-backend/commit/322bbe3665bef5ad7cf202c35accbed30fcc4d91))
+* remove port from application ([6214a00](https://github.com/wert2all/timeline-backend/commit/6214a00418c26fad7ed7e046f031156b6a69a4ed))
+
 ## 1.0.0 (2024-05-20)
 
 
