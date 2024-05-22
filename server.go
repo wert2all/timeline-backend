@@ -24,7 +24,7 @@ func main() {
 	}
 	defer sentry.Flush(time.Second)
 
-	app.NewApplication(app.NewAppState(appConfig), di.NewServiceLocator(context.Background(), client)).Start()
+	app.NewApplication(appConfig, di.NewServiceLocator(context.Background(), client)).Start()
 }
 
 func readConfig() di.Config {
