@@ -4,7 +4,6 @@ import (
 	"log"
 	"net/http"
 	"timeline/backend/app/http/middleware"
-	"timeline/backend/db/model/user"
 	"timeline/backend/di"
 	"timeline/backend/graph"
 
@@ -26,8 +25,7 @@ type app struct {
 }
 
 type routerFactory struct {
-	handler   http.HandlerFunc
-	userModel user.Authorize
+	handler http.HandlerFunc
 }
 
 type handlerFactory struct{}
@@ -38,15 +36,13 @@ func (a *app) Start() {
 }
 
 // Create implements Factory.
-func (a *routerFactory) Create(config di.Config) chi.Router {
+func (a *routerFactory) Create(authMiddleware func(http.Handler) http.Handler, middlewares ...func(http.Handler) http.Handler) chi.Router {
 	router := chi.NewRouter()
-	router.Use(middleware.Cors(config.App.Cors.AllowedOrigin, config.App.Cors.Debug).Handler)
-	router.Use(chiMiddleware.Recoverer)
-	router.Use(middleware.Sentry())
+	router.Use(middlewares...)
 
 	router.Options("/graphql", a.handler)
 	router.Group(func(r chi.Router) {
-		r.Use(middleware.AuthMiddleware(a.userModel, config.Google.ClientId))
+		r.Use(authMiddleware)
 		r.Post("/graphql", a.handler)
 	})
 	return router
@@ -66,15 +62,15 @@ func getHandlerFactory() *handlerFactory {
 	return &handlerFactory{}
 }
 
-func getRouterFactory(handler http.HandlerFunc, userModel user.Authorize) *routerFactory {
-	return &routerFactory{
-		handler:   handler,
-		userModel: userModel,
-	}
+func getRouterFactory(handler http.HandlerFunc) *routerFactory {
+	return &routerFactory{handler: handler}
 }
 
 func NewApplication(config di.Config, locator di.ServiceLocator) Application {
+	authMiddleware := middleware.AuthMiddleware(locator.Models().Users(), config.Google.ClientId)
+	middlewares := []func(http.Handler) http.Handler{middleware.Cors(config.App.Cors.AllowedOrigin, config.App.Cors.Debug).Handler, chiMiddleware.Recoverer, middleware.Sentry()}
 	return &app{
-		router: getRouterFactory(getHandlerFactory().Create(config, locator), locator.Models().Users()).Create(config),
+		router: getRouterFactory(getHandlerFactory().Create(config, locator)).
+			Create(authMiddleware, middlewares...),
 	}
 }
