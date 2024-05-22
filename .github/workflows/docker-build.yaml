@@ -6,7 +6,7 @@ on:
 env:
   REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
   # IMAGE_NAME: ${{ github.repository }}
-  IMAGE_NAME: ${{ DOCKER_IMAGE_NAME }}
+  IMAGE_NAME: ${{ vars.DOCKER_IMAGE_NAME }}
 jobs:
   docker:
     name: Build and push
