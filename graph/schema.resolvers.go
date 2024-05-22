@@ -54,18 +54,18 @@ func (r *mutationResolver) DeleteEvent(ctx context.Context, eventID int) (model.
 
 // TimelineEvents is the resolver for the timelineEvents field.
 func (r *queryResolver) TimelineEvents(ctx context.Context, timelineID int, limit *model.Limit) ([]*model.TimelineEvent, error) {
-	timeline, error := r.Models.Timeline.GetUserTimeline(appContext.GetUserID(ctx), timelineID)
+	timeline, error := r.ServiceLocator.Models().Timeline().GetUserTimeline(appContext.GetUserID(ctx), timelineID)
 	if error != nil {
 		return nil, error
 	}
-	events, error := r.Models.Timeline.GetEvents(timeline, convert.ToLimit(limit))
+	events, error := r.ServiceLocator.Models().Timeline().GetEvents(timeline, convert.ToLimit(limit))
 	if error != nil {
 		return nil, error
 	}
 
 	tags := make(map[int][]string)
 	for _, event := range events {
-		tagsEntities := r.Models.Tag.GetEventTags(event)
+		tagsEntities := r.ServiceLocator.Models().Tag().GetEventTags(event)
 		entityTags := make([]string, 0)
 		for _, tagEntity := range tagsEntities {
 			entityTags = append(entityTags, tagEntity.Tag)
@@ -82,5 +82,7 @@ func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 // Query returns QueryResolver implementation.
 func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
-type mutationResolver struct{ *Resolver }
-type queryResolver struct{ *Resolver }
+type (
+	mutationResolver struct{ *Resolver }
+	queryResolver    struct{ *Resolver }
+)

@@ -1,15 +1,16 @@
 package app
 
 import (
-	"github.com/99designs/gqlgen/graphql/handler"
-	"github.com/go-chi/chi"
-	chiMiddleware "github.com/go-chi/chi/middleware"
 	"log"
 	"net/http"
 	"timeline/backend/app/http/middleware"
 	"timeline/backend/db/model/user"
 	"timeline/backend/di"
 	"timeline/backend/graph"
+
+	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/go-chi/chi"
+	chiMiddleware "github.com/go-chi/chi/middleware"
 )
 
 type Application interface {
@@ -22,7 +23,6 @@ type Factory[T any] interface {
 
 type State struct {
 	Config di.Config
-	Models di.Models
 }
 
 type app struct {
@@ -59,9 +59,7 @@ func (a *routerFactory) Create(state State) chi.Router {
 
 func (h *handlerFactory) Create(state State, locator di.ServiceLocator) http.HandlerFunc {
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{
-		Resolvers: &graph.Resolver{
-			Models: state.Models, ServiceLocator: locator,
-		},
+		Resolvers: &graph.Resolver{ServiceLocator: locator},
 	}))
 
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -80,13 +78,13 @@ func getRouterFactory(handler http.HandlerFunc, userModel user.Authorize) *route
 	}
 }
 
-func NewAppState(models di.Models, config di.Config) State {
-	return State{Config: config, Models: models}
+func NewAppState(config di.Config) State {
+	return State{Config: config}
 }
 
 func NewApplication(state State, locator di.ServiceLocator) Application {
 	return &app{
-		router: getRouterFactory(getHandlerFactory().Create(state, locator), state.Models.Users).Create(state),
+		router: getRouterFactory(getHandlerFactory().Create(state, locator), locator.Models().Users()).Create(state),
 		state:  state,
 	}
 }
