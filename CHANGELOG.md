@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1](https://github.com/wert2all/timeline-backend/compare/v1.1.0...v1.1.1) (2024-05-22)
+
+
+### Bug Fixes
+
+* fix docker image name ([4abbc88](https://github.com/wert2all/timeline-backend/commit/4abbc8842eccc0491046d1045f9d6e38800dfd4a))
+
 ## [1.1.0](https://github.com/wert2all/timeline-backend/compare/v1.0.0...v1.1.0) (2024-05-22)
 
 
