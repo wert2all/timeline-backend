@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.1.3](https://github.com/wert2all/timeline-backend/compare/v1.1.2...v1.1.3) (2024-05-23)
+
+
+### Bug Fixes
+
+* fix postgres driver ([6c9b8f1](https://github.com/wert2all/timeline-backend/commit/6c9b8f1e11f9565767821e7566af15aa66b3125b))
+* fix static test ([90912bf](https://github.com/wert2all/timeline-backend/commit/90912bf45f5d3995a6a4a8dad412b1f322a10239))
+* move creating client etc to di ([442e255](https://github.com/wert2all/timeline-backend/commit/442e255e9484c0ac07571bd89c82338a59d3f019))
+* remove CLose() from Application ([e19c648](https://github.com/wert2all/timeline-backend/commit/e19c6485cb73ac3e05775dbfbef06e319737345c))
+* remove useless function ([0df0191](https://github.com/wert2all/timeline-backend/commit/0df0191dd2f58cb02a80fcdf3d9cef2ff98c4727))
+
 ## [1.1.2](https://github.com/wert2all/timeline-backend/compare/v1.1.1...v1.1.2) (2024-05-22)
 
 
