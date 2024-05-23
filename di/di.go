@@ -7,6 +7,7 @@ import (
 	"timeline/backend/ent"
 
 	"github.com/getsentry/sentry-go"
+	_ "github.com/lib/pq"
 	"golang.org/x/net/context"
 	"gopkg.in/yaml.v2"
 )
