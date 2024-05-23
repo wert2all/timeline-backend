@@ -11,5 +11,5 @@ func main() {
 	application := app.NewApplication(serviceLocator)
 	application.Start()
 
-	defer application.Close()
+	defer serviceLocator.Close()
 }
