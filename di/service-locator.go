@@ -1,6 +1,8 @@
 package di
 
 import (
+	"net/http"
+	"timeline/backend/app/http/middleware"
 	"timeline/backend/db/model/event"
 	"timeline/backend/db/model/tag"
 	"timeline/backend/db/model/timeline"
@@ -12,6 +14,8 @@ import (
 	"timeline/backend/ent"
 	"timeline/backend/graph/model"
 	"timeline/backend/graph/resolvers"
+
+	chiMiddleware "github.com/go-chi/chi/middleware"
 
 	"golang.org/x/net/context"
 )
@@ -50,19 +54,28 @@ type RepositoriesServiceLocator interface {
 	Tag() tagRepository.Repository
 }
 
+type Middlewares interface {
+	AuthMiddleware() func(http.Handler) http.Handler
+	Common() []func(http.Handler) http.Handler
+}
+
 type ServiceLocator interface {
+	Config() Config
 	Resolvers() ResolversServiceLocator
 	Models() ModelsServiceLocator
 	Repositories() RepositoriesServiceLocator
 	Context() context.Context
 	DbClient() *ent.Client
+	Middlewares() Middlewares
 }
 type serviceLocator struct {
+	config                     Config
 	context                    context.Context
 	client                     *ent.Client
 	repositoriesServiceLocator RepositoriesServiceLocator
 	resolversServiceLocator    ResolversServiceLocator
 	modelsServiceLocator       ModelsServiceLocator
+	middlewares                Middlewares
 }
 
 type resolversServiceLocator struct {
@@ -99,7 +112,6 @@ type modelsServiceLocator struct {
 	locator ServiceLocator
 }
 
-// Tag implements ModelsServiceLocator.
 func (m modelsServiceLocator) Tag() tag.Model {
 	return tag.NewTagModel(m.locator.Repositories().Tag())
 }
@@ -218,12 +230,30 @@ func (r resolversServiceLocator) Mutation() MutationResolversServiceLocator {
 
 func (s serviceLocator) Resolvers() ResolversServiceLocator { return s.resolversServiceLocator }
 
-func NewServiceLocator(context context.Context, client *ent.Client) ServiceLocator {
-	locator := serviceLocator{context: context, client: client}
-	locator.repositoriesServiceLocator = newRepositoriesServiceLocator(locator)
-	locator.modelsServiceLocator = newModelsServiceLocator(locator)
-	locator.resolversServiceLocator = newResolversServiceLocator(locator)
-	return locator
+func (s serviceLocator) Middlewares() Middlewares { return s.middlewares }
+
+func (s serviceLocator) Config() Config { return s.config }
+
+type middlewares struct {
+	locator ServiceLocator
+}
+
+func (m middlewares) Common() []func(http.Handler) http.Handler {
+	return []func(http.Handler) http.Handler{m.corsMiddleware(), m.recoverer(), m.sentry()}
+}
+
+func (m middlewares) corsMiddleware() func(http.Handler) http.Handler {
+	return middleware.Cors(m.locator.Config().App.Cors.AllowedOrigin, m.locator.Config().App.Cors.Debug).Handler
+}
+
+func (m middlewares) recoverer() func(http.Handler) http.Handler { return chiMiddleware.Recoverer }
+func (m middlewares) sentry() func(http.Handler) http.Handler    { return middleware.Sentry() }
+func (m middlewares) AuthMiddleware() func(http.Handler) http.Handler {
+	return middleware.AuthMiddleware(m.locator.Models().Users(), m.locator.Config().Google.ClientId)
+}
+
+func newMiddlewares(locator serviceLocator) Middlewares {
+	return middlewares{locator: locator}
 }
 
 func newRepositoriesServiceLocator(locator ServiceLocator) RepositoriesServiceLocator {

@@ -3,13 +3,11 @@ package app
 import (
 	"log"
 	"net/http"
-	"timeline/backend/app/http/middleware"
 	"timeline/backend/di"
 	"timeline/backend/graph"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/go-chi/chi"
-	chiMiddleware "github.com/go-chi/chi/middleware"
 )
 
 type Application interface {
@@ -67,8 +65,8 @@ func getRouterFactory(handler http.HandlerFunc) *routerFactory {
 }
 
 func NewApplication(config di.Config, locator di.ServiceLocator) Application {
-	authMiddleware := middleware.AuthMiddleware(locator.Models().Users(), config.Google.ClientId)
-	middlewares := []func(http.Handler) http.Handler{middleware.Cors(config.App.Cors.AllowedOrigin, config.App.Cors.Debug).Handler, chiMiddleware.Recoverer, middleware.Sentry()}
+	authMiddleware := locator.Middlewares().AuthMiddleware()
+	middlewares := locator.Middlewares().Common()
 	return &app{
 		router: getRouterFactory(getHandlerFactory().Create(config, locator)).
 			Create(authMiddleware, middlewares...),

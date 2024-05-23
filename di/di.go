@@ -1,5 +1,11 @@
 package di
 
+import (
+	"timeline/backend/ent"
+
+	"golang.org/x/net/context"
+)
+
 type Postgres struct {
 	Port     string `yaml:"port"`
 	Host     string `yaml:"host"`
@@ -25,4 +31,13 @@ type Config struct {
 	Sentry struct {
 		Dsn string `yaml:"dsn"`
 	} `yaml:"sentry"`
+}
+
+func NewServiceLocator(config Config, context context.Context, client *ent.Client) ServiceLocator {
+	locator := serviceLocator{config: config, context: context, client: client}
+	locator.repositoriesServiceLocator = newRepositoriesServiceLocator(locator)
+	locator.modelsServiceLocator = newModelsServiceLocator(locator)
+	locator.resolversServiceLocator = newResolversServiceLocator(locator)
+	locator.middlewares = newMiddlewares(locator)
+	return locator
 }
