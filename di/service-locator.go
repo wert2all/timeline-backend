@@ -2,6 +2,7 @@ package di
 
 import (
 	"net/http"
+	"time"
 	"timeline/backend/app/http/middleware"
 	"timeline/backend/db/model/event"
 	"timeline/backend/db/model/tag"
@@ -15,6 +16,7 @@ import (
 	"timeline/backend/graph/model"
 	"timeline/backend/graph/resolvers"
 
+	"github.com/getsentry/sentry-go"
 	chiMiddleware "github.com/go-chi/chi/middleware"
 
 	"golang.org/x/net/context"
@@ -67,6 +69,7 @@ type ServiceLocator interface {
 	Context() context.Context
 	DbClient() *ent.Client
 	Middlewares() Middlewares
+	Close()
 }
 type serviceLocator struct {
 	config                     Config
@@ -76,6 +79,11 @@ type serviceLocator struct {
 	resolversServiceLocator    ResolversServiceLocator
 	modelsServiceLocator       ModelsServiceLocator
 	middlewares                Middlewares
+}
+
+func (s serviceLocator) Close() {
+	sentry.Flush(time.Second)
+	s.DbClient().Close()
 }
 
 type resolversServiceLocator struct {

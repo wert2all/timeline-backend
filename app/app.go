@@ -11,10 +11,16 @@ import (
 
 type Application interface {
 	Start()
+	Close()
 }
 
 type app struct {
-	router chi.Router
+	router  chi.Router
+	locator di.ServiceLocator
+}
+
+func (a *app) Close() {
+	a.locator.Close()
 }
 
 func (a *app) Start() {
@@ -22,5 +28,5 @@ func (a *app) Start() {
 }
 
 func NewApplication(locator di.ServiceLocator) Application {
-	return &app{router: router.NewRouterFactory(locator).Create()}
+	return &app{router: router.NewRouterFactory(locator).Create(), locator: locator}
 }
