@@ -2,45 +2,46 @@ package router
 
 import (
 	"net/http"
-	"timeline/backend/app/router/handler"
-	"timeline/backend/di"
+	"timeline/backend/app/router/route"
 
 	"github.com/go-chi/chi"
 )
 
-type RouterFactory interface {
-	Create() chi.Router
+type RouterBuilder interface {
+	SetMiddlewares(middlewares ...func(http.Handler) http.Handler) RouterBuilder
+	SetRoutes(routes ...route.Route) RouterBuilder
+	Build() chi.Router
 }
 
-type routerFactory struct {
-	locator          di.ServiceLocator
-	authMiddleware   func(http.Handler) http.Handler
-	commonMiddlwares []func(http.Handler) http.Handler
+type routerBuilder struct {
+	middlewares []func(http.Handler) http.Handler
+	routes      []route.Route
 }
 
-func NewRouterFactory(locator di.ServiceLocator) RouterFactory {
-	return &routerFactory{
-		locator:          locator,
-		authMiddleware:   locator.Middlewares().AuthMiddleware(),
-		commonMiddlwares: locator.Middlewares().Common(),
+// SetRoutes implements RouterBuilder.
+func (r *routerBuilder) SetRoutes(routes ...route.Route) RouterBuilder {
+	r.routes = append(r.routes, routes...)
+	return r
+}
+
+// SetMiddlewares implements RouterBuilder.
+func (r *routerBuilder) SetMiddlewares(middlewares ...func(http.Handler) http.Handler) RouterBuilder {
+	r.middlewares = append(r.middlewares, middlewares...)
+	return r
+}
+
+func NewRouterBuilder() RouterBuilder {
+	return &routerBuilder{
+		middlewares: []func(http.Handler) http.Handler{},
+		routes:      []route.Route{},
 	}
 }
 
-func (r *routerFactory) Create() chi.Router {
+func (r *routerBuilder) Build() chi.Router {
 	router := chi.NewRouter()
-	router.Use(r.commonMiddlwares...)
-
-	return r.addGQLRoute(router)
-}
-
-// TODO: refactor to abstract
-func (r *routerFactory) addGQLRoute(router chi.Router) chi.Router {
-	handler := handler.NewGQLHandler(r.locator)
-
-	router.Options("/graphql", handler)
-	router.Group(func(chiRouter chi.Router) {
-		chiRouter.Use(r.authMiddleware)
-		chiRouter.Post("/graphql", handler)
-	})
+	router.Use(r.middlewares...)
+	for _, route := range r.routes {
+		route.Apply(router)
+	}
 	return router
 }
