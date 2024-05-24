@@ -5,6 +5,7 @@ import (
 	"os"
 	"strings"
 	"timeline/backend/ent"
+	"timeline/backend/lib/dumper"
 
 	"github.com/getsentry/sentry-go"
 	_ "github.com/lib/pq"
@@ -100,7 +101,7 @@ func readConfig() Config {
 	if err != nil {
 		panic("cannot parse config ")
 	}
-
+	dumper.D(cfg)
 	return cfg
 }
 
