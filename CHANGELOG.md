@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.1.4](https://github.com/wert2all/timeline-backend/compare/v1.1.3...v1.1.4) (2024-05-24)
+
+
+### Bug Fixes
+
+* add dump for application config ([040ac09](https://github.com/wert2all/timeline-backend/commit/040ac09ec1daab49d848e798de040185dc7ab22e))
+* fix docker compose env ([3377406](https://github.com/wert2all/timeline-backend/commit/3377406eff0504782d2708687cea5f9c2ddae715))
+* remove config ([ca47701](https://github.com/wert2all/timeline-backend/commit/ca47701aed47061d6db5447ee09d3fc76af44b70))
+
 ## [1.1.3](https://github.com/wert2all/timeline-backend/compare/v1.1.2...v1.1.3) (2024-05-23)
 
 
