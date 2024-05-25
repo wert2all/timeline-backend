@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.6](https://github.com/wert2all/timeline-backend/compare/v1.1.5...v1.1.6) (2024-05-25)
+
+
+### Bug Fixes
+
+* fix dockerfile ([a9818ef](https://github.com/wert2all/timeline-backend/commit/a9818effe8d856be777589fc5dd4e60786858c38))
+
 ## [1.1.5](https://github.com/wert2all/timeline-backend/compare/v1.1.4...v1.1.5) (2024-05-25)
 
 
