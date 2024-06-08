@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"timeline/backend/app/router/route"
 
-	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/v5"
 )
 
 type RouterBuilder interface {
