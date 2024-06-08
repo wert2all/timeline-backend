@@ -6,7 +6,6 @@ require (
 	entgo.io/ent v0.13.1
 	github.com/99designs/gqlgen v0.17.47
 	github.com/getsentry/sentry-go v0.28.0
-	github.com/go-chi/chi v1.5.5
 	github.com/lib/pq v1.10.9
 	github.com/rs/cors v1.11.0
 	github.com/vektah/gqlparser/v2 v2.5.12
@@ -16,6 +15,7 @@ require (
 )
 
 require (
+	github.com/go-chi/chi/v5 v5.0.12
 	github.com/gookit/goutil v0.6.15
 	github.com/microcosm-cc/bluemonday v1.0.26
 	golang.org/x/exp v0.0.0-20240525044651-4c93da0ed11d

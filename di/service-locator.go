@@ -17,7 +17,7 @@ import (
 	"timeline/backend/graph/resolvers"
 
 	"github.com/getsentry/sentry-go"
-	chiMiddleware "github.com/go-chi/chi/middleware"
+	chiMiddleware "github.com/go-chi/chi/v5/middleware"
 
 	"golang.org/x/net/context"
 )
