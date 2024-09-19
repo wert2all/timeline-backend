@@ -54,8 +54,8 @@ type TimelineEventInput struct {
 
 type User struct {
 	ID        int                  `json:"id"`
-	Name      string               `json:"name"`
-	Email     string               `json:"email"`
+	Name      *string              `json:"name,omitempty"`
+	Email     *string              `json:"email,omitempty"`
 	Avatar    *string              `json:"avatar,omitempty"`
 	IsNew     bool                 `json:"isNew"`
 	Timelines []*ShortUserTimeline `json:"timelines"`

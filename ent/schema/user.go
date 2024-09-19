@@ -17,8 +17,8 @@ type User struct {
 func (User) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("uuid").NotEmpty().Unique(),
-		field.String("name").NotEmpty(),
-		field.String("email").NotEmpty(),
+		field.String("name").Nillable(),
+		field.String("email").Nillable(),
 		field.String("avatar").Nillable(),
 		field.Time("created_at").Immutable().Default(time.Now),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),

@@ -21,8 +21,8 @@ type ShortUserTimeline {
 
 type User {
   id: Int!
-  name: String!
-  email: String!
+  name: String
+  email: String
   avatar: String
   isNew: Boolean!
   timelines: [ShortUserTimeline!]!
