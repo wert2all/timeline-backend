@@ -20,9 +20,9 @@ type User struct {
 	// UUID holds the value of the "uuid" field.
 	UUID string `json:"uuid,omitempty"`
 	// Name holds the value of the "name" field.
-	Name string `json:"name,omitempty"`
+	Name *string `json:"name,omitempty"`
 	// Email holds the value of the "email" field.
-	Email string `json:"email,omitempty"`
+	Email *string `json:"email,omitempty"`
 	// Avatar holds the value of the "avatar" field.
 	Avatar *string `json:"avatar,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
@@ -101,13 +101,15 @@ func (u *User) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
 			} else if value.Valid {
-				u.Name = value.String
+				u.Name = new(string)
+				*u.Name = value.String
 			}
 		case user.FieldEmail:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field email", values[i])
 			} else if value.Valid {
-				u.Email = value.String
+				u.Email = new(string)
+				*u.Email = value.String
 			}
 		case user.FieldAvatar:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -184,11 +186,15 @@ func (u *User) String() string {
 	builder.WriteString("uuid=")
 	builder.WriteString(u.UUID)
 	builder.WriteString(", ")
-	builder.WriteString("name=")
-	builder.WriteString(u.Name)
+	if v := u.Name; v != nil {
+		builder.WriteString("name=")
+		builder.WriteString(*v)
+	}
 	builder.WriteString(", ")
-	builder.WriteString("email=")
-	builder.WriteString(u.Email)
+	if v := u.Email; v != nil {
+		builder.WriteString("email=")
+		builder.WriteString(*v)
+	}
 	builder.WriteString(", ")
 	if v := u.Avatar; v != nil {
 		builder.WriteString("avatar=")
