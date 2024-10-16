@@ -1,10 +1,26 @@
-FROM golang:1.22
+FROM golang:alpine AS builder
+
+LABEL stage=gobuilder
+
+ENV CGO_ENABLED 0
+
+RUN apk update --no-cache && apk add --no-cache tzdata
+
+WORKDIR /build
+
+COPY go.mod .
+COPY go.sum .
+RUN go mod download
+COPY . .
+RUN go build -ldflags="-s -w" -o /app/timeline-backend server.go
+
+FROM scratch
+
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+COPY --from=builder /usr/share/zoneinfo/Asia/Shanghai /usr/share/zoneinfo/Asia/Shanghai
+ENV TZ Europe/Kiev
+
 WORKDIR /app
-COPY go.mod go.sum ./source/
-RUN cd source && go mod download
-COPY . ./source
+COPY --from=builder /app/timeline-backend /app/timeline-backend
 
-RUN cd ./source/ && CGO_ENABLED=0 GOOS=linux go build -o /app/timeline-backend && rm -rf /app/source
-EXPOSE 8000
-
-CMD ["/app/timeline-backend"]
+EXPOSE 8081
