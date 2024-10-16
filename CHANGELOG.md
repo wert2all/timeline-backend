@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.1.8](https://github.com/wert2all/timeline-backend/compare/v1.1.7...v1.1.8) (2024-10-16)
+
+
+### Bug Fixes
+
+* fix go version ([6ce8bf8](https://github.com/wert2all/timeline-backend/commit/6ce8bf843fa61a19e787091e0345c19db012c4d3))
+* fix nullable email and name of google user ([6c909f4](https://github.com/wert2all/timeline-backend/commit/6c909f40c6eb4e79fab04a8c07f426c0beabce27))
+* fix version of chi ([83496ac](https://github.com/wert2all/timeline-backend/commit/83496ace1ac0b7995cc69a78b6da04f233d94e3b))
+
 ## [1.1.7](https://github.com/wert2all/timeline-backend/compare/v1.1.6...v1.1.7) (2024-05-25)
 
 
