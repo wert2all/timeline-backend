@@ -9,22 +9,28 @@ type (
 		Password string
 	}
 
+	Cors struct {
+		Debug         bool
+		AllowedOrigin string
+	}
+
+	App struct {
+		Cors Cors
+	}
+
+	Google struct {
+		ClientID string
+	}
+
+	Sentry struct {
+		Dsn string
+	}
+
 	Config struct {
-		App struct {
-			Cors struct {
-				Debug         bool
-				AllowedOrigin string
-			}
-		}
-
-		Google struct {
-			ClientID string
-		}
-
+		App      App
 		Postgres Postgres
 
-		Sentry struct {
-			Dsn string
-		}
+		Google Google
+		Sentry Sentry
 	}
 )

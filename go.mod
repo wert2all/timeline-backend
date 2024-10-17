@@ -21,7 +21,6 @@ require (
 	github.com/gookit/goutil v0.6.17
 	github.com/microcosm-cc/bluemonday v1.0.27
 	golang.org/x/exp v0.0.0-20241009180824-f66d83c29e7c
-	gopkg.in/yaml.v2 v2.4.0
 )
 
 require (
