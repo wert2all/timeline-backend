@@ -3,6 +3,7 @@ package di
 import (
 	"net/http"
 	"time"
+
 	"timeline/backend/app/http/middleware"
 	"timeline/backend/db/model/event"
 	"timeline/backend/db/model/tag"
@@ -16,9 +17,10 @@ import (
 	"timeline/backend/graph/model"
 	"timeline/backend/graph/resolvers"
 
+	"timeline/backend/app/config"
+
 	"github.com/getsentry/sentry-go"
 	chiMiddleware "github.com/go-chi/chi/v5/middleware"
-
 	"golang.org/x/net/context"
 )
 
@@ -62,7 +64,7 @@ type Middlewares interface {
 }
 
 type ServiceLocator interface {
-	Config() Config
+	Config() config.Config
 	Resolvers() ResolversServiceLocator
 	Models() ModelsServiceLocator
 	Repositories() RepositoriesServiceLocator
@@ -72,7 +74,7 @@ type ServiceLocator interface {
 	Close()
 }
 type serviceLocator struct {
-	config                     Config
+	config                     config.Config
 	context                    context.Context
 	client                     *ent.Client
 	repositoriesServiceLocator RepositoriesServiceLocator
@@ -240,7 +242,7 @@ func (s serviceLocator) Resolvers() ResolversServiceLocator { return s.resolvers
 
 func (s serviceLocator) Middlewares() Middlewares { return s.middlewares }
 
-func (s serviceLocator) Config() Config { return s.config }
+func (s serviceLocator) Config() config.Config { return s.config }
 
 type middlewares struct {
 	locator ServiceLocator
@@ -257,7 +259,7 @@ func (m middlewares) corsMiddleware() func(http.Handler) http.Handler {
 func (m middlewares) recoverer() func(http.Handler) http.Handler { return chiMiddleware.Recoverer }
 func (m middlewares) sentry() func(http.Handler) http.Handler    { return middleware.Sentry() }
 func (m middlewares) AuthMiddleware() func(http.Handler) http.Handler {
-	return middleware.AuthMiddleware(m.locator.Models().Users(), m.locator.Config().Google.ClientId)
+	return middleware.AuthMiddleware(m.locator.Models().Users(), m.locator.Config().Google.ClientID)
 }
 
 func newMiddlewares(locator serviceLocator) Middlewares {

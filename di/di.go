@@ -3,7 +3,10 @@ package di
 import (
 	"log"
 	"os"
+	"strconv"
 	"strings"
+
+	"timeline/backend/app/config"
 	"timeline/backend/ent"
 	"timeline/backend/lib/dumper"
 
@@ -12,33 +15,6 @@ import (
 	"golang.org/x/net/context"
 	"gopkg.in/yaml.v2"
 )
-
-type Postgres struct {
-	Port     string `yaml:"port"`
-	Host     string `yaml:"host"`
-	Db       string `yaml:"db"`
-	User     string `yaml:"user"`
-	Password string `yaml:"password"`
-}
-
-type Config struct {
-	App struct {
-		Cors struct {
-			Debug         bool   `yaml:"debug"`
-			AllowedOrigin string `yaml:"allowedOrigin"`
-		} `yaml:"cors"`
-	} `yaml:"app"`
-
-	Google struct {
-		ClientId string `yaml:"clientId"`
-	} `yaml:"google"`
-
-	Postgres Postgres `yaml:"postgres"`
-
-	Sentry struct {
-		Dsn string `yaml:"dsn"`
-	} `yaml:"sentry"`
-}
 
 func Init() ServiceLocator {
 	config := readConfig()
@@ -58,7 +34,7 @@ func Init() ServiceLocator {
 	return locator
 }
 
-func newDBClient(context context.Context, config Postgres) *ent.Client {
+func newDBClient(context context.Context, config config.Postgres) *ent.Client {
 	client, err := ent.Open("postgres", createConnectionURL(config))
 	if err != nil {
 		log.Fatalf("failed opening connection to postgres: %v", err)
@@ -69,15 +45,15 @@ func newDBClient(context context.Context, config Postgres) *ent.Client {
 	return client
 }
 
-func createConnectionURL(config Postgres) string {
+func createConnectionURL(config config.Postgres) string {
 	var sb strings.Builder
 
 	optionsMap := map[string]string{
 		"host":     config.Host,
-		"port":     config.Port,
+		"port":     strconv.Itoa(config.Port),
 		"user":     config.User,
 		"password": config.Password,
-		"dbname":   config.Db,
+		"dbname":   config.DB,
 		"sslmode":  "disable",
 	}
 
@@ -88,14 +64,14 @@ func createConnectionURL(config Postgres) string {
 	return sb.String()
 }
 
-func readConfig() Config {
+func readConfig() config.Config {
 	f, err := os.Open("config.yaml")
 	if err != nil {
 		panic("cannot open config file")
 	}
 	defer f.Close()
 
-	var cfg Config
+	var cfg config.Config
 	decoder := yaml.NewDecoder(f)
 	err = decoder.Decode(&cfg)
 	if err != nil {
