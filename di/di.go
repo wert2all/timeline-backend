@@ -1,19 +1,17 @@
 package di
 
 import (
+	"flag"
 	"log"
-	"os"
 	"strconv"
 	"strings"
 
 	"timeline/backend/app/config"
 	"timeline/backend/ent"
-	"timeline/backend/lib/dumper"
 
 	"github.com/getsentry/sentry-go"
 	_ "github.com/lib/pq"
 	"golang.org/x/net/context"
-	"gopkg.in/yaml.v2"
 )
 
 func Init() ServiceLocator {
@@ -65,20 +63,52 @@ func createConnectionURL(config config.Postgres) string {
 }
 
 func readConfig() config.Config {
-	f, err := os.Open("config.yaml")
-	if err != nil {
-		panic("cannot open config file")
-	}
-	defer f.Close()
+	var (
+		debugFlag          bool
+		postgresPort       int
+		postgresHost       string
+		postgresDB         string
+		postgresUser       string
+		postgresPassword   string
+		sentryDsnFlag      string
+		googleClientIDFlag string
+	)
 
-	var cfg config.Config
-	decoder := yaml.NewDecoder(f)
-	err = decoder.Decode(&cfg)
-	if err != nil {
-		dumper.D(err, cfg)
-		panic("cannot parse config ")
+	flag.BoolVar(&debugFlag, "debug", false, "Debug mode")
+
+	flag.StringVar(&postgresHost, "postgres-host", "timeline", "Postgres host")
+	flag.IntVar(&postgresPort, "postgres-port", 5432, "Postgres port")
+	flag.StringVar(&postgresUser, "postgres-user", "timeline", "Postgres user")
+	flag.StringVar(&postgresPassword, "postgres-password", "timeline", "Postgres password")
+	flag.StringVar(&postgresDB, "postgres-db", "timeline", "Postgres DB")
+
+	flag.StringVar(&googleClientIDFlag, "google-client-id", "", "Google client ID")
+	flag.StringVar(&sentryDsnFlag, "sentry-dsn", "", "Sentry DSN")
+
+	config := config.Config{
+		App: config.App{
+			Cors: config.Cors{
+				AllowedOrigin: "*",
+				Debug:         debugFlag,
+			},
+		},
+		Postgres: config.Postgres{
+			Port:     postgresPort,
+			Host:     postgresHost,
+			DB:       postgresDB,
+			User:     postgresUser,
+			Password: postgresPassword,
+		},
+
+		Google: config.Google{
+			ClientID: googleClientIDFlag,
+		},
+		Sentry: config.Sentry{
+			Dsn: sentryDsnFlag,
+		},
 	}
-	return cfg
+
+	return config
 }
 
 func initSentry(dsn string) {
