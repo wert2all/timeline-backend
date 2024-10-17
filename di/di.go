@@ -8,6 +8,8 @@ import (
 
 	"timeline/backend/app/config"
 	"timeline/backend/ent"
+	"timeline/backend/ent/migrate"
+	"timeline/backend/lib/utils"
 
 	"github.com/getsentry/sentry-go"
 	_ "github.com/lib/pq"
@@ -20,10 +22,14 @@ func Init() ServiceLocator {
 
 	initSentry(config.Sentry.Dsn)
 
+	client, err := newDBClient(applicationContext, config.Postgres)
+	if err != nil {
+		utils.F("Could not connect to database: %v", err)
+	}
 	locator := serviceLocator{
 		config:  config,
 		context: applicationContext,
-		client:  newDBClient(applicationContext, config.Postgres),
+		client:  client,
 	}
 	locator.repositoriesServiceLocator = newRepositoriesServiceLocator(locator)
 	locator.modelsServiceLocator = newModelsServiceLocator(locator)
@@ -32,15 +38,19 @@ func Init() ServiceLocator {
 	return locator
 }
 
-func newDBClient(context context.Context, config config.Postgres) *ent.Client {
+func newDBClient(context context.Context, config config.Postgres) (*ent.Client, error) {
 	client, err := ent.Open("postgres", createConnectionURL(config))
 	if err != nil {
-		log.Fatalf("failed opening connection to postgres: %v", err)
+		return nil, err
 	}
-	if err := client.Schema.Create(context); err != nil {
-		log.Fatalf("failed creating schema resources: %v", err)
+	if err := client.Schema.Create(
+		context,
+		migrate.WithDropIndex(true),
+		migrate.WithDropColumn(true)); err != nil {
+		return nil, err
 	}
-	return client
+
+	return client, nil
 }
 
 func createConnectionURL(config config.Postgres) string {
