@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.2.0](https://github.com/wert2all/timeline-backend/compare/v1.1.8...v1.2.0) (2024-10-17)
+
+
+### Features
+
+* add utils D method ([b6012c4](https://github.com/wert2all/timeline-backend/commit/b6012c4260f7fa32d17dc7291aa607298ad98077))
+
+
+### Bug Fixes
+
+* fix generated code ([cdcbeee](https://github.com/wert2all/timeline-backend/commit/cdcbeeed6033a9b1e8006579016b37a4c8f51c3e))
+* fix golang-lint action ([a0ec4e6](https://github.com/wert2all/timeline-backend/commit/a0ec4e6badc975ba06c5b3021a044cc7e0909db7))
+* remove useless code ([89a6d1e](https://github.com/wert2all/timeline-backend/commit/89a6d1e2fba7d99f3fad189cd2199c1244d1989b))
+
 ## [1.1.8](https://github.com/wert2all/timeline-backend/compare/v1.1.7...v1.1.8) (2024-10-16)
 
 
