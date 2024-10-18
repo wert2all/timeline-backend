@@ -1,5 +1,7 @@
 package config
 
+import "flag"
+
 type (
 	Postgres struct {
 		Port     int
@@ -14,8 +16,13 @@ type (
 		AllowedOrigin string
 	}
 
+	ListenHost struct {
+		Host string
+		Port int
+	}
 	App struct {
-		Cors Cors
+		Cors   Cors
+		Listen ListenHost
 	}
 
 	Google struct {
@@ -34,3 +41,61 @@ type (
 		Sentry Sentry
 	}
 )
+
+func NewConfig() Config {
+	var (
+		listenHostFlag     string
+		listenPortFlag     int
+		debugFlag          bool
+		postgresPort       int
+		postgresHost       string
+		postgresDB         string
+		postgresUser       string
+		postgresPassword   string
+		sentryDsnFlag      string
+		googleClientIDFlag string
+	)
+
+	flag.StringVar(&listenHostFlag, "listen-host", "localhost", "Listen host")
+	flag.IntVar(&listenPortFlag, "listen-port", 8000, "Listen port")
+
+	flag.BoolVar(&debugFlag, "debug", false, "Debug mode")
+
+	flag.StringVar(&postgresHost, "postgres-host", "timeline", "Postgres host")
+	flag.IntVar(&postgresPort, "postgres-port", 5432, "Postgres port")
+	flag.StringVar(&postgresUser, "postgres-user", "timeline", "Postgres user")
+	flag.StringVar(&postgresPassword, "postgres-password", "timeline", "Postgres password")
+	flag.StringVar(&postgresDB, "postgres-db", "timeline", "Postgres DB")
+
+	flag.StringVar(&googleClientIDFlag, "google-client-id", "", "Google client ID")
+	flag.StringVar(&sentryDsnFlag, "sentry-dsn", "", "Sentry DSN")
+
+	config := Config{
+		App: App{
+			Cors: Cors{
+				AllowedOrigin: "*",
+				Debug:         debugFlag,
+			},
+			Listen: ListenHost{
+				Host: listenHostFlag,
+				Port: listenPortFlag,
+			},
+		},
+		Postgres: Postgres{
+			Port:     postgresPort,
+			Host:     postgresHost,
+			DB:       postgresDB,
+			User:     postgresUser,
+			Password: postgresPassword,
+		},
+
+		Google: Google{
+			ClientID: googleClientIDFlag,
+		},
+		Sentry: Sentry{
+			Dsn: sentryDsnFlag,
+		},
+	}
+
+	return config
+}

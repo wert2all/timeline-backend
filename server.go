@@ -2,25 +2,14 @@ package main
 
 import (
 	"timeline/backend/app"
-	appRouter "timeline/backend/app/router"
-	"timeline/backend/app/router/route"
-	"timeline/backend/di"
-	"timeline/backend/graph"
+	"timeline/backend/lib/utils"
 )
 
 func main() {
-	serviceLocator := di.Init()
-
-	gqlConfig := route.NewGQLConfig(&graph.Resolver{ServiceLocator: serviceLocator})
-	gqlRoute := route.NewGQLRoute(gqlConfig, serviceLocator.Middlewares().AuthMiddleware())
-
-	router := appRouter.NewRouterBuilder().
-		SetMiddlewares(serviceLocator.Middlewares().Common()...).
-		SetRoutes(gqlRoute).
-		Build()
-
-	application := app.NewApplication(router)
+	application, err := app.NewApplication()
+	if err != nil {
+		utils.F("Coulnd not create application: %v", err)
+	}
 	application.Start()
-
-	defer serviceLocator.Close()
+	defer application.Closer()()
 }
