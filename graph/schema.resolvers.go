@@ -14,7 +14,7 @@ import (
 	"timeline/backend/graph/resolvers"
 	"timeline/backend/lib/utils"
 
-	"github.com/golobby/container/v3"
+	container "github.com/golobby/container/v3"
 )
 
 // Authorize is the resolver for the authorize field.
