@@ -1,26 +1,25 @@
 package main
 
 import (
+	"context"
 	"timeline/backend/app"
-	appRouter "timeline/backend/app/router"
-	"timeline/backend/app/router/route"
-	"timeline/backend/di"
-	"timeline/backend/graph"
+	"timeline/backend/app/config"
+	"timeline/backend/app/di"
+	"timeline/backend/lib/utils"
+
+	"github.com/golobby/container/v3"
 )
 
 func main() {
-	serviceLocator := di.Init()
+	di.InitContainer(config.NewConfig(), context.Background())
 
-	gqlConfig := route.NewGQLConfig(&graph.Resolver{ServiceLocator: serviceLocator})
-	gqlRoute := route.NewGQLRoute(gqlConfig, serviceLocator.Middlewares().AuthMiddleware())
+	var application app.Application
+	err := container.Resolve(&application)
 
-	router := appRouter.NewRouterBuilder().
-		SetMiddlewares(serviceLocator.Middlewares().Common()...).
-		SetRoutes(gqlRoute).
-		Build()
+	if err != nil {
+		utils.F("Coulnd not create application: %v", err)
+	}
 
-	application := app.NewApplication(router)
 	application.Start()
-
-	defer serviceLocator.Close()
+	defer application.Closer()()
 }

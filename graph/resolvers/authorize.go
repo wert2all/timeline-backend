@@ -53,6 +53,7 @@ func (a authorizeResolverImpl) Resolve(_ context.Context, arguments ValidArgumen
 	}, nil
 }
 func (a AuthorizeArgumentFactory) New() Arguments[AuthorizeArguments] { return AuthorizeArguments{} }
+
 func NewAutorizeResolver(timeline timeline.UserTimeline) Resolver[*model.User, ValidAuthorizeArguments] {
 	return authorizeResolverImpl{Timeline: timeline}
 }
