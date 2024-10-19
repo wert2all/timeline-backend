@@ -7,65 +7,153 @@ package graph
 import (
 	"context"
 	appContext "timeline/backend/app/context"
+	tagModel "timeline/backend/db/model/tag"
+	timelineModel "timeline/backend/db/model/timeline"
 	"timeline/backend/graph/convert"
 	"timeline/backend/graph/model"
 	"timeline/backend/graph/resolvers"
+	"timeline/backend/lib/utils"
+
+	"github.com/golobby/container/v3"
 )
 
 // Authorize is the resolver for the authorize field.
 func (r *mutationResolver) Authorize(ctx context.Context) (*model.User, error) {
-	return resolvers.Resolve(
-		ctx,
-		r.ServiceLocator.Resolvers().Mutation().Authorize().ArgumentFactory().New(),
-		r.ServiceLocator.Resolvers().Mutation().Authorize().Validator(),
-		r.ServiceLocator.Resolvers().Mutation().Authorize().Resolver(),
-	)
+	var factory resolvers.AuthorizeArgumentFactory
+	var validator resolvers.Validator[resolvers.AuthorizeArguments, resolvers.ValidAuthorizeArguments]
+	var resolver resolvers.Resolver[*model.User, resolvers.ValidAuthorizeArguments]
+
+	errFactoryResolve := container.Resolve(&factory)
+	if errFactoryResolve != nil {
+		utils.F("Couldnt resolve Authorize factory: %v", errFactoryResolve)
+		return nil, errFactoryResolve
+	}
+
+	errValidatorResolve := container.Resolve(&validator)
+	if errValidatorResolve != nil {
+		utils.F("Couldnt resolve Authorize validator: %v", errValidatorResolve)
+		return nil, errValidatorResolve
+	}
+
+	errResolverResolve := container.Resolve(&resolver)
+	if errResolverResolve != nil {
+		utils.F("Couldnt resolve Authorize resolver: %v", errResolverResolve)
+		return nil, errResolverResolve
+	}
+
+	return resolvers.Resolve(ctx, factory.New(), validator, resolver)
 }
 
 // AddTimeline is the resolver for the addTimeline field.
 func (r *mutationResolver) AddTimeline(ctx context.Context, timeline *model.AddTimeline) (*model.ShortUserTimeline, error) {
-	return resolvers.Resolve(
-		ctx,
-		r.ServiceLocator.Resolvers().Mutation().AddTimeline().ArgumentFactory().New(timeline),
-		r.ServiceLocator.Resolvers().Mutation().AddTimeline().Validator(),
-		r.ServiceLocator.Resolvers().Mutation().AddTimeline().Resolver(),
-	)
+	var factory resolvers.AddTimelineArgumentFactory
+	var validator resolvers.Validator[resolvers.AddTimelineArguments, resolvers.ValidAddTimelineArguments]
+	var resolver resolvers.Resolver[*model.ShortUserTimeline, resolvers.ValidAddTimelineArguments]
+
+	errFactoryResolve := container.Resolve(&factory)
+	if errFactoryResolve != nil {
+		utils.F("Couldnt resolve AddTimeline factory: %v", errFactoryResolve)
+		return nil, errFactoryResolve
+	}
+
+	errValidatorResolve := container.Resolve(&validator)
+	if errValidatorResolve != nil {
+		utils.F("Couldnt resolve AddTimeline validator: %v", errValidatorResolve)
+		return nil, errValidatorResolve
+	}
+
+	errResolverResolve := container.Resolve(&resolver)
+	if errResolverResolve != nil {
+		utils.F("Couldnt resolve AddTimeline resolver: %v", errResolverResolve)
+		return nil, errResolverResolve
+	}
+
+	return resolvers.Resolve(ctx, factory.New(timeline), validator, resolver)
 }
 
 // AddEvent is the resolver for the addEvent field.
 func (r *mutationResolver) AddEvent(ctx context.Context, event model.TimelineEventInput) (*model.TimelineEvent, error) {
-	return resolvers.Resolve(
-		ctx,
-		r.ServiceLocator.Resolvers().Mutation().AddEvent().ArgumentFactory().New(event),
-		r.ServiceLocator.Resolvers().Mutation().AddEvent().Validator(),
-		r.ServiceLocator.Resolvers().Mutation().AddEvent().Resolver(),
-	)
+	var factory resolvers.AddEventArgumentFactory
+	var validator resolvers.Validator[resolvers.AddEventArguments, resolvers.ValidAddEventArguments]
+	var resolver resolvers.Resolver[*model.TimelineEvent, resolvers.ValidAddEventArguments]
+
+	errFactoryResolve := container.Resolve(&factory)
+	if errFactoryResolve != nil {
+		utils.F("Couldnt resolve AddEvent factory: %v", errFactoryResolve)
+		return nil, errFactoryResolve
+	}
+
+	errValidatorResolve := container.Resolve(&validator)
+	if errValidatorResolve != nil {
+		utils.F("Couldnt resolve AddEvent validator: %v", errValidatorResolve)
+		return nil, errValidatorResolve
+	}
+
+	errResolverResolve := container.Resolve(&resolver)
+	if errResolverResolve != nil {
+		utils.F("Couldnt resolve AddEvent resolver: %v", errResolverResolve)
+		return nil, errResolverResolve
+	}
+
+	return resolvers.Resolve(ctx, factory.New(event), validator, resolver)
 }
 
 // DeleteEvent is the resolver for the deleteEvent field.
 func (r *mutationResolver) DeleteEvent(ctx context.Context, eventID int) (model.Status, error) {
-	return resolvers.Resolve(
-		ctx,
-		r.ServiceLocator.Resolvers().Mutation().DeleteEvent().ArgumentFactory().New(eventID),
-		r.ServiceLocator.Resolvers().Mutation().DeleteEvent().Validator(),
-		r.ServiceLocator.Resolvers().Mutation().DeleteEvent().Resolver(),
-	)
+	var factory resolvers.DeleteEventArgumentFactory
+	var validator resolvers.Validator[resolvers.DeleteEventArguments, resolvers.ValidDeleteEventArguments]
+	var resolver resolvers.Resolver[model.Status, resolvers.ValidDeleteEventArguments]
+
+	errFactoryResolve := container.Resolve(&factory)
+	if errFactoryResolve != nil {
+		utils.F("Couldnt resolve AddEvent factory: %v", errFactoryResolve)
+		return model.StatusError, errFactoryResolve
+	}
+
+	errValidatorResolve := container.Resolve(&validator)
+	if errValidatorResolve != nil {
+		utils.F("Couldnt resolve AddEvent validator: %v", errValidatorResolve)
+		return model.StatusError, errValidatorResolve
+	}
+
+	errResolverResolve := container.Resolve(&resolver)
+	if errResolverResolve != nil {
+		utils.F("Couldnt resolve AddEvent resolver: %v", errResolverResolve)
+		return model.StatusError, errResolverResolve
+	}
+
+	return resolvers.Resolve(ctx, factory.New(eventID), validator, resolver)
 }
 
 // TimelineEvents is the resolver for the timelineEvents field.
 func (r *queryResolver) TimelineEvents(ctx context.Context, timelineID int, limit *model.Limit) ([]*model.TimelineEvent, error) {
-	timeline, error := r.ServiceLocator.Models().Timeline().GetUserTimeline(appContext.GetUserID(ctx), timelineID)
+	var timelineModel timelineModel.UserTimeline
+	var tagModel tagModel.Model
+
+	err := container.Resolve(&timelineModel)
+	if err != nil {
+		utils.F("Couldnt resolve model Timeline: %v", err)
+		return nil, err
+	}
+
+	errTagResolve := container.Resolve(&tagModel)
+	if errTagResolve != nil {
+		utils.F("Couldnt resolve model Tag: %v", errTagResolve)
+		return nil, errTagResolve
+	}
+
+	timeline, error := timelineModel.GetUserTimeline(appContext.GetUserID(ctx), timelineID)
 	if error != nil {
 		return nil, error
 	}
-	events, error := r.ServiceLocator.Models().Timeline().GetEvents(timeline, convert.ToLimit(limit))
+	events, error := timelineModel.GetEvents(timeline, convert.ToLimit(limit))
 	if error != nil {
 		return nil, error
 	}
 
 	tags := make(map[int][]string)
 	for _, event := range events {
-		tagsEntities := r.ServiceLocator.Models().Tag().GetEventTags(event)
+		tagsEntities := tagModel.GetEventTags(event)
 		entityTags := make([]string, 0)
 		for _, tagEntity := range tagsEntities {
 			entityTags = append(entityTags, tagEntity.Tag)
