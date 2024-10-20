@@ -69,6 +69,7 @@ func NewConfig() Config {
 
 	flag.StringVar(&googleClientIDFlag, "google-client-id", "", "Google client ID")
 	flag.StringVar(&sentryDsnFlag, "sentry-dsn", "", "Sentry DSN")
+	flag.Parse()
 
 	config := Config{
 		App: App{
