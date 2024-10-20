@@ -14,6 +14,7 @@ import (
 	"timeline/backend/lib/utils"
 
 	userModel "timeline/backend/db/model/user"
+	"timeline/backend/db/repository/user"
 
 	"github.com/getsentry/sentry-go"
 	"github.com/golobby/container/v3"
@@ -31,6 +32,8 @@ func InitContainer(config config.Config, appContext context.Context) {
 	initModels()
 
 	initOperationsResolvers()
+
+	initService(func(repository user.Repository) userModel.Authorize { return userModel.NewUserModel(repository) })
 
 	initApplication(config)
 }
