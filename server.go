@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+
 	"timeline/backend/app"
 	"timeline/backend/app/config"
 	"timeline/backend/app/di"
@@ -15,7 +16,6 @@ func main() {
 
 	var application app.Application
 	err := container.Resolve(&application)
-
 	if err != nil {
 		utils.F("Coulnd not create application: %v", err)
 	}
