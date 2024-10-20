@@ -1,11 +1,12 @@
 package middlewares
 
 import (
-	"context"
 	"net/http"
 	"strings"
 
 	"timeline/backend/db/model/user"
+
+	appContext "timeline/backend/app/context"
 
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/rs/cors"
@@ -16,8 +17,6 @@ type (
 	Middlewares struct {
 		List []func(http.Handler) http.Handler
 	}
-	userKey      struct{}
-	userIsNewKey struct{}
 )
 
 func NewMiddlewares() Middlewares {
@@ -68,7 +67,7 @@ func NewAuthMiddleware(userModel user.Authorize, googleClientID string) func(htt
 				return
 			}
 
-			req = req.WithContext(setUserID(req.Context(), userCheck.ID, userCheck.IsNew))
+			req = req.WithContext(appContext.SetUserID(req.Context(), userCheck.ID, userCheck.IsNew))
 			next.ServeHTTP(w, req)
 		})
 	}
@@ -83,19 +82,4 @@ func extractToken(req *http.Request) string {
 	} else {
 		return ""
 	}
-}
-
-func setUserID(ctx context.Context, id int, isNew bool) context.Context {
-	newCtx := context.WithValue(ctx, userIsNewKey{}, isNew)
-	return context.WithValue(newCtx, userKey{}, id)
-}
-
-func GetUserID(ctx context.Context) int {
-	val, _ := ctx.Value(userKey{}).(int)
-	return val
-}
-
-func GetIsNew(ctx context.Context) bool {
-	val, _ := ctx.Value(userIsNewKey{}).(bool)
-	return val
 }
