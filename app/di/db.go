@@ -4,6 +4,7 @@ import (
 	"context"
 	"strconv"
 	"strings"
+
 	"timeline/backend/app/config"
 	eventModel "timeline/backend/db/model/event"
 	tagModel "timeline/backend/db/model/tag"
@@ -15,6 +16,8 @@ import (
 	"timeline/backend/db/repository/user"
 	"timeline/backend/ent"
 	"timeline/backend/ent/migrate"
+
+	_ "github.com/lib/pq"
 )
 
 func initRepositories() {

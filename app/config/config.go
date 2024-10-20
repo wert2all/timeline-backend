@@ -61,7 +61,7 @@ func NewConfig() Config {
 
 	flag.BoolVar(&debugFlag, "debug", false, "Debug mode")
 
-	flag.StringVar(&postgresHost, "postgres-host", "timeline", "Postgres host")
+	flag.StringVar(&postgresHost, "postgres-host", "localhost", "Postgres host")
 	flag.IntVar(&postgresPort, "postgres-port", 5432, "Postgres port")
 	flag.StringVar(&postgresUser, "postgres-user", "timeline", "Postgres user")
 	flag.StringVar(&postgresPassword, "postgres-password", "timeline", "Postgres password")

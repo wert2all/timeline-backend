@@ -23,7 +23,9 @@ func InitContainer(config config.Config, appContext context.Context) {
 	initVoidServices(config)
 
 	initService(func() context.Context { return appContext })
-	initService(func(context context.Context) (*ent.Client, error) { return createClient(context, config.Postgres) })
+	initService(func(context context.Context) (*ent.Client, error) {
+		return createClient(context, config.Postgres)
+	})
 
 	initRepositories()
 	initModels()
