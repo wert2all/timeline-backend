@@ -2,6 +2,7 @@ package di
 
 import (
 	"net/http"
+
 	middlewares "timeline/backend/app/middleware"
 	"timeline/backend/graph"
 
@@ -9,14 +10,18 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-func newRouter(middlewares middlewares.Middlewares) *chi.Mux {
+func newRouter(middlewares middlewares.Middlewares, authMiddleware func(http.Handler) http.Handler) *chi.Mux {
 	gqlHandler := createGQLHandler()
 
 	router := chi.NewRouter()
 	router.Use(middlewares.List...)
 
 	router.Options("/graphql", gqlHandler)
-	router.Post("/graphql", gqlHandler)
+	router.Group(func(chiRouter chi.Router) {
+		chiRouter.Use(middlewares.List...)
+		chiRouter.Use(authMiddleware)
+		chiRouter.Post("/graphql", gqlHandler)
+	})
 
 	router.Get("/panic", func(w http.ResponseWriter, r *http.Request) {
 		panic("server panic")
