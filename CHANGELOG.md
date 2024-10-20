@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.2.0](https://github.com/wert2all/timeline-backend/compare/v1.1.8...v1.2.0) (2024-10-20)
+
+
+### Features
+
+* add custom logger ([4af6fdd](https://github.com/wert2all/timeline-backend/commit/4af6fdd0f7e6fdb26899ecf649cfcbde037c829b))
+* add utils D method ([b6012c4](https://github.com/wert2all/timeline-backend/commit/b6012c4260f7fa32d17dc7291aa607298ad98077))
+
+
+### Bug Fixes
+
+* change postgres port for docker compose ([009ac31](https://github.com/wert2all/timeline-backend/commit/009ac318408c905c385b429739fef7fbc45c8fa1))
+* fix container ([67428f1](https://github.com/wert2all/timeline-backend/commit/67428f11522efc14dcb5f783c1315eb91afbf658))
+* fix extract user ID from context ([e1b3903](https://github.com/wert2all/timeline-backend/commit/e1b39034ff882ec9a0d7e82dc73c09c7e4e497b4))
+* fix generated code ([cdcbeee](https://github.com/wert2all/timeline-backend/commit/cdcbeeed6033a9b1e8006579016b37a4c8f51c3e))
+* fix golang-lint action ([a0ec4e6](https://github.com/wert2all/timeline-backend/commit/a0ec4e6badc975ba06c5b3021a044cc7e0909db7))
+* fix GQL routing ([83c232c](https://github.com/wert2all/timeline-backend/commit/83c232c3e42b8dd6a71b6068ae2606d78fbddc7e))
+* fix parsing command prompt string ([b54e2cf](https://github.com/wert2all/timeline-backend/commit/b54e2cf9c03bdba2023141089521726616ffe497))
+* fix sql driver ([a3e443f](https://github.com/wert2all/timeline-backend/commit/a3e443f941458943d9cde25d664a80c3a2eb778e))
+* remove useless code ([89a6d1e](https://github.com/wert2all/timeline-backend/commit/89a6d1e2fba7d99f3fad189cd2199c1244d1989b))
+
 ## [1.1.8](https://github.com/wert2all/timeline-backend/compare/v1.1.7...v1.1.8) (2024-10-16)
 
 
