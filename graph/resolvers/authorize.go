@@ -2,6 +2,7 @@ package resolvers
 
 import (
 	"context"
+
 	appContext "timeline/backend/app/context"
 	"timeline/backend/db/model/timeline"
 	"timeline/backend/db/model/user"
