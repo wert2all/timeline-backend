@@ -20,7 +20,7 @@ type (
 	userIsNewKey struct{}
 )
 
-func NewMiddlewares(userModel user.Authorize, googleClientID string) Middlewares {
+func NewMiddlewares() Middlewares {
 	return Middlewares{
 		List: []func(http.Handler) http.Handler{
 			middleware.Logger,
@@ -35,12 +35,11 @@ func NewMiddlewares(userModel user.Authorize, googleClientID string) Middlewares
 				Debug:              true,
 			}).
 				Handler,
-			authMiddleware(userModel, googleClientID),
 		},
 	}
 }
 
-func authMiddleware(userModel user.Authorize, googleClientID string) func(http.Handler) http.Handler {
+func NewAuthMiddleware(userModel user.Authorize, googleClientID string) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 			// fmt.Printf("User ID: %d\n", context.GetUserID())

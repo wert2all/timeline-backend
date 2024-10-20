@@ -41,7 +41,7 @@ func InitContainer(config config.Config, appContext context.Context) {
 func initApplication(config config.Config) {
 	initService(func(entClient *ent.Client, userModel userModel.Authorize) app.Application {
 		return app.NewApplication(
-			newRouter(middlewares.NewMiddlewares(userModel, config.Google.ClientID)),
+			newRouter(middlewares.NewMiddlewares(), middlewares.NewAuthMiddleware(userModel, config.Google.ClientID)),
 			config.App.Listen,
 			func() {
 				entClient.Close()
