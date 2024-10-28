@@ -97,7 +97,6 @@ func (a addEventResolverImpl) Resolve(ctx context.Context, arguments ValidArgume
 }
 
 type addEventvalidatorImpl struct {
-	Timeline      timeline.UserTimeline
 	baseValidator eventValidator.BaseValidator
 }
 
@@ -123,5 +122,5 @@ func NewAddEventResolver(event event.Model, timeline timeline.UserTimeline, tag 
 }
 
 func NewAddEventValidator(timeline timeline.UserTimeline) Validator[AddEventArguments, ValidAddEventArguments] {
-	return addEventvalidatorImpl{Timeline: timeline, baseValidator: eventValidator.NewBaseValidator(timeline)}
+	return addEventvalidatorImpl{baseValidator: eventValidator.NewBaseValidator(timeline)}
 }
