@@ -121,6 +121,6 @@ func NewAddEventResolver(event event.Model, timeline timeline.UserTimeline, tag 
 	return addEventResolverImpl{event, timeline, tag}
 }
 
-func NewAddEventValidator(timeline timeline.UserTimeline) Validator[AddEventArguments, ValidAddEventArguments] {
-	return addEventvalidatorImpl{baseValidator: eventValidator.NewBaseValidator(timeline)}
+func NewAddEventValidator(baseValidator eventValidator.BaseValidator) Validator[AddEventArguments, ValidAddEventArguments] {
+	return addEventvalidatorImpl{baseValidator: baseValidator}
 }
