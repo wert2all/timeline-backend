@@ -8,6 +8,7 @@ import (
 	"timeline/backend/db/repository/event"
 	"timeline/backend/graph/model"
 	"timeline/backend/graph/resolvers"
+	eventValidator "timeline/backend/graph/resolvers/mutation/event"
 )
 
 func initOperationsResolvers() {
@@ -24,14 +25,18 @@ func initArgumentFactories() {
 }
 
 func initValidators() {
+	initService(func(timeline timelineModel.UserTimeline) eventValidator.BaseValidator {
+		return eventValidator.NewBaseValidator(timeline)
+	})
+
 	initService(func(userModel userModel.UserModel) resolvers.Validator[resolvers.AuthorizeArguments, resolvers.ValidAuthorizeArguments] {
 		return resolvers.NewAuthorizeValidator(userModel)
 	})
 	initService(func(userModel userModel.UserModel) resolvers.Validator[resolvers.AddTimelineArguments, resolvers.ValidAddTimelineArguments] {
 		return resolvers.NewAddtimelineValidator(userModel)
 	})
-	initService(func(timelineModel timelineModel.UserTimeline) resolvers.Validator[resolvers.AddEventArguments, resolvers.ValidAddEventArguments] {
-		return resolvers.NewAddEventValidator(timelineModel)
+	initService(func(baseValidator eventValidator.BaseValidator) resolvers.Validator[resolvers.AddEventArguments, resolvers.ValidAddEventArguments] {
+		return resolvers.NewAddEventValidator(baseValidator)
 	})
 	initService(func(userModel userModel.UserModel, eventModel eventModel.Model) resolvers.Validator[resolvers.DeleteEventArguments, resolvers.ValidDeleteEventArguments] {
 		return resolvers.NewDeleteEventValidator(userModel, eventModel)
