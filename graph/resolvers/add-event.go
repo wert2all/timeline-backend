@@ -4,17 +4,14 @@ import (
 	"context"
 	"net/url"
 	"time"
-	appContext "timeline/backend/app/context"
+
 	"timeline/backend/db/model/event"
 	"timeline/backend/db/model/tag"
 	"timeline/backend/db/model/timeline"
 	"timeline/backend/ent"
 	entEvent "timeline/backend/ent/event"
 	"timeline/backend/graph/model"
-	"timeline/backend/lib/utils"
-
-	"github.com/microcosm-cc/bluemonday"
-	"golang.org/x/exp/maps"
+	eventValidator "timeline/backend/graph/resolvers/mutation/event"
 )
 
 type AddEventArgumentFactory struct{}
@@ -100,57 +97,25 @@ func (a addEventResolverImpl) Resolve(ctx context.Context, arguments ValidArgume
 }
 
 type addEventvalidatorImpl struct {
-	Timeline timeline.UserTimeline
+	Timeline      timeline.UserTimeline
+	baseValidator eventValidator.BaseValidator
 }
 
 func (a addEventvalidatorImpl) Validate(ctx context.Context, arguments Arguments[AddEventArguments]) (ValidArguments[ValidAddEventArguments], error) {
-	p := bluemonday.StrictPolicy()
-	input := arguments.GetArguments().eventInput
-	timelineEntity, err := a.Timeline.GetUserTimeline(appContext.GetUserID(ctx), input.TimelineID)
+	baseEvent, err := a.baseValidator.GetBaseValidEventInput(eventValidator.GQLInput(arguments.GetArguments().eventInput), ctx)
 	if err != nil {
 		return nil, err
 	}
-	var eventType entEvent.Type
-	if input.Type == nil {
-		eventType = entEvent.Type(model.TimelineTypeDefault)
-	} else {
-		eventType = entEvent.Type(input.Type.String())
-	}
-
-	groupedTags := make(map[string]string)
-	for _, tagInput := range input.Tags {
-		groupedTags[p.Sanitize(tagInput)] = p.Sanitize(tagInput)
-	}
-	var showTime bool
-	if input.ShowTime != nil {
-		showTime = *input.ShowTime
-	} else {
-		showTime = true
-	}
-
 	return ValidAddEventArguments{
-		timeline:    timelineEntity,
-		eventType:   eventType,
-		date:        arguments.GetArguments().eventInput.Date,
-		title:       p.Sanitize(utils.DerefString(arguments.GetArguments().eventInput.Title)),
-		description: p.Sanitize(utils.DerefString(arguments.GetArguments().eventInput.Description)),
-		showTime:    showTime,
-		url:         a.getLink(arguments.GetArguments().eventInput.URL),
-		tags:        maps.Values(groupedTags),
+		timeline:    baseEvent.Timeline,
+		eventType:   baseEvent.EventType,
+		date:        baseEvent.Date,
+		title:       baseEvent.Title,
+		description: baseEvent.Description,
+		showTime:    baseEvent.ShowTime,
+		url:         baseEvent.Url,
+		tags:        baseEvent.Tags,
 	}, err
-}
-
-func (a addEventvalidatorImpl) getLink(link *string) *url.URL {
-	linkString := utils.DerefString(link)
-	if linkString != "" {
-		link, err := url.ParseRequestURI(linkString)
-		if err != nil {
-			panic(err)
-		}
-		return link
-	} else {
-		return nil
-	}
 }
 
 func NewAddEventResolver(event event.Model, timeline timeline.UserTimeline, tag tag.Model) Resolver[*model.TimelineEvent, ValidAddEventArguments] {
@@ -158,5 +123,5 @@ func NewAddEventResolver(event event.Model, timeline timeline.UserTimeline, tag 
 }
 
 func NewAddEventValidator(timeline timeline.UserTimeline) Validator[AddEventArguments, ValidAddEventArguments] {
-	return addEventvalidatorImpl{timeline}
+	return addEventvalidatorImpl{Timeline: timeline, baseValidator: eventValidator.NewBaseValidator(timeline)}
 }
