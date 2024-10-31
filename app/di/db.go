@@ -39,14 +39,15 @@ func initModels() {
 	initService(func(repository user.Repository) userModel.UserModel {
 		return userModel.NewUserModel(repository)
 	})
-	initService(func(repository event.Repository) eventModel.Model {
-		return eventModel.NewEventModel(repository)
-	})
+
 	initService(func(repository tag.Repository) tagModel.Model {
 		return tagModel.NewTagModel(repository)
 	})
 	initService(func(repository timeline.Repository) timelineModel.UserTimeline {
 		return timelineModel.NewTimelineModel(repository)
+	})
+	initService(func(repository event.Repository, timelineModel timelineModel.UserTimeline, tagModel tagModel.Model) eventModel.Model {
+		return eventModel.NewEventModel(repository, tagModel, timelineModel)
 	})
 }
 

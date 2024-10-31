@@ -2,12 +2,14 @@ package timeline
 
 import (
 	"context"
-	"entgo.io/ent/dialect/sql"
+
 	"timeline/backend/db/query"
 	"timeline/backend/ent"
 	"timeline/backend/ent/event"
 	"timeline/backend/ent/timeline"
 	"timeline/backend/ent/user"
+
+	"entgo.io/ent/dialect/sql"
 )
 
 type Repository interface {
@@ -61,7 +63,6 @@ func (t timelineRepositoryImpl) GetTimeline(timelineID int) (*ent.Timeline, erro
 
 func (t timelineRepositoryImpl) Create(name string, user *ent.User) (*ent.Timeline, error) {
 	return t.client.Timeline.Create().SetName(name).SetUser(user).Save(t.context)
-
 }
 
 func (t timelineRepositoryImpl) GetUserTimelines(user *ent.User) ([]*ent.Timeline, error) {

@@ -6,6 +6,7 @@ package graph
 
 import (
 	"context"
+
 	appContext "timeline/backend/app/context"
 	tagModel "timeline/backend/db/model/tag"
 	timelineModel "timeline/backend/db/model/timeline"
@@ -98,6 +99,33 @@ func (r *mutationResolver) AddEvent(ctx context.Context, event model.TimelineEve
 	return resolvers.Resolve(ctx, factory.New(event), validator, resolver)
 }
 
+// EditEvent is the resolver for the editEvent field.
+func (r *mutationResolver) EditEvent(ctx context.Context, event model.ExistTimelineEventInput) (*model.TimelineEvent, error) {
+	var factory resolvers.EditEventArgumentFactory
+	var validator resolvers.Validator[resolvers.EditEventArguments, resolvers.ValidEditEventArguments]
+	var resolver resolvers.Resolver[*model.TimelineEvent, resolvers.ValidEditEventArguments]
+
+	errFactoryResolve := container.Resolve(&factory)
+	if errFactoryResolve != nil {
+		utils.F("Couldnt resolve EditEvent factory: %v", errFactoryResolve)
+		return nil, errFactoryResolve
+	}
+
+	errValidatorResolve := container.Resolve(&validator)
+	if errValidatorResolve != nil {
+		utils.F("Couldnt resolve EditEvent validator: %v", errValidatorResolve)
+		return nil, errValidatorResolve
+	}
+
+	errResolverResolve := container.Resolve(&resolver)
+	if errResolverResolve != nil {
+		utils.F("Couldnt resolve EditEvent resolver: %v", errResolverResolve)
+		return nil, errResolverResolve
+	}
+
+	return resolvers.Resolve(ctx, factory.New(event), validator, resolver)
+}
+
 // DeleteEvent is the resolver for the deleteEvent field.
 func (r *mutationResolver) DeleteEvent(ctx context.Context, eventID int) (model.Status, error) {
 	var factory resolvers.DeleteEventArgumentFactory
@@ -170,5 +198,7 @@ func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 // Query returns QueryResolver implementation.
 func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
-type mutationResolver struct{ *Resolver }
-type queryResolver struct{ *Resolver }
+type (
+	mutationResolver struct{ *Resolver }
+	queryResolver    struct{ *Resolver }
+)

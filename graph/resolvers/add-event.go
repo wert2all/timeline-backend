@@ -101,7 +101,19 @@ type addEventvalidatorImpl struct {
 }
 
 func (a addEventvalidatorImpl) Validate(ctx context.Context, arguments Arguments[AddEventArguments]) (ValidArguments[ValidAddEventArguments], error) {
-	baseEvent, err := a.baseValidator.GetBaseValidEventInput(eventValidator.GQLInput(arguments.GetArguments().eventInput), ctx)
+	input := arguments.GetArguments().eventInput
+	gqlInput := eventValidator.GQLInput{
+		TimelineID:  input.TimelineID,
+		Type:        input.Type,
+		Date:        input.Date,
+		Title:       input.Title,
+		Description: input.Description,
+		ShowTime:    input.ShowTime,
+		URL:         input.URL,
+		Tags:        input.Tags,
+	}
+
+	baseEvent, err := a.baseValidator.GetBaseValidEventInput(gqlInput, ctx)
 	if err != nil {
 		return nil, err
 	}
