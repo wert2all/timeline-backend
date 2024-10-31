@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.3.0](https://github.com/wert2all/timeline-backend/compare/v1.2.0...v1.3.0) (2024-10-31)
+
+
+### Features
+
+* saving existing event ([446dc4d](https://github.com/wert2all/timeline-backend/commit/446dc4ddf7db7f49e354f111a04096260d7affa7))
+
+
+### Bug Fixes
+
+* fix DI of base validator ([f421cd1](https://github.com/wert2all/timeline-backend/commit/f421cd1b2c8d9afb2b0f26356edb73db1d500fa8))
+* fix static test ([ca69f4e](https://github.com/wert2all/timeline-backend/commit/ca69f4e3193fdadde0f51d2b68339ac1260f34ed))
+* remove usless dependencues from add event validator ([29b6a8b](https://github.com/wert2all/timeline-backend/commit/29b6a8b694d693186711b5bba7fa4149a08b28d6))
+
 ## [1.2.0](https://github.com/wert2all/timeline-backend/compare/v1.1.8...v1.2.0) (2024-10-20)
 
 
