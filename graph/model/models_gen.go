@@ -13,6 +13,18 @@ type AddTimeline struct {
 	Name *string `json:"name,omitempty"`
 }
 
+type ExistTimelineEventInput struct {
+	ID          int           `json:"id"`
+	TimelineID  int           `json:"timelineId"`
+	Date        time.Time     `json:"date"`
+	Type        *TimelineType `json:"type,omitempty"`
+	Title       *string       `json:"title,omitempty"`
+	Description *string       `json:"description,omitempty"`
+	ShowTime    *bool         `json:"showTime,omitempty"`
+	URL         *string       `json:"url,omitempty"`
+	Tags        []string      `json:"tags,omitempty"`
+}
+
 type Limit struct {
 	From *int `json:"from,omitempty"`
 	To   *int `json:"to,omitempty"`

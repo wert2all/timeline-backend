@@ -12,8 +12,8 @@ import (
 	"timeline/backend/graph/model"
 	"timeline/backend/lib/utils"
 
-	"golang.org/x/exp/maps"
 	"github.com/microcosm-cc/bluemonday"
+	"golang.org/x/exp/maps"
 )
 
 type (
@@ -21,7 +21,6 @@ type (
 		GetBaseValidEventInput(GQLInput, context.Context) (*BaseValidEventInput, error)
 	}
 	GQLInput struct {
-		ID          *int
 		TimelineID  int
 		Date        time.Time
 		Type        *model.TimelineType
@@ -33,6 +32,7 @@ type (
 	}
 
 	BaseValidEventInput struct {
+		UserID      int
 		Timeline    *ent.Timeline
 		EventType   entEvent.Type
 		Date        time.Time
@@ -53,8 +53,9 @@ func NewBaseValidator(timelineModel timeline.UserTimeline) BaseValidator {
 }
 
 func (b baseValidatorImpl) GetBaseValidEventInput(input GQLInput, ctx context.Context) (*BaseValidEventInput, error) {
+	userID := appContext.GetUserID(ctx)
 	p := bluemonday.StrictPolicy()
-	timelineEntity, err := b.timelineModel.GetUserTimeline(appContext.GetUserID(ctx), input.TimelineID)
+	timelineEntity, err := b.timelineModel.GetUserTimeline(userID, input.TimelineID)
 	if err != nil {
 		return nil, err
 	}
@@ -77,6 +78,7 @@ func (b baseValidatorImpl) GetBaseValidEventInput(input GQLInput, ctx context.Co
 	}
 
 	return &BaseValidEventInput{
+		UserID:      userID,
 		Timeline:    timelineEntity,
 		EventType:   eventType,
 		Date:        input.Date,
