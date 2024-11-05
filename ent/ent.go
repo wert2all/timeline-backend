@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"reflect"
 	"sync"
+	"timeline/backend/ent/account"
 	"timeline/backend/ent/event"
 	"timeline/backend/ent/tag"
 	"timeline/backend/ent/timeline"
@@ -76,6 +77,7 @@ var (
 func checkColumn(table, column string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
+			account.Table:  account.ValidColumn,
 			event.Table:    event.ValidColumn,
 			tag.Table:      tag.ValidColumn,
 			timeline.Table: timeline.ValidColumn,

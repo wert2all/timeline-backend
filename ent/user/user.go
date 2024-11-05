@@ -32,6 +32,8 @@ const (
 	FieldAdmin = "admin"
 	// EdgeTimeline holds the string denoting the timeline edge name in mutations.
 	EdgeTimeline = "timeline"
+	// EdgeAccount holds the string denoting the account edge name in mutations.
+	EdgeAccount = "account"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// TimelineTable is the table that holds the timeline relation/edge.
@@ -41,6 +43,13 @@ const (
 	TimelineInverseTable = "timelines"
 	// TimelineColumn is the table column denoting the timeline relation/edge.
 	TimelineColumn = "user_timeline"
+	// AccountTable is the table that holds the account relation/edge.
+	AccountTable = "accounts"
+	// AccountInverseTable is the table name for the Account entity.
+	// It exists in this package in order to avoid circular dependency with the "account" package.
+	AccountInverseTable = "accounts"
+	// AccountColumn is the table column denoting the account relation/edge.
+	AccountColumn = "user_account"
 )
 
 // Columns holds all SQL columns for user fields.
@@ -142,10 +151,31 @@ func ByTimeline(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newTimelineStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByAccountCount orders the results by account count.
+func ByAccountCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newAccountStep(), opts...)
+	}
+}
+
+// ByAccount orders the results by account terms.
+func ByAccount(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newAccountStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newTimelineStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(TimelineInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, TimelineTable, TimelineColumn),
+	)
+}
+func newAccountStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(AccountInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, AccountTable, AccountColumn),
 	)
 }

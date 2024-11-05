@@ -43,9 +43,11 @@ type User struct {
 type UserEdges struct {
 	// Timeline holds the value of the timeline edge.
 	Timeline []*Timeline `json:"timeline,omitempty"`
+	// Account holds the value of the account edge.
+	Account []*Account `json:"account,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 }
 
 // TimelineOrErr returns the Timeline value or an error if the edge
@@ -55,6 +57,15 @@ func (e UserEdges) TimelineOrErr() ([]*Timeline, error) {
 		return e.Timeline, nil
 	}
 	return nil, &NotLoadedError{edge: "timeline"}
+}
+
+// AccountOrErr returns the Account value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) AccountOrErr() ([]*Account, error) {
+	if e.loadedTypes[1] {
+		return e.Account, nil
+	}
+	return nil, &NotLoadedError{edge: "account"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -158,6 +169,11 @@ func (u *User) Value(name string) (ent.Value, error) {
 // QueryTimeline queries the "timeline" edge of the User entity.
 func (u *User) QueryTimeline() *TimelineQuery {
 	return NewUserClient(u.config).QueryTimeline(u)
+}
+
+// QueryAccount queries the "account" edge of the User entity.
+func (u *User) QueryAccount() *AccountQuery {
+	return NewUserClient(u.config).QueryAccount(u)
 }
 
 // Update returns a builder for updating this User.
