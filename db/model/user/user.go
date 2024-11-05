@@ -2,6 +2,7 @@ package user
 
 import (
 	"time"
+
 	"timeline/backend/db/repository/user"
 	"timeline/backend/ent"
 )
