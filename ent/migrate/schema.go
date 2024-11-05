@@ -8,6 +8,26 @@ import (
 )
 
 var (
+	// AccountsColumns holds the columns for the "accounts" table.
+	AccountsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "name", Type: field.TypeString},
+		{Name: "user_account", Type: field.TypeInt, Nullable: true},
+	}
+	// AccountsTable holds the schema information for the "accounts" table.
+	AccountsTable = &schema.Table{
+		Name:       "accounts",
+		Columns:    AccountsColumns,
+		PrimaryKey: []*schema.Column{AccountsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "accounts_users_account",
+				Columns:    []*schema.Column{AccountsColumns[2]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
 	// EventsColumns holds the columns for the "events" table.
 	EventsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -111,6 +131,7 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		AccountsTable,
 		EventsTable,
 		TagsTable,
 		TimelinesTable,
@@ -120,6 +141,7 @@ var (
 )
 
 func init() {
+	AccountsTable.ForeignKeys[0].RefTable = UsersTable
 	EventsTable.ForeignKeys[0].RefTable = TimelinesTable
 	TimelinesTable.ForeignKeys[0].RefTable = UsersTable
 	TagEventTable.ForeignKeys[0].RefTable = TagsTable

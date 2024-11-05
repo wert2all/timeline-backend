@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"time"
+	"timeline/backend/ent/account"
 	"timeline/backend/ent/timeline"
 	"timeline/backend/ent/user"
 
@@ -116,6 +117,21 @@ func (uc *UserCreate) AddTimeline(t ...*Timeline) *UserCreate {
 		ids[i] = t[i].ID
 	}
 	return uc.AddTimelineIDs(ids...)
+}
+
+// AddAccountIDs adds the "account" edge to the Account entity by IDs.
+func (uc *UserCreate) AddAccountIDs(ids ...int) *UserCreate {
+	uc.mutation.AddAccountIDs(ids...)
+	return uc
+}
+
+// AddAccount adds the "account" edges to the Account entity.
+func (uc *UserCreate) AddAccount(a ...*Account) *UserCreate {
+	ids := make([]int, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
+	}
+	return uc.AddAccountIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -270,6 +286,22 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(timeline.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := uc.mutation.AccountIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.AccountTable,
+			Columns: []string{user.AccountColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(account.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

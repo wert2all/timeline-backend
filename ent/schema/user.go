@@ -31,5 +31,6 @@ func (User) Fields() []ent.Field {
 func (User) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("timeline", Timeline.Type),
+		edge.To("account", Account.Type),
 	}
 }
