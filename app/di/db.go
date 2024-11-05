@@ -10,6 +10,7 @@ import (
 	tagModel "timeline/backend/db/model/tag"
 	timelineModel "timeline/backend/db/model/timeline"
 	userModel "timeline/backend/db/model/user"
+	"timeline/backend/db/repository/account"
 	"timeline/backend/db/repository/event"
 	"timeline/backend/db/repository/tag"
 	"timeline/backend/db/repository/timeline"
@@ -32,6 +33,9 @@ func initRepositories() {
 	})
 	initService(func(ctx context.Context, client *ent.Client) tag.Repository {
 		return tag.NewRepository(ctx, client)
+	})
+	initService(func(ctx context.Context, client *ent.Client) account.Repository {
+		return account.NewRepository(ctx, client)
 	})
 }
 
