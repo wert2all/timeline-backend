@@ -8,7 +8,7 @@ type Query {
 
 type Mutation {
   authorize: User
-  
+
   addTimeline(timeline: AddTimeline): ShortUserTimeline!
 
   addEvent(event: TimelineEventInput!): TimelineEvent!
@@ -21,6 +21,11 @@ type ShortUserTimeline {
   name: String
 }
 
+type Account {
+  name: String
+  avatar: String
+}
+
 type User {
   id: Int!
   name: String
@@ -28,6 +33,7 @@ type User {
   avatar: String
   isNew: Boolean!
   timelines: [ShortUserTimeline!]!
+  accounts: [Account]!
 }
 
 type TimelineEvent {

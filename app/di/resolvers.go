@@ -5,6 +5,7 @@ import (
 	tagModel "timeline/backend/db/model/tag"
 	"timeline/backend/db/model/timeline"
 	timelineModel "timeline/backend/db/model/timeline"
+	"timeline/backend/db/model/user"
 	userModel "timeline/backend/db/model/user"
 	"timeline/backend/db/repository/event"
 	"timeline/backend/graph/model"
@@ -49,8 +50,8 @@ func initValidators() {
 }
 
 func initResolvers() {
-	initService(func(timelineModel timelineModel.UserTimeline) resolvers.Resolver[*model.User, resolvers.ValidAuthorizeArguments] {
-		return resolvers.NewAutorizeResolver(timelineModel)
+	initService(func(timelineModel timelineModel.UserTimeline, userModel user.UserModel) resolvers.Resolver[*model.User, resolvers.ValidAuthorizeArguments] {
+		return resolvers.NewAutorizeResolver(timelineModel, userModel)
 	})
 	initService(func(timelineModel timelineModel.UserTimeline, userModel userModel.UserModel) resolvers.Resolver[*model.ShortUserTimeline, resolvers.ValidAddTimelineArguments] {
 		return resolvers.NewAddTimelineResolver(userModel, timelineModel)

@@ -25,11 +25,17 @@ type Authorize interface {
 type UserModel interface {
 	Authorize
 	GetUser(int) (*ent.User, error)
+	GetUserAccounts(*ent.User) ([]*ent.Account, error)
 }
 
 type userModelImp struct {
 	userRepository    user.Repository
 	accountRepository account.Repository
+}
+
+// GetUserAccounts implements UserModel.
+func (u userModelImp) GetUserAccounts(user *ent.User) ([]*ent.Account, error) {
+	return u.userRepository.GetUserAccounts(user)
 }
 
 func (u userModelImp) GetUser(userID int) (*ent.User, error) {
