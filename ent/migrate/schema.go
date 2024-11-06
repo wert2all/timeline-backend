@@ -12,6 +12,7 @@ var (
 	AccountsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "name", Type: field.TypeString},
+		{Name: "avatar", Type: field.TypeString},
 		{Name: "user_account", Type: field.TypeInt, Nullable: true},
 	}
 	// AccountsTable holds the schema information for the "accounts" table.
@@ -22,7 +23,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "accounts_users_account",
-				Columns:    []*schema.Column{AccountsColumns[2]},
+				Columns:    []*schema.Column{AccountsColumns[3]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

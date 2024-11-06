@@ -40,8 +40,8 @@ func initRepositories() {
 }
 
 func initModels() {
-	initService(func(repository user.Repository) userModel.UserModel {
-		return userModel.NewUserModel(repository)
+	initService(func(userRepository user.Repository, accountRepository account.Repository) userModel.UserModel {
+		return userModel.NewUserModel(userRepository, accountRepository)
 	})
 
 	initService(func(repository tag.Repository) tagModel.Model {

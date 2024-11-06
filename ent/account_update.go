@@ -41,6 +41,20 @@ func (au *AccountUpdate) SetNillableName(s *string) *AccountUpdate {
 	return au
 }
 
+// SetAvatar sets the "avatar" field.
+func (au *AccountUpdate) SetAvatar(s string) *AccountUpdate {
+	au.mutation.SetAvatar(s)
+	return au
+}
+
+// SetNillableAvatar sets the "avatar" field if the given value is not nil.
+func (au *AccountUpdate) SetNillableAvatar(s *string) *AccountUpdate {
+	if s != nil {
+		au.SetAvatar(*s)
+	}
+	return au
+}
+
 // Mutation returns the AccountMutation object of the builder.
 func (au *AccountUpdate) Mutation() *AccountMutation {
 	return au.mutation
@@ -85,6 +99,9 @@ func (au *AccountUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := au.mutation.Name(); ok {
 		_spec.SetField(account.FieldName, field.TypeString, value)
 	}
+	if value, ok := au.mutation.Avatar(); ok {
+		_spec.SetField(account.FieldAvatar, field.TypeString, value)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, au.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{account.Label}
@@ -115,6 +132,20 @@ func (auo *AccountUpdateOne) SetName(s string) *AccountUpdateOne {
 func (auo *AccountUpdateOne) SetNillableName(s *string) *AccountUpdateOne {
 	if s != nil {
 		auo.SetName(*s)
+	}
+	return auo
+}
+
+// SetAvatar sets the "avatar" field.
+func (auo *AccountUpdateOne) SetAvatar(s string) *AccountUpdateOne {
+	auo.mutation.SetAvatar(s)
+	return auo
+}
+
+// SetNillableAvatar sets the "avatar" field if the given value is not nil.
+func (auo *AccountUpdateOne) SetNillableAvatar(s *string) *AccountUpdateOne {
+	if s != nil {
+		auo.SetAvatar(*s)
 	}
 	return auo
 }
@@ -192,6 +223,9 @@ func (auo *AccountUpdateOne) sqlSave(ctx context.Context) (_node *Account, err e
 	}
 	if value, ok := auo.mutation.Name(); ok {
 		_spec.SetField(account.FieldName, field.TypeString, value)
+	}
+	if value, ok := auo.mutation.Avatar(); ok {
+		_spec.SetField(account.FieldAvatar, field.TypeString, value)
 	}
 	_node = &Account{config: auo.config}
 	_spec.Assign = _node.assignValues

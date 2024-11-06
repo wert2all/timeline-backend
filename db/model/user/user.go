@@ -3,6 +3,7 @@ package user
 import (
 	"time"
 
+	"timeline/backend/db/repository/account"
 	"timeline/backend/db/repository/user"
 	"timeline/backend/ent"
 )
@@ -27,21 +28,30 @@ type UserModel interface {
 }
 
 type userModelImp struct {
-	repository user.Repository
+	userRepository    user.Repository
+	accountRepository account.Repository
 }
 
 func (u userModelImp) GetUser(userID int) (*ent.User, error) {
-	return u.repository.FindByID(userID)
+	return u.userRepository.FindByID(userID)
 }
 
 func (u userModelImp) CheckOrCreate(googleUser SomeUser) (*CheckOrCreate, error) {
-	user, error := u.repository.FindByUUID(googleUser.UUID)
+	user, error := u.userRepository.FindByUUID(googleUser.UUID)
 	error, notFound := error.(*ent.NotFoundError)
 
 	if notFound {
-		createdUser, error := u.repository.Create(googleUser.UUID, googleUser.Name, googleUser.Email, googleUser.Avatar)
+		createdUser, error := u.userRepository.Create(googleUser.UUID, googleUser.Name, googleUser.Email, googleUser.Avatar)
 		if error != nil {
 			return nil, error
+		}
+		account, errorAccount := u.accountRepository.Create(createdUser.ID, googleUser.Name, googleUser.Avatar)
+		if errorAccount != nil {
+			return nil, errorAccount
+		}
+		_, errorAddAccount := u.userRepository.AddAccount(createdUser, account)
+		if errorAddAccount != nil {
+			return nil, errorAddAccount
 		}
 		return &CheckOrCreate{ID: createdUser.ID, IsNew: true}, nil
 	}
@@ -54,19 +64,20 @@ func (u userModelImp) CheckOrCreate(googleUser SomeUser) (*CheckOrCreate, error)
 }
 
 func (u userModelImp) Authorize(userID int) (*ent.User, error) {
-	fetchedUser, error := u.repository.FindByID(userID)
+	fetchedUser, error := u.userRepository.FindByID(userID)
 	if error != nil {
 		return nil, error
 	}
-	return u.repository.Save(fetchedUser.Update().SetUpdatedAt(time.Now()))
+	return u.userRepository.Save(fetchedUser.Update().SetUpdatedAt(time.Now()))
 }
 
 func NewSomeUser(uuid, name, email, avatar string) SomeUser {
 	return SomeUser{UUID: uuid, Name: name, Email: email, Avatar: avatar}
 }
 
-func NewUserModel(repository user.Repository) UserModel {
+func NewUserModel(userRepository user.Repository, accountRepository account.Repository) UserModel {
 	return userModelImp{
-		repository: repository,
+		userRepository:    userRepository,
+		accountRepository: accountRepository,
 	}
 }

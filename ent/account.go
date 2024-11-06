@@ -17,7 +17,9 @@ type Account struct {
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
 	// Name holds the value of the "name" field.
-	Name         string `json:"name,omitempty"`
+	Name string `json:"name,omitempty"`
+	// Avatar holds the value of the "avatar" field.
+	Avatar       *string `json:"avatar,omitempty"`
 	user_account *int
 	selectValues sql.SelectValues
 }
@@ -29,7 +31,7 @@ func (*Account) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case account.FieldID:
 			values[i] = new(sql.NullInt64)
-		case account.FieldName:
+		case account.FieldName, account.FieldAvatar:
 			values[i] = new(sql.NullString)
 		case account.ForeignKeys[0]: // user_account
 			values[i] = new(sql.NullInt64)
@@ -59,6 +61,13 @@ func (a *Account) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
 			} else if value.Valid {
 				a.Name = value.String
+			}
+		case account.FieldAvatar:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field avatar", values[i])
+			} else if value.Valid {
+				a.Avatar = new(string)
+				*a.Avatar = value.String
 			}
 		case account.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -105,6 +114,11 @@ func (a *Account) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v, ", a.ID))
 	builder.WriteString("name=")
 	builder.WriteString(a.Name)
+	builder.WriteString(", ")
+	if v := a.Avatar; v != nil {
+		builder.WriteString("avatar=")
+		builder.WriteString(*v)
+	}
 	builder.WriteByte(')')
 	return builder.String()
 }

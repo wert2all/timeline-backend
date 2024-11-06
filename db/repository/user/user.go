@@ -2,6 +2,7 @@ package user
 
 import (
 	"fmt"
+
 	"timeline/backend/ent"
 	"timeline/backend/ent/user"
 
@@ -12,12 +13,18 @@ type Repository interface {
 	FindByID(ID int) (*ent.User, error)
 	FindByUUID(uuid string) (*ent.User, error)
 	Create(uuid, name, email, avatar string) (*ent.User, error)
-	Save(user *ent.UserUpdateOne) (*ent.User, error)
+	Save(*ent.UserUpdateOne) (*ent.User, error)
+	AddAccount(*ent.User, *ent.Account) (*ent.User, error)
 }
 
 type userRepositoryImpl struct {
 	client  *ent.Client
 	context context.Context
+}
+
+// AddAccount implements Repository.
+func (u userRepositoryImpl) AddAccount(user *ent.User, account *ent.Account) (*ent.User, error) {
+	return user.Update().AddAccount(account).Save(u.context)
 }
 
 // Save implements  Repository.

@@ -42,6 +42,7 @@ type AccountMutation struct {
 	typ           string
 	id            *int
 	name          *string
+	avatar        *string
 	clearedFields map[string]struct{}
 	done          bool
 	oldValue      func(context.Context) (*Account, error)
@@ -182,6 +183,42 @@ func (m *AccountMutation) ResetName() {
 	m.name = nil
 }
 
+// SetAvatar sets the "avatar" field.
+func (m *AccountMutation) SetAvatar(s string) {
+	m.avatar = &s
+}
+
+// Avatar returns the value of the "avatar" field in the mutation.
+func (m *AccountMutation) Avatar() (r string, exists bool) {
+	v := m.avatar
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAvatar returns the old "avatar" field's value of the Account entity.
+// If the Account object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AccountMutation) OldAvatar(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAvatar is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAvatar requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAvatar: %w", err)
+	}
+	return oldValue.Avatar, nil
+}
+
+// ResetAvatar resets all changes to the "avatar" field.
+func (m *AccountMutation) ResetAvatar() {
+	m.avatar = nil
+}
+
 // Where appends a list predicates to the AccountMutation builder.
 func (m *AccountMutation) Where(ps ...predicate.Account) {
 	m.predicates = append(m.predicates, ps...)
@@ -216,9 +253,12 @@ func (m *AccountMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *AccountMutation) Fields() []string {
-	fields := make([]string, 0, 1)
+	fields := make([]string, 0, 2)
 	if m.name != nil {
 		fields = append(fields, account.FieldName)
+	}
+	if m.avatar != nil {
+		fields = append(fields, account.FieldAvatar)
 	}
 	return fields
 }
@@ -230,6 +270,8 @@ func (m *AccountMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case account.FieldName:
 		return m.Name()
+	case account.FieldAvatar:
+		return m.Avatar()
 	}
 	return nil, false
 }
@@ -241,6 +283,8 @@ func (m *AccountMutation) OldField(ctx context.Context, name string) (ent.Value,
 	switch name {
 	case account.FieldName:
 		return m.OldName(ctx)
+	case account.FieldAvatar:
+		return m.OldAvatar(ctx)
 	}
 	return nil, fmt.Errorf("unknown Account field %s", name)
 }
@@ -256,6 +300,13 @@ func (m *AccountMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetName(v)
+		return nil
+	case account.FieldAvatar:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAvatar(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Account field %s", name)
@@ -308,6 +359,9 @@ func (m *AccountMutation) ResetField(name string) error {
 	switch name {
 	case account.FieldName:
 		m.ResetName()
+		return nil
+	case account.FieldAvatar:
+		m.ResetAvatar()
 		return nil
 	}
 	return fmt.Errorf("unknown Account field %s", name)
