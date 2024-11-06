@@ -27,6 +27,12 @@ func (ac *AccountCreate) SetName(s string) *AccountCreate {
 	return ac
 }
 
+// SetAvatar sets the "avatar" field.
+func (ac *AccountCreate) SetAvatar(s string) *AccountCreate {
+	ac.mutation.SetAvatar(s)
+	return ac
+}
+
 // Mutation returns the AccountMutation object of the builder.
 func (ac *AccountCreate) Mutation() *AccountMutation {
 	return ac.mutation
@@ -64,6 +70,9 @@ func (ac *AccountCreate) check() error {
 	if _, ok := ac.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Account.name"`)}
 	}
+	if _, ok := ac.mutation.Avatar(); !ok {
+		return &ValidationError{Name: "avatar", err: errors.New(`ent: missing required field "Account.avatar"`)}
+	}
 	return nil
 }
 
@@ -94,6 +103,10 @@ func (ac *AccountCreate) createSpec() (*Account, *sqlgraph.CreateSpec) {
 	if value, ok := ac.mutation.Name(); ok {
 		_spec.SetField(account.FieldName, field.TypeString, value)
 		_node.Name = value
+	}
+	if value, ok := ac.mutation.Avatar(); ok {
+		_spec.SetField(account.FieldAvatar, field.TypeString, value)
+		_node.Avatar = &value
 	}
 	return _node, _spec
 }
@@ -159,6 +172,18 @@ func (u *AccountUpsert) UpdateName() *AccountUpsert {
 	return u
 }
 
+// SetAvatar sets the "avatar" field.
+func (u *AccountUpsert) SetAvatar(v string) *AccountUpsert {
+	u.Set(account.FieldAvatar, v)
+	return u
+}
+
+// UpdateAvatar sets the "avatar" field to the value that was provided on create.
+func (u *AccountUpsert) UpdateAvatar() *AccountUpsert {
+	u.SetExcluded(account.FieldAvatar)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
@@ -210,6 +235,20 @@ func (u *AccountUpsertOne) SetName(v string) *AccountUpsertOne {
 func (u *AccountUpsertOne) UpdateName() *AccountUpsertOne {
 	return u.Update(func(s *AccountUpsert) {
 		s.UpdateName()
+	})
+}
+
+// SetAvatar sets the "avatar" field.
+func (u *AccountUpsertOne) SetAvatar(v string) *AccountUpsertOne {
+	return u.Update(func(s *AccountUpsert) {
+		s.SetAvatar(v)
+	})
+}
+
+// UpdateAvatar sets the "avatar" field to the value that was provided on create.
+func (u *AccountUpsertOne) UpdateAvatar() *AccountUpsertOne {
+	return u.Update(func(s *AccountUpsert) {
+		s.UpdateAvatar()
 	})
 }
 
@@ -427,6 +466,20 @@ func (u *AccountUpsertBulk) SetName(v string) *AccountUpsertBulk {
 func (u *AccountUpsertBulk) UpdateName() *AccountUpsertBulk {
 	return u.Update(func(s *AccountUpsert) {
 		s.UpdateName()
+	})
+}
+
+// SetAvatar sets the "avatar" field.
+func (u *AccountUpsertBulk) SetAvatar(v string) *AccountUpsertBulk {
+	return u.Update(func(s *AccountUpsert) {
+		s.SetAvatar(v)
+	})
+}
+
+// UpdateAvatar sets the "avatar" field to the value that was provided on create.
+func (u *AccountUpsertBulk) UpdateAvatar() *AccountUpsertBulk {
+	return u.Update(func(s *AccountUpsert) {
+		s.UpdateAvatar()
 	})
 }
 
