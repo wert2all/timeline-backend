@@ -29,7 +29,7 @@ type Account {
 type User {
   id: Int!
   name: String
-  email: String
+  email: String!
   avatar: String
   isNew: Boolean!
   timelines: [ShortUserTimeline!]!
