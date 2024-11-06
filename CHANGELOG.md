@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.4.0](https://github.com/wert2all/timeline-backend/compare/v1.3.0...v1.4.0) (2024-11-06)
+
+
+### Features
+
+* add account ent entity ([a9db9b5](https://github.com/wert2all/timeline-backend/commit/a9db9b5a2db94f39ffcab38944ea5a61be6ecb9b))
+* add account repository ([87791d5](https://github.com/wert2all/timeline-backend/commit/87791d5d7230dedb546d11d3584374f308c0404d))
+* create account after first login ([67272fc](https://github.com/wert2all/timeline-backend/commit/67272fc679916a39122f754912a55dea6d6c6ca8))
+* expose user accounts ([2488821](https://github.com/wert2all/timeline-backend/commit/248882149d562acae618fd03c406480dcc2a9e2e))
+
 ## [1.3.0](https://github.com/wert2all/timeline-backend/compare/v1.2.0...v1.3.0) (2024-10-31)
 
 
