@@ -15,11 +15,17 @@ type Repository interface {
 	Create(uuid, name, email, avatar string) (*ent.User, error)
 	Save(*ent.UserUpdateOne) (*ent.User, error)
 	AddAccount(*ent.User, *ent.Account) (*ent.User, error)
+	GetUserAccounts(*ent.User) ([]*ent.Account, error)
 }
 
 type userRepositoryImpl struct {
 	client  *ent.Client
 	context context.Context
+}
+
+// GetUserAccounts implements Repository.
+func (u userRepositoryImpl) GetUserAccounts(user *ent.User) ([]*ent.Account, error) {
+	return user.QueryAccount().All(u.context)
 }
 
 // AddAccount implements Repository.

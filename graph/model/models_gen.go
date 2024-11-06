@@ -9,6 +9,11 @@ import (
 	"time"
 )
 
+type Account struct {
+	Name   *string `json:"name,omitempty"`
+	Avatar *string `json:"avatar,omitempty"`
+}
+
 type AddTimeline struct {
 	Name *string `json:"name,omitempty"`
 }
@@ -71,6 +76,7 @@ type User struct {
 	Avatar    *string              `json:"avatar,omitempty"`
 	IsNew     bool                 `json:"isNew"`
 	Timelines []*ShortUserTimeline `json:"timelines"`
+	Accounts  []*Account           `json:"accounts"`
 }
 
 type Status string
