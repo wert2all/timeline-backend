@@ -81,7 +81,7 @@ func (a authorizeResolverImpl) converTimelines(timelines []*ent.Timeline) []*mod
 func (a authorizeResolverImpl) convertAccounts(accounts []*ent.Account) []*model.Account {
 	gqlAccounts := make([]*model.Account, len(accounts))
 	for i, accountEntity := range accounts {
-		gqlAccounts[i] = &model.Account{Name: &accountEntity.Name, Avatar: accountEntity.Avatar}
+		gqlAccounts[i] = &model.Account{Name: &accountEntity.Name, Avatar: accountEntity.Avatar, ID: accountEntity.ID}
 	}
 	return gqlAccounts
 }
