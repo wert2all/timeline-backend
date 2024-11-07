@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.4.1](https://github.com/wert2all/timeline-backend/compare/v1.4.0...v1.4.1) (2024-11-07)
+
+
+### Bug Fixes
+
+* add id to account ([3d3bad2](https://github.com/wert2all/timeline-backend/commit/3d3bad2cdcd82d6bb8c9bb5f2ca501bdcd2e0334))
+* make user email unique and non nullable ([156be3b](https://github.com/wert2all/timeline-backend/commit/156be3bf0f1f79b7c2e115cfac926a1b273d908d))
+
 ## [1.4.0](https://github.com/wert2all/timeline-backend/compare/v1.3.0...v1.4.0) (2024-11-06)
 
 
