@@ -71,7 +71,7 @@ var (
 	TimelinesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "name", Type: field.TypeString},
-		{Name: "user_timeline", Type: field.TypeInt, Nullable: true},
+		{Name: "account_timeline", Type: field.TypeInt, Nullable: true},
 	}
 	// TimelinesTable holds the schema information for the "timelines" table.
 	TimelinesTable = &schema.Table{
@@ -80,9 +80,9 @@ var (
 		PrimaryKey: []*schema.Column{TimelinesColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "timelines_users_timeline",
+				Symbol:     "timelines_accounts_timeline",
 				Columns:    []*schema.Column{TimelinesColumns[2]},
-				RefColumns: []*schema.Column{UsersColumns[0]},
+				RefColumns: []*schema.Column{AccountsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 		},
@@ -144,7 +144,7 @@ var (
 func init() {
 	AccountsTable.ForeignKeys[0].RefTable = UsersTable
 	EventsTable.ForeignKeys[0].RefTable = TimelinesTable
-	TimelinesTable.ForeignKeys[0].RefTable = UsersTable
+	TimelinesTable.ForeignKeys[0].RefTable = AccountsTable
 	TagEventTable.ForeignKeys[0].RefTable = TagsTable
 	TagEventTable.ForeignKeys[1].RefTable = EventsTable
 }

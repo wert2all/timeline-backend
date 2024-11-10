@@ -6,10 +6,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"timeline/backend/ent/account"
 	"timeline/backend/ent/event"
 	"timeline/backend/ent/predicate"
 	"timeline/backend/ent/timeline"
-	"timeline/backend/ent/user"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -43,23 +43,23 @@ func (tu *TimelineUpdate) SetNillableName(s *string) *TimelineUpdate {
 	return tu
 }
 
-// SetUserID sets the "user" edge to the User entity by ID.
-func (tu *TimelineUpdate) SetUserID(id int) *TimelineUpdate {
-	tu.mutation.SetUserID(id)
+// SetAccountID sets the "account" edge to the Account entity by ID.
+func (tu *TimelineUpdate) SetAccountID(id int) *TimelineUpdate {
+	tu.mutation.SetAccountID(id)
 	return tu
 }
 
-// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
-func (tu *TimelineUpdate) SetNillableUserID(id *int) *TimelineUpdate {
+// SetNillableAccountID sets the "account" edge to the Account entity by ID if the given value is not nil.
+func (tu *TimelineUpdate) SetNillableAccountID(id *int) *TimelineUpdate {
 	if id != nil {
-		tu = tu.SetUserID(*id)
+		tu = tu.SetAccountID(*id)
 	}
 	return tu
 }
 
-// SetUser sets the "user" edge to the User entity.
-func (tu *TimelineUpdate) SetUser(u *User) *TimelineUpdate {
-	return tu.SetUserID(u.ID)
+// SetAccount sets the "account" edge to the Account entity.
+func (tu *TimelineUpdate) SetAccount(a *Account) *TimelineUpdate {
+	return tu.SetAccountID(a.ID)
 }
 
 // AddEventIDs adds the "event" edge to the Event entity by IDs.
@@ -82,9 +82,9 @@ func (tu *TimelineUpdate) Mutation() *TimelineMutation {
 	return tu.mutation
 }
 
-// ClearUser clears the "user" edge to the User entity.
-func (tu *TimelineUpdate) ClearUser() *TimelineUpdate {
-	tu.mutation.ClearUser()
+// ClearAccount clears the "account" edge to the Account entity.
+func (tu *TimelineUpdate) ClearAccount() *TimelineUpdate {
+	tu.mutation.ClearAccount()
 	return tu
 }
 
@@ -148,28 +148,28 @@ func (tu *TimelineUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := tu.mutation.Name(); ok {
 		_spec.SetField(timeline.FieldName, field.TypeString, value)
 	}
-	if tu.mutation.UserCleared() {
+	if tu.mutation.AccountCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   timeline.UserTable,
-			Columns: []string{timeline.UserColumn},
+			Table:   timeline.AccountTable,
+			Columns: []string{timeline.AccountColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(account.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := tu.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := tu.mutation.AccountIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   timeline.UserTable,
-			Columns: []string{timeline.UserColumn},
+			Table:   timeline.AccountTable,
+			Columns: []string{timeline.AccountColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(account.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -256,23 +256,23 @@ func (tuo *TimelineUpdateOne) SetNillableName(s *string) *TimelineUpdateOne {
 	return tuo
 }
 
-// SetUserID sets the "user" edge to the User entity by ID.
-func (tuo *TimelineUpdateOne) SetUserID(id int) *TimelineUpdateOne {
-	tuo.mutation.SetUserID(id)
+// SetAccountID sets the "account" edge to the Account entity by ID.
+func (tuo *TimelineUpdateOne) SetAccountID(id int) *TimelineUpdateOne {
+	tuo.mutation.SetAccountID(id)
 	return tuo
 }
 
-// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
-func (tuo *TimelineUpdateOne) SetNillableUserID(id *int) *TimelineUpdateOne {
+// SetNillableAccountID sets the "account" edge to the Account entity by ID if the given value is not nil.
+func (tuo *TimelineUpdateOne) SetNillableAccountID(id *int) *TimelineUpdateOne {
 	if id != nil {
-		tuo = tuo.SetUserID(*id)
+		tuo = tuo.SetAccountID(*id)
 	}
 	return tuo
 }
 
-// SetUser sets the "user" edge to the User entity.
-func (tuo *TimelineUpdateOne) SetUser(u *User) *TimelineUpdateOne {
-	return tuo.SetUserID(u.ID)
+// SetAccount sets the "account" edge to the Account entity.
+func (tuo *TimelineUpdateOne) SetAccount(a *Account) *TimelineUpdateOne {
+	return tuo.SetAccountID(a.ID)
 }
 
 // AddEventIDs adds the "event" edge to the Event entity by IDs.
@@ -295,9 +295,9 @@ func (tuo *TimelineUpdateOne) Mutation() *TimelineMutation {
 	return tuo.mutation
 }
 
-// ClearUser clears the "user" edge to the User entity.
-func (tuo *TimelineUpdateOne) ClearUser() *TimelineUpdateOne {
-	tuo.mutation.ClearUser()
+// ClearAccount clears the "account" edge to the Account entity.
+func (tuo *TimelineUpdateOne) ClearAccount() *TimelineUpdateOne {
+	tuo.mutation.ClearAccount()
 	return tuo
 }
 
@@ -391,28 +391,28 @@ func (tuo *TimelineUpdateOne) sqlSave(ctx context.Context) (_node *Timeline, err
 	if value, ok := tuo.mutation.Name(); ok {
 		_spec.SetField(timeline.FieldName, field.TypeString, value)
 	}
-	if tuo.mutation.UserCleared() {
+	if tuo.mutation.AccountCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   timeline.UserTable,
-			Columns: []string{timeline.UserColumn},
+			Table:   timeline.AccountTable,
+			Columns: []string{timeline.AccountColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(account.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := tuo.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := tuo.mutation.AccountIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   timeline.UserTable,
-			Columns: []string{timeline.UserColumn},
+			Table:   timeline.AccountTable,
+			Columns: []string{timeline.AccountColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(account.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

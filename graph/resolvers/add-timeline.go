@@ -3,42 +3,42 @@ package resolvers
 import (
 	"context"
 	"errors"
-	"github.com/microcosm-cc/bluemonday"
+
 	appContext "timeline/backend/app/context"
 	"timeline/backend/db/model/timeline"
 	"timeline/backend/db/model/user"
 	"timeline/backend/ent"
 	"timeline/backend/graph/model"
 	"timeline/backend/lib/utils"
+
+	"github.com/microcosm-cc/bluemonday"
 )
 
-type AddTimelineArgumentFactory struct{}
+type (
+	AddTimelineArgumentFactory struct{}
+	AddTimelineArguments       struct {
+		timeline *model.AddTimeline
+	}
+	ValidAddTimelineArguments struct {
+		name    string
+		account *ent.Account
+	}
+	addTimelineValidator struct {
+		UsersModel user.UserModel
+	}
+	addTimelimeMutation struct {
+		Users    user.UserModel
+		Timeline timeline.Timeline
+	}
+)
 
 func (f AddTimelineArgumentFactory) New(timeline *model.AddTimeline) Arguments[AddTimelineArguments] {
 	return AddTimelineArguments{timeline: timeline}
 }
 
-type AddTimelineArguments struct {
-	timeline *model.AddTimeline
-}
-
-type ValidAddTimelineArguments struct {
-	name string
-	User *ent.User
-}
-
-type addTimelineValidator struct {
-	UsersModel user.UserModel
-}
-
-type addTimelimeMutation struct {
-	Users    user.UserModel
-	Timeline timeline.UserTimeline
-}
-
 func (a addTimelineValidator) Validate(ctx context.Context, input Arguments[AddTimelineArguments]) (ValidArguments[ValidAddTimelineArguments], error) {
 	p := bluemonday.StrictPolicy()
-	userEntity, error := a.UsersModel.GetUser(appContext.GetUserID(ctx))
+	account, error := a.UsersModel.GetUserAccount(input.GetArguments().timeline.AccountID, appContext.GetUserID(ctx))
 	if error != nil {
 		return nil, error
 	}
@@ -48,20 +48,20 @@ func (a addTimelineValidator) Validate(ctx context.Context, input Arguments[AddT
 	} else {
 		return nil, errors.New(`missing required timeline`)
 	}
-	return ValidAddTimelineArguments{name: p.Sanitize(name), User: userEntity}, nil
+	return ValidAddTimelineArguments{name: p.Sanitize(name), account: account}, nil
 }
 func (a AddTimelineArguments) GetArguments() AddTimelineArguments           { return a }
 func (v ValidAddTimelineArguments) GetArguments() ValidAddTimelineArguments { return v }
 
 func (a addTimelimeMutation) Resolve(_ context.Context, arguments ValidArguments[ValidAddTimelineArguments]) (*model.ShortUserTimeline, error) {
-	created, error := a.Timeline.CreateTimeline(arguments.GetArguments().name, arguments.GetArguments().User)
+	created, error := a.Timeline.CreateTimeline(arguments.GetArguments().name, arguments.GetArguments().account)
 	if error != nil {
 		return nil, error
 	}
 	return &model.ShortUserTimeline{ID: created.ID, Name: &created.Name}, nil
 }
 
-func NewAddTimelineResolver(users user.UserModel, timeline timeline.UserTimeline) Resolver[*model.ShortUserTimeline, ValidAddTimelineArguments] {
+func NewAddTimelineResolver(users user.UserModel, timeline timeline.Timeline) Resolver[*model.ShortUserTimeline, ValidAddTimelineArguments] {
 	return addTimelimeMutation{Users: users, Timeline: timeline}
 }
 

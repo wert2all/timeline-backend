@@ -30,19 +30,10 @@ const (
 	FieldActive = "active"
 	// FieldAdmin holds the string denoting the admin field in the database.
 	FieldAdmin = "admin"
-	// EdgeTimeline holds the string denoting the timeline edge name in mutations.
-	EdgeTimeline = "timeline"
 	// EdgeAccount holds the string denoting the account edge name in mutations.
 	EdgeAccount = "account"
 	// Table holds the table name of the user in the database.
 	Table = "users"
-	// TimelineTable is the table that holds the timeline relation/edge.
-	TimelineTable = "timelines"
-	// TimelineInverseTable is the table name for the Timeline entity.
-	// It exists in this package in order to avoid circular dependency with the "timeline" package.
-	TimelineInverseTable = "timelines"
-	// TimelineColumn is the table column denoting the timeline relation/edge.
-	TimelineColumn = "user_timeline"
 	// AccountTable is the table that holds the account relation/edge.
 	AccountTable = "accounts"
 	// AccountInverseTable is the table name for the Account entity.
@@ -140,20 +131,6 @@ func ByAdmin(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldAdmin, opts...).ToFunc()
 }
 
-// ByTimelineCount orders the results by timeline count.
-func ByTimelineCount(opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newTimelineStep(), opts...)
-	}
-}
-
-// ByTimeline orders the results by timeline terms.
-func ByTimeline(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newTimelineStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
-
 // ByAccountCount orders the results by account count.
 func ByAccountCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -166,13 +143,6 @@ func ByAccount(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newAccountStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
-}
-func newTimelineStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(TimelineInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, TimelineTable, TimelineColumn),
-	)
 }
 func newAccountStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(

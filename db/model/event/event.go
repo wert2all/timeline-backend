@@ -23,11 +23,10 @@ type modelImpl struct {
 	eventRepository event.Repository
 
 	tagModel      tag.Model
-	timelineModel timeline.UserTimeline
+	timelineModel timeline.Timeline
 }
 
 func (m modelImpl) UpdateEvent(event *ent.Event, input *eventValidator.BaseValidEventInput) (*ent.Event, error) {
-
 	tags := make([]*ent.Tag, 0)
 	for _, tagArgument := range input.Tags {
 		tagEntity, err := m.tagModel.UpsertTag(tagArgument)
@@ -71,6 +70,6 @@ func (m modelImpl) Create(date time.Time, eventType entEvent.Type) (*ent.Event, 
 	return m.eventRepository.CreateEvent(date, eventType)
 }
 
-func NewEventModel(eventRepository event.Repository, tagModel tag.Model, timelineModel timeline.UserTimeline) Model {
+func NewEventModel(eventRepository event.Repository, tagModel tag.Model, timelineModel timeline.Timeline) Model {
 	return modelImpl{eventRepository: eventRepository, tagModel: tagModel, timelineModel: timelineModel}
 }

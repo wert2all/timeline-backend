@@ -9,7 +9,6 @@ import (
 	"math"
 	"timeline/backend/ent/account"
 	"timeline/backend/ent/predicate"
-	"timeline/backend/ent/timeline"
 	"timeline/backend/ent/user"
 
 	"entgo.io/ent"
@@ -21,12 +20,11 @@ import (
 // UserQuery is the builder for querying User entities.
 type UserQuery struct {
 	config
-	ctx          *QueryContext
-	order        []user.OrderOption
-	inters       []Interceptor
-	predicates   []predicate.User
-	withTimeline *TimelineQuery
-	withAccount  *AccountQuery
+	ctx         *QueryContext
+	order       []user.OrderOption
+	inters      []Interceptor
+	predicates  []predicate.User
+	withAccount *AccountQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -61,28 +59,6 @@ func (uq *UserQuery) Unique(unique bool) *UserQuery {
 func (uq *UserQuery) Order(o ...user.OrderOption) *UserQuery {
 	uq.order = append(uq.order, o...)
 	return uq
-}
-
-// QueryTimeline chains the current query on the "timeline" edge.
-func (uq *UserQuery) QueryTimeline() *TimelineQuery {
-	query := (&TimelineClient{config: uq.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := uq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := uq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(user.Table, user.FieldID, selector),
-			sqlgraph.To(timeline.Table, timeline.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, user.TimelineTable, user.TimelineColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
 }
 
 // QueryAccount chains the current query on the "account" edge.
@@ -294,28 +270,16 @@ func (uq *UserQuery) Clone() *UserQuery {
 		return nil
 	}
 	return &UserQuery{
-		config:       uq.config,
-		ctx:          uq.ctx.Clone(),
-		order:        append([]user.OrderOption{}, uq.order...),
-		inters:       append([]Interceptor{}, uq.inters...),
-		predicates:   append([]predicate.User{}, uq.predicates...),
-		withTimeline: uq.withTimeline.Clone(),
-		withAccount:  uq.withAccount.Clone(),
+		config:      uq.config,
+		ctx:         uq.ctx.Clone(),
+		order:       append([]user.OrderOption{}, uq.order...),
+		inters:      append([]Interceptor{}, uq.inters...),
+		predicates:  append([]predicate.User{}, uq.predicates...),
+		withAccount: uq.withAccount.Clone(),
 		// clone intermediate query.
 		sql:  uq.sql.Clone(),
 		path: uq.path,
 	}
-}
-
-// WithTimeline tells the query-builder to eager-load the nodes that are connected to
-// the "timeline" edge. The optional arguments are used to configure the query builder of the edge.
-func (uq *UserQuery) WithTimeline(opts ...func(*TimelineQuery)) *UserQuery {
-	query := (&TimelineClient{config: uq.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	uq.withTimeline = query
-	return uq
 }
 
 // WithAccount tells the query-builder to eager-load the nodes that are connected to
@@ -407,8 +371,7 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	var (
 		nodes       = []*User{}
 		_spec       = uq.querySpec()
-		loadedTypes = [2]bool{
-			uq.withTimeline != nil,
+		loadedTypes = [1]bool{
 			uq.withAccount != nil,
 		}
 	)
@@ -430,13 +393,6 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := uq.withTimeline; query != nil {
-		if err := uq.loadTimeline(ctx, query, nodes,
-			func(n *User) { n.Edges.Timeline = []*Timeline{} },
-			func(n *User, e *Timeline) { n.Edges.Timeline = append(n.Edges.Timeline, e) }); err != nil {
-			return nil, err
-		}
-	}
 	if query := uq.withAccount; query != nil {
 		if err := uq.loadAccount(ctx, query, nodes,
 			func(n *User) { n.Edges.Account = []*Account{} },
@@ -447,37 +403,6 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	return nodes, nil
 }
 
-func (uq *UserQuery) loadTimeline(ctx context.Context, query *TimelineQuery, nodes []*User, init func(*User), assign func(*User, *Timeline)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*User)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
-		}
-	}
-	query.withFKs = true
-	query.Where(predicate.Timeline(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(user.TimelineColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.user_timeline
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "user_timeline" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "user_timeline" returned %v for node %v`, *fk, n.ID)
-		}
-		assign(node, n)
-	}
-	return nil
-}
 func (uq *UserQuery) loadAccount(ctx context.Context, query *AccountQuery, nodes []*User, init func(*User), assign func(*User, *Account)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[int]*User)

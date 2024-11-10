@@ -28,7 +28,7 @@ func initArgumentFactories() {
 }
 
 func initValidators() {
-	initService(func(timeline timelineModel.UserTimeline) eventValidator.BaseValidator {
+	initService(func(timeline timelineModel.Timeline) eventValidator.BaseValidator {
 		return eventValidator.NewBaseValidator(timeline)
 	})
 
@@ -41,7 +41,7 @@ func initValidators() {
 	initService(func(baseValidator eventValidator.BaseValidator) resolvers.Validator[resolvers.AddEventArguments, resolvers.ValidAddEventArguments] {
 		return resolvers.NewAddEventValidator(baseValidator)
 	})
-	initService(func(baseValidator eventValidator.BaseValidator, eventModel eventModel.Model, timelineModel timeline.UserTimeline) resolvers.Validator[resolvers.EditEventArguments, resolvers.ValidEditEventArguments] {
+	initService(func(baseValidator eventValidator.BaseValidator, eventModel eventModel.Model, timelineModel timeline.Timeline) resolvers.Validator[resolvers.EditEventArguments, resolvers.ValidEditEventArguments] {
 		return resolvers.NewEditEventValidator(baseValidator, eventModel, timelineModel)
 	})
 	initService(func(userModel userModel.UserModel, eventModel eventModel.Model) resolvers.Validator[resolvers.DeleteEventArguments, resolvers.ValidDeleteEventArguments] {
@@ -50,13 +50,13 @@ func initValidators() {
 }
 
 func initResolvers() {
-	initService(func(timelineModel timelineModel.UserTimeline, userModel user.UserModel) resolvers.Resolver[*model.User, resolvers.ValidAuthorizeArguments] {
+	initService(func(timelineModel timelineModel.Timeline, userModel user.UserModel) resolvers.Resolver[*model.User, resolvers.ValidAuthorizeArguments] {
 		return resolvers.NewAutorizeResolver(timelineModel, userModel)
 	})
-	initService(func(timelineModel timelineModel.UserTimeline, userModel userModel.UserModel) resolvers.Resolver[*model.ShortUserTimeline, resolvers.ValidAddTimelineArguments] {
+	initService(func(timelineModel timelineModel.Timeline, userModel userModel.UserModel) resolvers.Resolver[*model.ShortUserTimeline, resolvers.ValidAddTimelineArguments] {
 		return resolvers.NewAddTimelineResolver(userModel, timelineModel)
 	})
-	initService(func(timelineModel timelineModel.UserTimeline, eventModel eventModel.Model, tagModel tagModel.Model) resolvers.Resolver[*model.TimelineEvent, resolvers.ValidAddEventArguments] {
+	initService(func(timelineModel timelineModel.Timeline, eventModel eventModel.Model, tagModel tagModel.Model) resolvers.Resolver[*model.TimelineEvent, resolvers.ValidAddEventArguments] {
 		return resolvers.NewAddEventResolver(eventModel, timelineModel, tagModel)
 	})
 	initService(func(eventModel eventModel.Model) resolvers.Resolver[*model.TimelineEvent, resolvers.ValidEditEventArguments] {

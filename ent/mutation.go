@@ -38,15 +38,20 @@ const (
 // AccountMutation represents an operation that mutates the Account nodes in the graph.
 type AccountMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *int
-	name          *string
-	avatar        *string
-	clearedFields map[string]struct{}
-	done          bool
-	oldValue      func(context.Context) (*Account, error)
-	predicates    []predicate.Account
+	op              Op
+	typ             string
+	id              *int
+	name            *string
+	avatar          *string
+	clearedFields   map[string]struct{}
+	timeline        map[int]struct{}
+	removedtimeline map[int]struct{}
+	clearedtimeline bool
+	user            *int
+	cleareduser     bool
+	done            bool
+	oldValue        func(context.Context) (*Account, error)
+	predicates      []predicate.Account
 }
 
 var _ ent.Mutation = (*AccountMutation)(nil)
@@ -219,6 +224,99 @@ func (m *AccountMutation) ResetAvatar() {
 	m.avatar = nil
 }
 
+// AddTimelineIDs adds the "timeline" edge to the Timeline entity by ids.
+func (m *AccountMutation) AddTimelineIDs(ids ...int) {
+	if m.timeline == nil {
+		m.timeline = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.timeline[ids[i]] = struct{}{}
+	}
+}
+
+// ClearTimeline clears the "timeline" edge to the Timeline entity.
+func (m *AccountMutation) ClearTimeline() {
+	m.clearedtimeline = true
+}
+
+// TimelineCleared reports if the "timeline" edge to the Timeline entity was cleared.
+func (m *AccountMutation) TimelineCleared() bool {
+	return m.clearedtimeline
+}
+
+// RemoveTimelineIDs removes the "timeline" edge to the Timeline entity by IDs.
+func (m *AccountMutation) RemoveTimelineIDs(ids ...int) {
+	if m.removedtimeline == nil {
+		m.removedtimeline = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.timeline, ids[i])
+		m.removedtimeline[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedTimeline returns the removed IDs of the "timeline" edge to the Timeline entity.
+func (m *AccountMutation) RemovedTimelineIDs() (ids []int) {
+	for id := range m.removedtimeline {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// TimelineIDs returns the "timeline" edge IDs in the mutation.
+func (m *AccountMutation) TimelineIDs() (ids []int) {
+	for id := range m.timeline {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetTimeline resets all changes to the "timeline" edge.
+func (m *AccountMutation) ResetTimeline() {
+	m.timeline = nil
+	m.clearedtimeline = false
+	m.removedtimeline = nil
+}
+
+// SetUserID sets the "user" edge to the User entity by id.
+func (m *AccountMutation) SetUserID(id int) {
+	m.user = &id
+}
+
+// ClearUser clears the "user" edge to the User entity.
+func (m *AccountMutation) ClearUser() {
+	m.cleareduser = true
+}
+
+// UserCleared reports if the "user" edge to the User entity was cleared.
+func (m *AccountMutation) UserCleared() bool {
+	return m.cleareduser
+}
+
+// UserID returns the "user" edge ID in the mutation.
+func (m *AccountMutation) UserID() (id int, exists bool) {
+	if m.user != nil {
+		return *m.user, true
+	}
+	return
+}
+
+// UserIDs returns the "user" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// UserID instead. It exists only for internal usage by the builders.
+func (m *AccountMutation) UserIDs() (ids []int) {
+	if id := m.user; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetUser resets all changes to the "user" edge.
+func (m *AccountMutation) ResetUser() {
+	m.user = nil
+	m.cleareduser = false
+}
+
 // Where appends a list predicates to the AccountMutation builder.
 func (m *AccountMutation) Where(ps ...predicate.Account) {
 	m.predicates = append(m.predicates, ps...)
@@ -369,49 +467,103 @@ func (m *AccountMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *AccountMutation) AddedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 2)
+	if m.timeline != nil {
+		edges = append(edges, account.EdgeTimeline)
+	}
+	if m.user != nil {
+		edges = append(edges, account.EdgeUser)
+	}
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
 func (m *AccountMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case account.EdgeTimeline:
+		ids := make([]ent.Value, 0, len(m.timeline))
+		for id := range m.timeline {
+			ids = append(ids, id)
+		}
+		return ids
+	case account.EdgeUser:
+		if id := m.user; id != nil {
+			return []ent.Value{*id}
+		}
+	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *AccountMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 2)
+	if m.removedtimeline != nil {
+		edges = append(edges, account.EdgeTimeline)
+	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *AccountMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case account.EdgeTimeline:
+		ids := make([]ent.Value, 0, len(m.removedtimeline))
+		for id := range m.removedtimeline {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *AccountMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 2)
+	if m.clearedtimeline {
+		edges = append(edges, account.EdgeTimeline)
+	}
+	if m.cleareduser {
+		edges = append(edges, account.EdgeUser)
+	}
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
 func (m *AccountMutation) EdgeCleared(name string) bool {
+	switch name {
+	case account.EdgeTimeline:
+		return m.clearedtimeline
+	case account.EdgeUser:
+		return m.cleareduser
+	}
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
 func (m *AccountMutation) ClearEdge(name string) error {
+	switch name {
+	case account.EdgeUser:
+		m.ClearUser()
+		return nil
+	}
 	return fmt.Errorf("unknown Account unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
 func (m *AccountMutation) ResetEdge(name string) error {
+	switch name {
+	case account.EdgeTimeline:
+		m.ResetTimeline()
+		return nil
+	case account.EdgeUser:
+		m.ResetUser()
+		return nil
+	}
 	return fmt.Errorf("unknown Account edge %s", name)
 }
 
@@ -1772,19 +1924,19 @@ func (m *TagMutation) ResetEdge(name string) error {
 // TimelineMutation represents an operation that mutates the Timeline nodes in the graph.
 type TimelineMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *int
-	name          *string
-	clearedFields map[string]struct{}
-	user          *int
-	cleareduser   bool
-	event         map[int]struct{}
-	removedevent  map[int]struct{}
-	clearedevent  bool
-	done          bool
-	oldValue      func(context.Context) (*Timeline, error)
-	predicates    []predicate.Timeline
+	op             Op
+	typ            string
+	id             *int
+	name           *string
+	clearedFields  map[string]struct{}
+	account        *int
+	clearedaccount bool
+	event          map[int]struct{}
+	removedevent   map[int]struct{}
+	clearedevent   bool
+	done           bool
+	oldValue       func(context.Context) (*Timeline, error)
+	predicates     []predicate.Timeline
 }
 
 var _ ent.Mutation = (*TimelineMutation)(nil)
@@ -1921,43 +2073,43 @@ func (m *TimelineMutation) ResetName() {
 	m.name = nil
 }
 
-// SetUserID sets the "user" edge to the User entity by id.
-func (m *TimelineMutation) SetUserID(id int) {
-	m.user = &id
+// SetAccountID sets the "account" edge to the Account entity by id.
+func (m *TimelineMutation) SetAccountID(id int) {
+	m.account = &id
 }
 
-// ClearUser clears the "user" edge to the User entity.
-func (m *TimelineMutation) ClearUser() {
-	m.cleareduser = true
+// ClearAccount clears the "account" edge to the Account entity.
+func (m *TimelineMutation) ClearAccount() {
+	m.clearedaccount = true
 }
 
-// UserCleared reports if the "user" edge to the User entity was cleared.
-func (m *TimelineMutation) UserCleared() bool {
-	return m.cleareduser
+// AccountCleared reports if the "account" edge to the Account entity was cleared.
+func (m *TimelineMutation) AccountCleared() bool {
+	return m.clearedaccount
 }
 
-// UserID returns the "user" edge ID in the mutation.
-func (m *TimelineMutation) UserID() (id int, exists bool) {
-	if m.user != nil {
-		return *m.user, true
+// AccountID returns the "account" edge ID in the mutation.
+func (m *TimelineMutation) AccountID() (id int, exists bool) {
+	if m.account != nil {
+		return *m.account, true
 	}
 	return
 }
 
-// UserIDs returns the "user" edge IDs in the mutation.
+// AccountIDs returns the "account" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// UserID instead. It exists only for internal usage by the builders.
-func (m *TimelineMutation) UserIDs() (ids []int) {
-	if id := m.user; id != nil {
+// AccountID instead. It exists only for internal usage by the builders.
+func (m *TimelineMutation) AccountIDs() (ids []int) {
+	if id := m.account; id != nil {
 		ids = append(ids, *id)
 	}
 	return
 }
 
-// ResetUser resets all changes to the "user" edge.
-func (m *TimelineMutation) ResetUser() {
-	m.user = nil
-	m.cleareduser = false
+// ResetAccount resets all changes to the "account" edge.
+func (m *TimelineMutation) ResetAccount() {
+	m.account = nil
+	m.clearedaccount = false
 }
 
 // AddEventIDs adds the "event" edge to the Event entity by ids.
@@ -2148,8 +2300,8 @@ func (m *TimelineMutation) ResetField(name string) error {
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *TimelineMutation) AddedEdges() []string {
 	edges := make([]string, 0, 2)
-	if m.user != nil {
-		edges = append(edges, timeline.EdgeUser)
+	if m.account != nil {
+		edges = append(edges, timeline.EdgeAccount)
 	}
 	if m.event != nil {
 		edges = append(edges, timeline.EdgeEvent)
@@ -2161,8 +2313,8 @@ func (m *TimelineMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *TimelineMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case timeline.EdgeUser:
-		if id := m.user; id != nil {
+	case timeline.EdgeAccount:
+		if id := m.account; id != nil {
 			return []ent.Value{*id}
 		}
 	case timeline.EdgeEvent:
@@ -2201,8 +2353,8 @@ func (m *TimelineMutation) RemovedIDs(name string) []ent.Value {
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *TimelineMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 2)
-	if m.cleareduser {
-		edges = append(edges, timeline.EdgeUser)
+	if m.clearedaccount {
+		edges = append(edges, timeline.EdgeAccount)
 	}
 	if m.clearedevent {
 		edges = append(edges, timeline.EdgeEvent)
@@ -2214,8 +2366,8 @@ func (m *TimelineMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *TimelineMutation) EdgeCleared(name string) bool {
 	switch name {
-	case timeline.EdgeUser:
-		return m.cleareduser
+	case timeline.EdgeAccount:
+		return m.clearedaccount
 	case timeline.EdgeEvent:
 		return m.clearedevent
 	}
@@ -2226,8 +2378,8 @@ func (m *TimelineMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *TimelineMutation) ClearEdge(name string) error {
 	switch name {
-	case timeline.EdgeUser:
-		m.ClearUser()
+	case timeline.EdgeAccount:
+		m.ClearAccount()
 		return nil
 	}
 	return fmt.Errorf("unknown Timeline unique edge %s", name)
@@ -2237,8 +2389,8 @@ func (m *TimelineMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *TimelineMutation) ResetEdge(name string) error {
 	switch name {
-	case timeline.EdgeUser:
-		m.ResetUser()
+	case timeline.EdgeAccount:
+		m.ResetAccount()
 		return nil
 	case timeline.EdgeEvent:
 		m.ResetEvent()
@@ -2250,27 +2402,24 @@ func (m *TimelineMutation) ResetEdge(name string) error {
 // UserMutation represents an operation that mutates the User nodes in the graph.
 type UserMutation struct {
 	config
-	op              Op
-	typ             string
-	id              *int
-	uuid            *string
-	name            *string
-	email           *string
-	avatar          *string
-	created_at      *time.Time
-	updated_at      *time.Time
-	active          *bool
-	admin           *bool
-	clearedFields   map[string]struct{}
-	timeline        map[int]struct{}
-	removedtimeline map[int]struct{}
-	clearedtimeline bool
-	account         map[int]struct{}
-	removedaccount  map[int]struct{}
-	clearedaccount  bool
-	done            bool
-	oldValue        func(context.Context) (*User, error)
-	predicates      []predicate.User
+	op             Op
+	typ            string
+	id             *int
+	uuid           *string
+	name           *string
+	email          *string
+	avatar         *string
+	created_at     *time.Time
+	updated_at     *time.Time
+	active         *bool
+	admin          *bool
+	clearedFields  map[string]struct{}
+	account        map[int]struct{}
+	removedaccount map[int]struct{}
+	clearedaccount bool
+	done           bool
+	oldValue       func(context.Context) (*User, error)
+	predicates     []predicate.User
 }
 
 var _ ent.Mutation = (*UserMutation)(nil)
@@ -2659,60 +2808,6 @@ func (m *UserMutation) ResetAdmin() {
 	m.admin = nil
 }
 
-// AddTimelineIDs adds the "timeline" edge to the Timeline entity by ids.
-func (m *UserMutation) AddTimelineIDs(ids ...int) {
-	if m.timeline == nil {
-		m.timeline = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.timeline[ids[i]] = struct{}{}
-	}
-}
-
-// ClearTimeline clears the "timeline" edge to the Timeline entity.
-func (m *UserMutation) ClearTimeline() {
-	m.clearedtimeline = true
-}
-
-// TimelineCleared reports if the "timeline" edge to the Timeline entity was cleared.
-func (m *UserMutation) TimelineCleared() bool {
-	return m.clearedtimeline
-}
-
-// RemoveTimelineIDs removes the "timeline" edge to the Timeline entity by IDs.
-func (m *UserMutation) RemoveTimelineIDs(ids ...int) {
-	if m.removedtimeline == nil {
-		m.removedtimeline = make(map[int]struct{})
-	}
-	for i := range ids {
-		delete(m.timeline, ids[i])
-		m.removedtimeline[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedTimeline returns the removed IDs of the "timeline" edge to the Timeline entity.
-func (m *UserMutation) RemovedTimelineIDs() (ids []int) {
-	for id := range m.removedtimeline {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// TimelineIDs returns the "timeline" edge IDs in the mutation.
-func (m *UserMutation) TimelineIDs() (ids []int) {
-	for id := range m.timeline {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetTimeline resets all changes to the "timeline" edge.
-func (m *UserMutation) ResetTimeline() {
-	m.timeline = nil
-	m.clearedtimeline = false
-	m.removedtimeline = nil
-}
-
 // AddAccountIDs adds the "account" edge to the Account entity by ids.
 func (m *UserMutation) AddAccountIDs(ids ...int) {
 	if m.account == nil {
@@ -3019,10 +3114,7 @@ func (m *UserMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *UserMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.timeline != nil {
-		edges = append(edges, user.EdgeTimeline)
-	}
+	edges := make([]string, 0, 1)
 	if m.account != nil {
 		edges = append(edges, user.EdgeAccount)
 	}
@@ -3033,12 +3125,6 @@ func (m *UserMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *UserMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case user.EdgeTimeline:
-		ids := make([]ent.Value, 0, len(m.timeline))
-		for id := range m.timeline {
-			ids = append(ids, id)
-		}
-		return ids
 	case user.EdgeAccount:
 		ids := make([]ent.Value, 0, len(m.account))
 		for id := range m.account {
@@ -3051,10 +3137,7 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *UserMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.removedtimeline != nil {
-		edges = append(edges, user.EdgeTimeline)
-	}
+	edges := make([]string, 0, 1)
 	if m.removedaccount != nil {
 		edges = append(edges, user.EdgeAccount)
 	}
@@ -3065,12 +3148,6 @@ func (m *UserMutation) RemovedEdges() []string {
 // the given name in this mutation.
 func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
-	case user.EdgeTimeline:
-		ids := make([]ent.Value, 0, len(m.removedtimeline))
-		for id := range m.removedtimeline {
-			ids = append(ids, id)
-		}
-		return ids
 	case user.EdgeAccount:
 		ids := make([]ent.Value, 0, len(m.removedaccount))
 		for id := range m.removedaccount {
@@ -3083,10 +3160,7 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *UserMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.clearedtimeline {
-		edges = append(edges, user.EdgeTimeline)
-	}
+	edges := make([]string, 0, 1)
 	if m.clearedaccount {
 		edges = append(edges, user.EdgeAccount)
 	}
@@ -3097,8 +3171,6 @@ func (m *UserMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *UserMutation) EdgeCleared(name string) bool {
 	switch name {
-	case user.EdgeTimeline:
-		return m.clearedtimeline
 	case user.EdgeAccount:
 		return m.clearedaccount
 	}
@@ -3117,9 +3189,6 @@ func (m *UserMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *UserMutation) ResetEdge(name string) error {
 	switch name {
-	case user.EdgeTimeline:
-		m.ResetTimeline()
-		return nil
 	case user.EdgeAccount:
 		m.ResetAccount()
 		return nil

@@ -2,7 +2,6 @@ package resolvers
 
 import (
 	"context"
-	"errors"
 
 	"timeline/backend/db/model/event"
 	"timeline/backend/db/model/timeline"
@@ -25,7 +24,7 @@ type (
 	editEventvalidatorImpl struct {
 		baseValidator eventValidator.BaseValidator
 		eventsModel   event.Model
-		timelineModel timeline.UserTimeline
+		timelineModel timeline.Timeline
 	}
 
 	editEventResolverImpl struct {
@@ -73,11 +72,6 @@ func (e editEventvalidatorImpl) Validate(ctx context.Context, arguments Argument
 		return nil, err
 	}
 
-	_, errTimeline := e.timelineModel.GetUserTimeline(baseEvent.UserID, baseEvent.Timeline.ID)
-	if errTimeline != nil {
-		return nil, errors.New("Cannot edit event that does not belong to user")
-	}
-
 	return ValidEditEventArguments{
 		id:        input.ID,
 		baseInput: baseEvent,
@@ -92,7 +86,7 @@ func (e EditEventArgumentFactory) New(input model.ExistTimelineEventInput) Argum
 // GetArguments implements Arguments.
 func (e EditEventArguments) GetArguments() EditEventArguments { return e }
 
-func NewEditEventValidator(baseValidator eventValidator.BaseValidator, eventModel event.Model, timelineModel timeline.UserTimeline) Validator[EditEventArguments, ValidEditEventArguments] {
+func NewEditEventValidator(baseValidator eventValidator.BaseValidator, eventModel event.Model, timelineModel timeline.Timeline) Validator[EditEventArguments, ValidEditEventArguments] {
 	return editEventvalidatorImpl{baseValidator: baseValidator, eventsModel: eventModel, timelineModel: timelineModel}
 }
 

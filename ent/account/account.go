@@ -4,6 +4,7 @@ package account
 
 import (
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 const (
@@ -15,8 +16,26 @@ const (
 	FieldName = "name"
 	// FieldAvatar holds the string denoting the avatar field in the database.
 	FieldAvatar = "avatar"
+	// EdgeTimeline holds the string denoting the timeline edge name in mutations.
+	EdgeTimeline = "timeline"
+	// EdgeUser holds the string denoting the user edge name in mutations.
+	EdgeUser = "user"
 	// Table holds the table name of the account in the database.
 	Table = "accounts"
+	// TimelineTable is the table that holds the timeline relation/edge.
+	TimelineTable = "timelines"
+	// TimelineInverseTable is the table name for the Timeline entity.
+	// It exists in this package in order to avoid circular dependency with the "timeline" package.
+	TimelineInverseTable = "timelines"
+	// TimelineColumn is the table column denoting the timeline relation/edge.
+	TimelineColumn = "account_timeline"
+	// UserTable is the table that holds the user relation/edge.
+	UserTable = "accounts"
+	// UserInverseTable is the table name for the User entity.
+	// It exists in this package in order to avoid circular dependency with the "user" package.
+	UserInverseTable = "users"
+	// UserColumn is the table column denoting the user relation/edge.
+	UserColumn = "user_account"
 )
 
 // Columns holds all SQL columns for account fields.
@@ -63,4 +82,39 @@ func ByName(opts ...sql.OrderTermOption) OrderOption {
 // ByAvatar orders the results by the avatar field.
 func ByAvatar(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldAvatar, opts...).ToFunc()
+}
+
+// ByTimelineCount orders the results by timeline count.
+func ByTimelineCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newTimelineStep(), opts...)
+	}
+}
+
+// ByTimeline orders the results by timeline terms.
+func ByTimeline(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newTimelineStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByUserField orders the results by user field.
+func ByUserField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newUserStep(), sql.OrderByField(field, opts...))
+	}
+}
+func newTimelineStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(TimelineInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, TimelineTable, TimelineColumn),
+	)
+}
+func newUserStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(UserInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, UserTable, UserColumn),
+	)
 }

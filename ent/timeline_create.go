@@ -6,9 +6,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"timeline/backend/ent/account"
 	"timeline/backend/ent/event"
 	"timeline/backend/ent/timeline"
-	"timeline/backend/ent/user"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -29,23 +29,23 @@ func (tc *TimelineCreate) SetName(s string) *TimelineCreate {
 	return tc
 }
 
-// SetUserID sets the "user" edge to the User entity by ID.
-func (tc *TimelineCreate) SetUserID(id int) *TimelineCreate {
-	tc.mutation.SetUserID(id)
+// SetAccountID sets the "account" edge to the Account entity by ID.
+func (tc *TimelineCreate) SetAccountID(id int) *TimelineCreate {
+	tc.mutation.SetAccountID(id)
 	return tc
 }
 
-// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
-func (tc *TimelineCreate) SetNillableUserID(id *int) *TimelineCreate {
+// SetNillableAccountID sets the "account" edge to the Account entity by ID if the given value is not nil.
+func (tc *TimelineCreate) SetNillableAccountID(id *int) *TimelineCreate {
 	if id != nil {
-		tc = tc.SetUserID(*id)
+		tc = tc.SetAccountID(*id)
 	}
 	return tc
 }
 
-// SetUser sets the "user" edge to the User entity.
-func (tc *TimelineCreate) SetUser(u *User) *TimelineCreate {
-	return tc.SetUserID(u.ID)
+// SetAccount sets the "account" edge to the Account entity.
+func (tc *TimelineCreate) SetAccount(a *Account) *TimelineCreate {
+	return tc.SetAccountID(a.ID)
 }
 
 // AddEventIDs adds the "event" edge to the Event entity by IDs.
@@ -131,21 +131,21 @@ func (tc *TimelineCreate) createSpec() (*Timeline, *sqlgraph.CreateSpec) {
 		_spec.SetField(timeline.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
-	if nodes := tc.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := tc.mutation.AccountIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   timeline.UserTable,
-			Columns: []string{timeline.UserColumn},
+			Table:   timeline.AccountTable,
+			Columns: []string{timeline.AccountColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(account.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.user_timeline = &nodes[0]
+		_node.account_timeline = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := tc.mutation.EventIDs(); len(nodes) > 0 {

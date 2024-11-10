@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"time"
 	"timeline/backend/ent/account"
-	"timeline/backend/ent/timeline"
 	"timeline/backend/ent/user"
 
 	"entgo.io/ent/dialect/sql"
@@ -102,21 +101,6 @@ func (uc *UserCreate) SetNillableAdmin(b *bool) *UserCreate {
 		uc.SetAdmin(*b)
 	}
 	return uc
-}
-
-// AddTimelineIDs adds the "timeline" edge to the Timeline entity by IDs.
-func (uc *UserCreate) AddTimelineIDs(ids ...int) *UserCreate {
-	uc.mutation.AddTimelineIDs(ids...)
-	return uc
-}
-
-// AddTimeline adds the "timeline" edges to the Timeline entity.
-func (uc *UserCreate) AddTimeline(t ...*Timeline) *UserCreate {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
-	}
-	return uc.AddTimelineIDs(ids...)
 }
 
 // AddAccountIDs adds the "account" edge to the Account entity by IDs.
@@ -281,22 +265,6 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	if value, ok := uc.mutation.Admin(); ok {
 		_spec.SetField(user.FieldAdmin, field.TypeBool, value)
 		_node.Admin = value
-	}
-	if nodes := uc.mutation.TimelineIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.TimelineTable,
-			Columns: []string{user.TimelineColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(timeline.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := uc.mutation.AccountIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

@@ -25,6 +25,7 @@ type Account {
   id: Int!
   name: String
   avatar: String
+  # timelines: [ShortTimeline!]!
 }
 
 type User {
@@ -33,7 +34,6 @@ type User {
   email: String!
   avatar: String
   isNew: Boolean!
-  timelines: [ShortUserTimeline!]!
   accounts: [Account]!
 }
 
@@ -50,6 +50,7 @@ type TimelineEvent {
 
 input AddTimeline {
   name: String
+  accountId: Int!
 }
 
 input TimelineEventInput {

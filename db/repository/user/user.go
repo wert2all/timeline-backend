@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"timeline/backend/ent"
+	"timeline/backend/ent/account"
 	"timeline/backend/ent/user"
 
 	"golang.org/x/net/context"
@@ -16,11 +17,23 @@ type Repository interface {
 	Save(*ent.UserUpdateOne) (*ent.User, error)
 	AddAccount(*ent.User, *ent.Account) (*ent.User, error)
 	GetUserAccounts(*ent.User) ([]*ent.Account, error)
+	GetUserAccount(int, int) (*ent.Account, error)
 }
 
 type userRepositoryImpl struct {
 	client  *ent.Client
 	context context.Context
+}
+
+// GetUserAccount implements Repository.
+func (u userRepositoryImpl) GetUserAccount(accountID int, userID int) (*ent.Account, error) {
+	return u.client.Account.
+		Query().
+		Where(
+			account.ID(accountID),
+			account.HasUserWith(user.ID(userID)),
+		).
+		Only(u.context)
 }
 
 // GetUserAccounts implements Repository.

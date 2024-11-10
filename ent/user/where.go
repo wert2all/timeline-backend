@@ -455,29 +455,6 @@ func AdminNEQ(v bool) predicate.User {
 	return predicate.User(sql.FieldNEQ(FieldAdmin, v))
 }
 
-// HasTimeline applies the HasEdge predicate on the "timeline" edge.
-func HasTimeline() predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, TimelineTable, TimelineColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasTimelineWith applies the HasEdge predicate on the "timeline" edge with a given conditions (other predicates).
-func HasTimelineWith(preds ...predicate.Timeline) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := newTimelineStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
 // HasAccount applies the HasEdge predicate on the "account" edge.
 func HasAccount() predicate.User {
 	return predicate.User(func(s *sql.Selector) {
