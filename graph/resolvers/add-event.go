@@ -36,7 +36,7 @@ type AddEventArguments struct {
 }
 type addEventResolverImpl struct {
 	event    event.Model
-	timeline timeline.UserTimeline
+	timeline timeline.Timeline
 	tag      tag.Model
 }
 
@@ -129,7 +129,7 @@ func (a addEventvalidatorImpl) Validate(ctx context.Context, arguments Arguments
 	}, err
 }
 
-func NewAddEventResolver(event event.Model, timeline timeline.UserTimeline, tag tag.Model) Resolver[*model.TimelineEvent, ValidAddEventArguments] {
+func NewAddEventResolver(event event.Model, timeline timeline.Timeline, tag tag.Model) Resolver[*model.TimelineEvent, ValidAddEventArguments] {
 	return addEventResolverImpl{event, timeline, tag}
 }
 

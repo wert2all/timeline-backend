@@ -14,19 +14,19 @@ const (
 	FieldID = "id"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
-	// EdgeUser holds the string denoting the user edge name in mutations.
-	EdgeUser = "user"
+	// EdgeAccount holds the string denoting the account edge name in mutations.
+	EdgeAccount = "account"
 	// EdgeEvent holds the string denoting the event edge name in mutations.
 	EdgeEvent = "event"
 	// Table holds the table name of the timeline in the database.
 	Table = "timelines"
-	// UserTable is the table that holds the user relation/edge.
-	UserTable = "timelines"
-	// UserInverseTable is the table name for the User entity.
-	// It exists in this package in order to avoid circular dependency with the "user" package.
-	UserInverseTable = "users"
-	// UserColumn is the table column denoting the user relation/edge.
-	UserColumn = "user_timeline"
+	// AccountTable is the table that holds the account relation/edge.
+	AccountTable = "timelines"
+	// AccountInverseTable is the table name for the Account entity.
+	// It exists in this package in order to avoid circular dependency with the "account" package.
+	AccountInverseTable = "accounts"
+	// AccountColumn is the table column denoting the account relation/edge.
+	AccountColumn = "account_timeline"
 	// EventTable is the table that holds the event relation/edge.
 	EventTable = "events"
 	// EventInverseTable is the table name for the Event entity.
@@ -45,7 +45,7 @@ var Columns = []string{
 // ForeignKeys holds the SQL foreign-keys that are owned by the "timelines"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
-	"user_timeline",
+	"account_timeline",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -76,10 +76,10 @@ func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
 }
 
-// ByUserField orders the results by user field.
-func ByUserField(field string, opts ...sql.OrderTermOption) OrderOption {
+// ByAccountField orders the results by account field.
+func ByAccountField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newUserStep(), sql.OrderByField(field, opts...))
+		sqlgraph.OrderByNeighborTerms(s, newAccountStep(), sql.OrderByField(field, opts...))
 	}
 }
 
@@ -96,11 +96,11 @@ func ByEvent(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newEventStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
-func newUserStep() *sqlgraph.Step {
+func newAccountStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(UserInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, UserTable, UserColumn),
+		sqlgraph.To(AccountInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, AccountTable, AccountColumn),
 	)
 }
 func newEventStep() *sqlgraph.Step {

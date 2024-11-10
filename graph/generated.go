@@ -83,13 +83,12 @@ type ComplexityRoot struct {
 	}
 
 	User struct {
-		Accounts  func(childComplexity int) int
-		Avatar    func(childComplexity int) int
-		Email     func(childComplexity int) int
-		ID        func(childComplexity int) int
-		IsNew     func(childComplexity int) int
-		Name      func(childComplexity int) int
-		Timelines func(childComplexity int) int
+		Accounts func(childComplexity int) int
+		Avatar   func(childComplexity int) int
+		Email    func(childComplexity int) int
+		ID       func(childComplexity int) int
+		IsNew    func(childComplexity int) int
+		Name     func(childComplexity int) int
 	}
 }
 
@@ -323,20 +322,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.User.Name(childComplexity), true
 
-	case "User.timelines":
-		if e.complexity.User.Timelines == nil {
-			break
-		}
-
-		return e.complexity.User.Timelines(childComplexity), true
-
 	}
 	return 0, false
 }
 
 func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
-	rc := graphql.GetOperationContext(ctx)
-	ec := executionContext{rc, e, 0, 0, make(chan graphql.DeferredResult)}
+	opCtx := graphql.GetOperationContext(ctx)
+	ec := executionContext{opCtx, e, 0, 0, make(chan graphql.DeferredResult)}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
 		ec.unmarshalInputAddTimeline,
 		ec.unmarshalInputExistTimelineEventInput,
@@ -345,7 +337,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	)
 	first := true
 
-	switch rc.Operation.Operation {
+	switch opCtx.Operation.Operation {
 	case ast.Query:
 		return func(ctx context.Context) *graphql.Response {
 			var response graphql.Response
@@ -353,7 +345,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			if first {
 				first = false
 				ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
-				data = ec._Query(ctx, rc.Operation.SelectionSet)
+				data = ec._Query(ctx, opCtx.Operation.SelectionSet)
 			} else {
 				if atomic.LoadInt32(&ec.pendingDeferred) > 0 {
 					result := <-ec.deferredResults
@@ -383,7 +375,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			}
 			first = false
 			ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
-			data := ec._Mutation(ctx, rc.Operation.SelectionSet)
+			data := ec._Mutation(ctx, opCtx.Operation.SelectionSet)
 			var buf bytes.Buffer
 			data.MarshalGQL(&buf)
 
@@ -921,8 +913,6 @@ func (ec *executionContext) fieldContext_Mutation_authorize(_ context.Context, f
 				return ec.fieldContext_User_avatar(ctx, field)
 			case "isNew":
 				return ec.fieldContext_User_isNew(ctx, field)
-			case "timelines":
-				return ec.fieldContext_User_timelines(ctx, field)
 			case "accounts":
 				return ec.fieldContext_User_accounts(ctx, field)
 			}
@@ -2030,56 +2020,6 @@ func (ec *executionContext) fieldContext_User_isNew(_ context.Context, field gra
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Boolean does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _User_timelines(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_User_timelines(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Timelines, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*model.ShortUserTimeline)
-	fc.Result = res
-	return ec.marshalNShortUserTimeline2ᚕᚖtimelineᚋbackendᚋgraphᚋmodelᚐShortUserTimelineᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_User_timelines(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "User",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_ShortUserTimeline_id(ctx, field)
-			case "name":
-				return ec.fieldContext_ShortUserTimeline_name(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type ShortUserTimeline", field.Name)
 		},
 	}
 	return fc, nil
@@ -3917,7 +3857,7 @@ func (ec *executionContext) unmarshalInputAddTimeline(ctx context.Context, obj i
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"name"}
+	fieldsInOrder := [...]string{"name", "accountId"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -3931,6 +3871,13 @@ func (ec *executionContext) unmarshalInputAddTimeline(ctx context.Context, obj i
 				return it, err
 			}
 			it.Name = data
+		case "accountId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("accountId"))
+			data, err := ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.AccountID = data
 		}
 	}
 
@@ -4467,11 +4414,6 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "timelines":
-			out.Values[i] = ec._User_timelines(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
 		case "accounts":
 			out.Values[i] = ec._User_accounts(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -4901,50 +4843,6 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 
 func (ec *executionContext) marshalNShortUserTimeline2timelineᚋbackendᚋgraphᚋmodelᚐShortUserTimeline(ctx context.Context, sel ast.SelectionSet, v model.ShortUserTimeline) graphql.Marshaler {
 	return ec._ShortUserTimeline(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNShortUserTimeline2ᚕᚖtimelineᚋbackendᚋgraphᚋmodelᚐShortUserTimelineᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.ShortUserTimeline) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNShortUserTimeline2ᚖtimelineᚋbackendᚋgraphᚋmodelᚐShortUserTimeline(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-
-	for _, e := range ret {
-		if e == graphql.Null {
-			return graphql.Null
-		}
-	}
-
-	return ret
 }
 
 func (ec *executionContext) marshalNShortUserTimeline2ᚖtimelineᚋbackendᚋgraphᚋmodelᚐShortUserTimeline(ctx context.Context, sel ast.SelectionSet, v *model.ShortUserTimeline) graphql.Marshaler {

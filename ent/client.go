@@ -346,6 +346,38 @@ func (c *AccountClient) GetX(ctx context.Context, id int) *Account {
 	return obj
 }
 
+// QueryTimeline queries the timeline edge of a Account.
+func (c *AccountClient) QueryTimeline(a *Account) *TimelineQuery {
+	query := (&TimelineClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := a.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(account.Table, account.FieldID, id),
+			sqlgraph.To(timeline.Table, timeline.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, account.TimelineTable, account.TimelineColumn),
+		)
+		fromV = sqlgraph.Neighbors(a.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryUser queries the user edge of a Account.
+func (c *AccountClient) QueryUser(a *Account) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := a.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(account.Table, account.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, account.UserTable, account.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(a.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *AccountClient) Hooks() []Hook {
 	return c.hooks.Account
@@ -793,15 +825,15 @@ func (c *TimelineClient) GetX(ctx context.Context, id int) *Timeline {
 	return obj
 }
 
-// QueryUser queries the user edge of a Timeline.
-func (c *TimelineClient) QueryUser(t *Timeline) *UserQuery {
-	query := (&UserClient{config: c.config}).Query()
+// QueryAccount queries the account edge of a Timeline.
+func (c *TimelineClient) QueryAccount(t *Timeline) *AccountQuery {
+	query := (&AccountClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := t.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(timeline.Table, timeline.FieldID, id),
-			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, timeline.UserTable, timeline.UserColumn),
+			sqlgraph.To(account.Table, account.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, timeline.AccountTable, timeline.AccountColumn),
 		)
 		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
 		return fromV, nil
@@ -956,22 +988,6 @@ func (c *UserClient) GetX(ctx context.Context, id int) *User {
 		panic(err)
 	}
 	return obj
-}
-
-// QueryTimeline queries the timeline edge of a User.
-func (c *UserClient) QueryTimeline(u *User) *TimelineQuery {
-	query := (&TimelineClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := u.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(user.Table, user.FieldID, id),
-			sqlgraph.To(timeline.Table, timeline.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, user.TimelineTable, user.TimelineColumn),
-		)
-		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
 }
 
 // QueryAccount queries the account edge of a User.

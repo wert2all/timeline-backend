@@ -32,7 +32,6 @@ type (
 	}
 
 	BaseValidEventInput struct {
-		UserID      int
 		Timeline    *ent.Timeline
 		EventType   entEvent.Type
 		Date        time.Time
@@ -44,21 +43,26 @@ type (
 	}
 
 	baseValidatorImpl struct {
-		timelineModel timeline.UserTimeline
+		timelineModel timeline.Timeline
 	}
 )
 
-func NewBaseValidator(timelineModel timeline.UserTimeline) BaseValidator {
+func NewBaseValidator(timelineModel timeline.Timeline) BaseValidator {
 	return baseValidatorImpl{timelineModel: timelineModel}
 }
 
 func (b baseValidatorImpl) GetBaseValidEventInput(input GQLInput, ctx context.Context) (*BaseValidEventInput, error) {
-	userID := appContext.GetUserID(ctx)
 	p := bluemonday.StrictPolicy()
-	timelineEntity, err := b.timelineModel.GetUserTimeline(userID, input.TimelineID)
+	timelineEntity, err := b.timelineModel.GetTimeline(input.TimelineID)
 	if err != nil {
 		return nil, err
 	}
+
+	errCheckUser := b.timelineModel.CheckUserTimeline(timelineEntity, appContext.GetUserID(ctx))
+	if errCheckUser != nil {
+		return nil, errCheckUser
+	}
+
 	var eventType entEvent.Type
 	if input.Type == nil {
 		eventType = entEvent.Type(model.TimelineTypeDefault)
@@ -78,7 +82,6 @@ func (b baseValidatorImpl) GetBaseValidEventInput(input GQLInput, ctx context.Co
 	}
 
 	return &BaseValidEventInput{
-		UserID:      userID,
 		Timeline:    timelineEntity,
 		EventType:   eventType,
 		Date:        input.Date,

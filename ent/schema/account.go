@@ -2,6 +2,7 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 )
 
@@ -20,5 +21,8 @@ func (Account) Fields() []ent.Field {
 
 // Edges of the Account.
 func (Account) Edges() []ent.Edge {
-	return nil
+	return []ent.Edge{
+		edge.To("timeline", Timeline.Type),
+		edge.From("user", User.Type).Ref("account").Unique(),
+	}
 }

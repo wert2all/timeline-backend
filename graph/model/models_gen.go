@@ -16,7 +16,8 @@ type Account struct {
 }
 
 type AddTimeline struct {
-	Name *string `json:"name,omitempty"`
+	Name      *string `json:"name,omitempty"`
+	AccountID int     `json:"accountId"`
 }
 
 type ExistTimelineEventInput struct {
@@ -71,13 +72,12 @@ type TimelineEventInput struct {
 }
 
 type User struct {
-	ID        int                  `json:"id"`
-	Name      *string              `json:"name,omitempty"`
-	Email     string               `json:"email"`
-	Avatar    *string              `json:"avatar,omitempty"`
-	IsNew     bool                 `json:"isNew"`
-	Timelines []*ShortUserTimeline `json:"timelines"`
-	Accounts  []*Account           `json:"accounts"`
+	ID       int        `json:"id"`
+	Name     *string    `json:"name,omitempty"`
+	Email    string     `json:"email"`
+	Avatar   *string    `json:"avatar,omitempty"`
+	IsNew    bool       `json:"isNew"`
+	Accounts []*Account `json:"accounts"`
 }
 
 type Status string

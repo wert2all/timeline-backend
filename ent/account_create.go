@@ -7,6 +7,8 @@ import (
 	"errors"
 	"fmt"
 	"timeline/backend/ent/account"
+	"timeline/backend/ent/timeline"
+	"timeline/backend/ent/user"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -31,6 +33,40 @@ func (ac *AccountCreate) SetName(s string) *AccountCreate {
 func (ac *AccountCreate) SetAvatar(s string) *AccountCreate {
 	ac.mutation.SetAvatar(s)
 	return ac
+}
+
+// AddTimelineIDs adds the "timeline" edge to the Timeline entity by IDs.
+func (ac *AccountCreate) AddTimelineIDs(ids ...int) *AccountCreate {
+	ac.mutation.AddTimelineIDs(ids...)
+	return ac
+}
+
+// AddTimeline adds the "timeline" edges to the Timeline entity.
+func (ac *AccountCreate) AddTimeline(t ...*Timeline) *AccountCreate {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return ac.AddTimelineIDs(ids...)
+}
+
+// SetUserID sets the "user" edge to the User entity by ID.
+func (ac *AccountCreate) SetUserID(id int) *AccountCreate {
+	ac.mutation.SetUserID(id)
+	return ac
+}
+
+// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
+func (ac *AccountCreate) SetNillableUserID(id *int) *AccountCreate {
+	if id != nil {
+		ac = ac.SetUserID(*id)
+	}
+	return ac
+}
+
+// SetUser sets the "user" edge to the User entity.
+func (ac *AccountCreate) SetUser(u *User) *AccountCreate {
+	return ac.SetUserID(u.ID)
 }
 
 // Mutation returns the AccountMutation object of the builder.
@@ -107,6 +143,39 @@ func (ac *AccountCreate) createSpec() (*Account, *sqlgraph.CreateSpec) {
 	if value, ok := ac.mutation.Avatar(); ok {
 		_spec.SetField(account.FieldAvatar, field.TypeString, value)
 		_node.Avatar = &value
+	}
+	if nodes := ac.mutation.TimelineIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   account.TimelineTable,
+			Columns: []string{account.TimelineColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(timeline.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := ac.mutation.UserIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   account.UserTable,
+			Columns: []string{account.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.user_account = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

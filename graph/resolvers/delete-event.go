@@ -3,6 +3,7 @@ package resolvers
 import (
 	"context"
 	"errors"
+
 	appContext "timeline/backend/app/context"
 	"timeline/backend/db/model/event"
 	"timeline/backend/db/model/user"
@@ -45,15 +46,12 @@ func (v validatorDeleteEventImpl) Validate(ctx context.Context, input Arguments[
 	if error != nil {
 		return nil, error
 	}
-	userEntity, error := timeline.QueryUser().Only(ctx)
-	if error != nil {
-		return nil, error
+	account, err := timeline.QueryAccount().Only(ctx)
+	if err != nil {
+		return nil, err
 	}
-	userAutorized, error := v.usersModel.GetUser(appContext.GetUserID(ctx))
-	if error != nil {
-		return nil, error
-	}
-	if userEntity.ID != userAutorized.ID {
+	_, errAccount := v.usersModel.GetUserAccount(account.ID, appContext.GetUserID(ctx))
+	if errAccount != nil {
 		return nil, errors.New("could not delete event")
 	}
 

@@ -41,28 +41,17 @@ type User struct {
 
 // UserEdges holds the relations/edges for other nodes in the graph.
 type UserEdges struct {
-	// Timeline holds the value of the timeline edge.
-	Timeline []*Timeline `json:"timeline,omitempty"`
 	// Account holds the value of the account edge.
 	Account []*Account `json:"account,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
-}
-
-// TimelineOrErr returns the Timeline value or an error if the edge
-// was not loaded in eager-loading.
-func (e UserEdges) TimelineOrErr() ([]*Timeline, error) {
-	if e.loadedTypes[0] {
-		return e.Timeline, nil
-	}
-	return nil, &NotLoadedError{edge: "timeline"}
+	loadedTypes [1]bool
 }
 
 // AccountOrErr returns the Account value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) AccountOrErr() ([]*Account, error) {
-	if e.loadedTypes[1] {
+	if e.loadedTypes[0] {
 		return e.Account, nil
 	}
 	return nil, &NotLoadedError{edge: "account"}
@@ -163,11 +152,6 @@ func (u *User) assignValues(columns []string, values []any) error {
 // This includes values selected through modifiers, order, etc.
 func (u *User) Value(name string) (ent.Value, error) {
 	return u.selectValues.Get(name)
-}
-
-// QueryTimeline queries the "timeline" edge of the User entity.
-func (u *User) QueryTimeline() *TimelineQuery {
-	return NewUserClient(u.config).QueryTimeline(u)
 }
 
 // QueryAccount queries the "account" edge of the User entity.

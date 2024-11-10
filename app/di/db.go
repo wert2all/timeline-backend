@@ -47,10 +47,10 @@ func initModels() {
 	initService(func(repository tag.Repository) tagModel.Model {
 		return tagModel.NewTagModel(repository)
 	})
-	initService(func(repository timeline.Repository) timelineModel.UserTimeline {
+	initService(func(repository timeline.Repository) timelineModel.Timeline {
 		return timelineModel.NewTimelineModel(repository)
 	})
-	initService(func(repository event.Repository, timelineModel timelineModel.UserTimeline, tagModel tagModel.Model) eventModel.Model {
+	initService(func(repository event.Repository, timelineModel timelineModel.Timeline, tagModel tagModel.Model) eventModel.Model {
 		return eventModel.NewEventModel(repository, tagModel, timelineModel)
 	})
 }
