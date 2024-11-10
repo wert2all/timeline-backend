@@ -6,8 +6,10 @@ package graph
 
 import (
 	"context"
+	appContext "timeline/backend/app/context"
 	tagModel "timeline/backend/db/model/tag"
-	timelineModel "timeline/backend/db/model/timeline"
+	"timeline/backend/db/model/timeline"
+	"timeline/backend/db/model/user"
 	"timeline/backend/graph/convert"
 	"timeline/backend/graph/model"
 	"timeline/backend/graph/resolvers"
@@ -44,10 +46,10 @@ func (r *mutationResolver) Authorize(ctx context.Context) (*model.User, error) {
 }
 
 // AddTimeline is the resolver for the addTimeline field.
-func (r *mutationResolver) AddTimeline(ctx context.Context, timeline *model.AddTimeline) (*model.ShortUserTimeline, error) {
+func (r *mutationResolver) AddTimeline(ctx context.Context, timeline *model.AddTimeline) (*model.ShortTimeline, error) {
 	var factory resolvers.AddTimelineArgumentFactory
 	var validator resolvers.Validator[resolvers.AddTimelineArguments, resolvers.ValidAddTimelineArguments]
-	var resolver resolvers.Resolver[*model.ShortUserTimeline, resolvers.ValidAddTimelineArguments]
+	var resolver resolvers.Resolver[*model.ShortTimeline, resolvers.ValidAddTimelineArguments]
 
 	errFactoryResolve := container.Resolve(&factory)
 	if errFactoryResolve != nil {
@@ -153,7 +155,7 @@ func (r *mutationResolver) DeleteEvent(ctx context.Context, eventID int) (model.
 
 // TimelineEvents is the resolver for the timelineEvents field.
 func (r *queryResolver) TimelineEvents(ctx context.Context, timelineID int, limit *model.Limit) ([]*model.TimelineEvent, error) {
-	var timelineModel timelineModel.Timeline
+	var timelineModel timeline.Timeline
 	var tagModel tagModel.Model
 
 	err := container.Resolve(&timelineModel)
@@ -188,6 +190,33 @@ func (r *queryResolver) TimelineEvents(ctx context.Context, timelineID int, limi
 	}
 
 	return convert.ToEvents(events, tags), nil
+}
+
+// MyAccountTimelines is the resolver for the myAccountTimelines field.
+func (r *queryResolver) MyAccountTimelines(ctx context.Context, accountID int) ([]*model.ShortTimeline, error) {
+	var userModel user.UserModel
+	var timelineModel timeline.Timeline
+
+	errUser := container.Resolve(&userModel)
+	if errUser != nil {
+		utils.F("Couldnt resolve model User: %v", errUser)
+		return nil, errUser
+	}
+	errTimeline := container.Resolve(&timelineModel)
+	if errTimeline != nil {
+		utils.F("Couldnt resolve model Timeline: %v", errTimeline)
+		return nil, errTimeline
+	}
+	account, err := userModel.GetUserAccount(accountID, appContext.GetUserID(ctx))
+	if err != nil {
+		return nil, err
+	}
+	timelines, errTimelines := timelineModel.GetAccountTimelines(account)
+	if errTimelines != nil {
+		return nil, errTimelines
+	}
+
+	return convert.ToShortTimelines(timelines), nil
 }
 
 // Mutation returns MutationResolver implementation.

@@ -57,7 +57,8 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		TimelineEvents func(childComplexity int, timelineID int, limit *model.Limit) int
+		MyAccountTimelines func(childComplexity int, accountID int) int
+		TimelineEvents     func(childComplexity int, timelineID int, limit *model.Limit) int
 	}
 
 	ShortAccount struct {
@@ -66,7 +67,7 @@ type ComplexityRoot struct {
 		Name   func(childComplexity int) int
 	}
 
-	ShortUserTimeline struct {
+	ShortTimeline struct {
 		ID   func(childComplexity int) int
 		Name func(childComplexity int) int
 	}
@@ -94,13 +95,14 @@ type ComplexityRoot struct {
 
 type MutationResolver interface {
 	Authorize(ctx context.Context) (*model.User, error)
-	AddTimeline(ctx context.Context, timeline *model.AddTimeline) (*model.ShortUserTimeline, error)
+	AddTimeline(ctx context.Context, timeline *model.AddTimeline) (*model.ShortTimeline, error)
 	AddEvent(ctx context.Context, event model.TimelineEventInput) (*model.TimelineEvent, error)
 	EditEvent(ctx context.Context, event model.ExistTimelineEventInput) (*model.TimelineEvent, error)
 	DeleteEvent(ctx context.Context, eventID int) (model.Status, error)
 }
 type QueryResolver interface {
 	TimelineEvents(ctx context.Context, timelineID int, limit *model.Limit) ([]*model.TimelineEvent, error)
+	MyAccountTimelines(ctx context.Context, accountID int) ([]*model.ShortTimeline, error)
 }
 
 type executableSchema struct {
@@ -177,6 +179,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.EditEvent(childComplexity, args["event"].(model.ExistTimelineEventInput)), true
 
+	case "Query.myAccountTimelines":
+		if e.complexity.Query.MyAccountTimelines == nil {
+			break
+		}
+
+		args, err := ec.field_Query_myAccountTimelines_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.MyAccountTimelines(childComplexity, args["accountId"].(int)), true
+
 	case "Query.timelineEvents":
 		if e.complexity.Query.TimelineEvents == nil {
 			break
@@ -210,19 +224,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ShortAccount.Name(childComplexity), true
 
-	case "ShortUserTimeline.id":
-		if e.complexity.ShortUserTimeline.ID == nil {
+	case "ShortTimeline.id":
+		if e.complexity.ShortTimeline.ID == nil {
 			break
 		}
 
-		return e.complexity.ShortUserTimeline.ID(childComplexity), true
+		return e.complexity.ShortTimeline.ID(childComplexity), true
 
-	case "ShortUserTimeline.name":
-		if e.complexity.ShortUserTimeline.Name == nil {
+	case "ShortTimeline.name":
+		if e.complexity.ShortTimeline.Name == nil {
 			break
 		}
 
-		return e.complexity.ShortUserTimeline.Name(childComplexity), true
+		return e.complexity.ShortTimeline.Name(childComplexity), true
 
 	case "TimelineEvent.date":
 		if e.complexity.TimelineEvent.Date == nil {
@@ -610,6 +624,38 @@ func (ec *executionContext) field_Query___type_argsName(
 	return zeroVal, nil
 }
 
+func (ec *executionContext) field_Query_myAccountTimelines_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Query_myAccountTimelines_argsAccountID(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["accountId"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Query_myAccountTimelines_argsAccountID(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (int, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["accountId"]
+	if !ok {
+		var zeroVal int
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("accountId"))
+	if tmp, ok := rawArgs["accountId"]; ok {
+		return ec.unmarshalNInt2int(ctx, tmp)
+	}
+
+	var zeroVal int
+	return zeroVal, nil
+}
+
 func (ec *executionContext) field_Query_timelineEvents_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -822,9 +868,9 @@ func (ec *executionContext) _Mutation_addTimeline(ctx context.Context, field gra
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.ShortUserTimeline)
+	res := resTmp.(*model.ShortTimeline)
 	fc.Result = res
-	return ec.marshalNShortUserTimeline2ᚖtimelineᚋbackendᚋgraphᚋmodelᚐShortUserTimeline(ctx, field.Selections, res)
+	return ec.marshalNShortTimeline2ᚖtimelineᚋbackendᚋgraphᚋmodelᚐShortTimeline(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_addTimeline(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -836,11 +882,11 @@ func (ec *executionContext) fieldContext_Mutation_addTimeline(ctx context.Contex
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "id":
-				return ec.fieldContext_ShortUserTimeline_id(ctx, field)
+				return ec.fieldContext_ShortTimeline_id(ctx, field)
 			case "name":
-				return ec.fieldContext_ShortUserTimeline_name(ctx, field)
+				return ec.fieldContext_ShortTimeline_name(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type ShortUserTimeline", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type ShortTimeline", field.Name)
 		},
 	}
 	defer func() {
@@ -1131,6 +1177,67 @@ func (ec *executionContext) fieldContext_Query_timelineEvents(ctx context.Contex
 	return fc, nil
 }
 
+func (ec *executionContext) _Query_myAccountTimelines(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_myAccountTimelines(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().MyAccountTimelines(rctx, fc.Args["accountId"].(int))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.ShortTimeline)
+	fc.Result = res
+	return ec.marshalNShortTimeline2ᚕᚖtimelineᚋbackendᚋgraphᚋmodelᚐShortTimelineᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_myAccountTimelines(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_ShortTimeline_id(ctx, field)
+			case "name":
+				return ec.fieldContext_ShortTimeline_name(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ShortTimeline", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_myAccountTimelines_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Query___type(ctx, field)
 	if err != nil {
@@ -1386,8 +1493,8 @@ func (ec *executionContext) fieldContext_ShortAccount_avatar(_ context.Context, 
 	return fc, nil
 }
 
-func (ec *executionContext) _ShortUserTimeline_id(ctx context.Context, field graphql.CollectedField, obj *model.ShortUserTimeline) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_ShortUserTimeline_id(ctx, field)
+func (ec *executionContext) _ShortTimeline_id(ctx context.Context, field graphql.CollectedField, obj *model.ShortTimeline) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ShortTimeline_id(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1417,9 +1524,9 @@ func (ec *executionContext) _ShortUserTimeline_id(ctx context.Context, field gra
 	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_ShortUserTimeline_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_ShortTimeline_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "ShortUserTimeline",
+		Object:     "ShortTimeline",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -1430,8 +1537,8 @@ func (ec *executionContext) fieldContext_ShortUserTimeline_id(_ context.Context,
 	return fc, nil
 }
 
-func (ec *executionContext) _ShortUserTimeline_name(ctx context.Context, field graphql.CollectedField, obj *model.ShortUserTimeline) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_ShortUserTimeline_name(ctx, field)
+func (ec *executionContext) _ShortTimeline_name(ctx context.Context, field graphql.CollectedField, obj *model.ShortTimeline) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ShortTimeline_name(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1458,9 +1565,9 @@ func (ec *executionContext) _ShortUserTimeline_name(ctx context.Context, field g
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_ShortUserTimeline_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_ShortTimeline_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "ShortUserTimeline",
+		Object:     "ShortTimeline",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -4207,6 +4314,28 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "myAccountTimelines":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_myAccountTimelines(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "__type":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Query___type(ctx, field)
@@ -4281,24 +4410,24 @@ func (ec *executionContext) _ShortAccount(ctx context.Context, sel ast.Selection
 	return out
 }
 
-var shortUserTimelineImplementors = []string{"ShortUserTimeline"}
+var shortTimelineImplementors = []string{"ShortTimeline"}
 
-func (ec *executionContext) _ShortUserTimeline(ctx context.Context, sel ast.SelectionSet, obj *model.ShortUserTimeline) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, shortUserTimelineImplementors)
+func (ec *executionContext) _ShortTimeline(ctx context.Context, sel ast.SelectionSet, obj *model.ShortTimeline) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, shortTimelineImplementors)
 
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("ShortUserTimeline")
+			out.Values[i] = graphql.MarshalString("ShortTimeline")
 		case "id":
-			out.Values[i] = ec._ShortUserTimeline_id(ctx, field, obj)
+			out.Values[i] = ec._ShortTimeline_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
 		case "name":
-			out.Values[i] = ec._ShortUserTimeline_name(ctx, field, obj)
+			out.Values[i] = ec._ShortTimeline_name(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -4841,18 +4970,62 @@ func (ec *executionContext) marshalNShortAccount2ᚕᚖtimelineᚋbackendᚋgrap
 	return ret
 }
 
-func (ec *executionContext) marshalNShortUserTimeline2timelineᚋbackendᚋgraphᚋmodelᚐShortUserTimeline(ctx context.Context, sel ast.SelectionSet, v model.ShortUserTimeline) graphql.Marshaler {
-	return ec._ShortUserTimeline(ctx, sel, &v)
+func (ec *executionContext) marshalNShortTimeline2timelineᚋbackendᚋgraphᚋmodelᚐShortTimeline(ctx context.Context, sel ast.SelectionSet, v model.ShortTimeline) graphql.Marshaler {
+	return ec._ShortTimeline(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNShortUserTimeline2ᚖtimelineᚋbackendᚋgraphᚋmodelᚐShortUserTimeline(ctx context.Context, sel ast.SelectionSet, v *model.ShortUserTimeline) graphql.Marshaler {
+func (ec *executionContext) marshalNShortTimeline2ᚕᚖtimelineᚋbackendᚋgraphᚋmodelᚐShortTimelineᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.ShortTimeline) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNShortTimeline2ᚖtimelineᚋbackendᚋgraphᚋmodelᚐShortTimeline(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNShortTimeline2ᚖtimelineᚋbackendᚋgraphᚋmodelᚐShortTimeline(ctx context.Context, sel ast.SelectionSet, v *model.ShortTimeline) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
-	return ec._ShortUserTimeline(ctx, sel, v)
+	return ec._ShortTimeline(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNStatus2timelineᚋbackendᚋgraphᚋmodelᚐStatus(ctx context.Context, v interface{}) (model.Status, error) {

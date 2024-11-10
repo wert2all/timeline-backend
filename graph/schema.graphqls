@@ -4,19 +4,20 @@
 
 type Query {
   timelineEvents(timelineId: Int!, limit: Limit): [TimelineEvent!]!
+  myAccountTimelines(accountId: Int!): [ShortTimeline!]!
 }
 
 type Mutation {
   authorize: User
 
-  addTimeline(timeline: AddTimeline): ShortUserTimeline!
+  addTimeline(timeline: AddTimeline): ShortTimeline!
 
   addEvent(event: TimelineEventInput!): TimelineEvent!
   editEvent(event: ExistTimelineEventInput!): TimelineEvent!
   deleteEvent(eventId: Int!): Status!
 }
 
-type ShortUserTimeline {
+type ShortTimeline {
   id: Int!
   name: String
 }
@@ -25,7 +26,6 @@ type ShortAccount {
   id: Int!
   name: String
   avatar: String
-  # timelines: [ShortTimeline!]!
 }
 
 type User {

@@ -43,7 +43,7 @@ type ShortAccount struct {
 	Avatar *string `json:"avatar,omitempty"`
 }
 
-type ShortUserTimeline struct {
+type ShortTimeline struct {
 	ID   int     `json:"id"`
 	Name *string `json:"name,omitempty"`
 }
