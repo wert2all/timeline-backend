@@ -21,7 +21,7 @@ type ShortUserTimeline {
   name: String
 }
 
-type Account {
+type ShortAccount {
   id: Int!
   name: String
   avatar: String
@@ -34,7 +34,7 @@ type User {
   email: String!
   avatar: String
   isNew: Boolean!
-  accounts: [Account]!
+  accounts: [ShortAccount]!
 }
 
 type TimelineEvent {
