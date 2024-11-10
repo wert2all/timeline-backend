@@ -73,10 +73,10 @@ func NewAuthorizeValidator(userModel user.UserModel) Validator[AuthorizeArgument
 // 	return gqlTimelines
 // }
 
-func (a authorizeResolverImpl) convertAccounts(accounts []*ent.Account) []*model.Account {
-	gqlAccounts := make([]*model.Account, len(accounts))
+func (a authorizeResolverImpl) convertAccounts(accounts []*ent.Account) []*model.ShortAccount {
+	gqlAccounts := make([]*model.ShortAccount, len(accounts))
 	for i, accountEntity := range accounts {
-		gqlAccounts[i] = &model.Account{Name: &accountEntity.Name, Avatar: accountEntity.Avatar, ID: accountEntity.ID}
+		gqlAccounts[i] = &model.ShortAccount{Name: &accountEntity.Name, Avatar: accountEntity.Avatar, ID: accountEntity.ID}
 	}
 	return gqlAccounts
 }

@@ -9,12 +9,6 @@ import (
 	"time"
 )
 
-type Account struct {
-	ID     int     `json:"id"`
-	Name   *string `json:"name,omitempty"`
-	Avatar *string `json:"avatar,omitempty"`
-}
-
 type AddTimeline struct {
 	Name      *string `json:"name,omitempty"`
 	AccountID int     `json:"accountId"`
@@ -41,6 +35,12 @@ type Mutation struct {
 }
 
 type Query struct {
+}
+
+type ShortAccount struct {
+	ID     int     `json:"id"`
+	Name   *string `json:"name,omitempty"`
+	Avatar *string `json:"avatar,omitempty"`
 }
 
 type ShortUserTimeline struct {
@@ -72,12 +72,12 @@ type TimelineEventInput struct {
 }
 
 type User struct {
-	ID       int        `json:"id"`
-	Name     *string    `json:"name,omitempty"`
-	Email    string     `json:"email"`
-	Avatar   *string    `json:"avatar,omitempty"`
-	IsNew    bool       `json:"isNew"`
-	Accounts []*Account `json:"accounts"`
+	ID       int             `json:"id"`
+	Name     *string         `json:"name,omitempty"`
+	Email    string          `json:"email"`
+	Avatar   *string         `json:"avatar,omitempty"`
+	IsNew    bool            `json:"isNew"`
+	Accounts []*ShortAccount `json:"accounts"`
 }
 
 type Status string
