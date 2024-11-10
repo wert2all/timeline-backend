@@ -33,3 +33,14 @@ func ToLimit(limit *model.Limit) query.Limit {
 	}
 	return query.NewLimit(0, 100)
 }
+
+func ToShortTimelines(timelines []*ent.Timeline) []*model.ShortTimeline {
+	converted := make([]*model.ShortTimeline, len(timelines))
+	for i, timeline := range timelines {
+		converted[i] = &model.ShortTimeline{
+			ID:   timeline.ID,
+			Name: &timeline.Name,
+		}
+	}
+	return converted
+}
