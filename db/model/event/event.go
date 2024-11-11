@@ -40,7 +40,8 @@ func (m modelImpl) UpdateEvent(event *ent.Event, input *eventValidator.BaseValid
 		SetTitle(input.Title).
 		SetDescription(input.Description).
 		SetShowTime(input.ShowTime).
-		AddTags(tags...)
+		AddTags(tags...).
+		ClearTimeline()
 
 	if input.Url != nil {
 		shouldUpdateEntity = shouldUpdateEntity.SetURL(input.Url.String())

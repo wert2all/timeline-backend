@@ -30,7 +30,7 @@ func (t timelineModelImpl) GetEvents(timeline *ent.Timeline, limit query.Limit) 
 }
 
 func (t timelineModelImpl) AttachEvent(timeline *ent.Timeline, event *ent.Event) (*ent.Timeline, error) {
-	return t.repository.Save(timeline.Update().ClearEvent().AddEvent(event))
+	return t.repository.Save(timeline.Update().AddEvent(event))
 }
 
 func (t timelineModelImpl) GetTimeline(timelineID int) (*ent.Timeline, error) {
@@ -45,6 +45,6 @@ func (t timelineModelImpl) GetAccountTimelines(user *ent.Account) ([]*ent.Timeli
 	return t.repository.GetAccountTimelines(user)
 }
 
-func NewTimelineModel(repository timeline.Repository) Timeline {
-	return timelineModelImpl{repository: repository}
+func NewTimelineModel(timelineRepository timeline.Repository) Timeline {
+	return timelineModelImpl{repository: timelineRepository}
 }
