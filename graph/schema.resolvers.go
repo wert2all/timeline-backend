@@ -9,10 +9,10 @@ import (
 	appContext "timeline/backend/app/context"
 	tagModel "timeline/backend/db/model/tag"
 	"timeline/backend/db/model/timeline"
-	"timeline/backend/db/model/user"
 	"timeline/backend/graph/convert"
 	"timeline/backend/graph/model"
 	"timeline/backend/graph/resolvers"
+	myAccountTimelines "timeline/backend/graph/resolvers/query/timeline"
 	"timeline/backend/lib/utils"
 
 	container "github.com/golobby/container/v3"
@@ -194,29 +194,15 @@ func (r *queryResolver) TimelineEvents(ctx context.Context, timelineID int, limi
 
 // MyAccountTimelines is the resolver for the myAccountTimelines field.
 func (r *queryResolver) MyAccountTimelines(ctx context.Context, accountID int) ([]*model.ShortTimeline, error) {
-	var userModel user.UserModel
-	var timelineModel timeline.Timeline
+	var resolver myAccountTimelines.Resolver
 
-	errUser := container.Resolve(&userModel)
-	if errUser != nil {
-		utils.F("Couldnt resolve model User: %v", errUser)
-		return nil, errUser
-	}
-	errTimeline := container.Resolve(&timelineModel)
-	if errTimeline != nil {
-		utils.F("Couldnt resolve model Timeline: %v", errTimeline)
-		return nil, errTimeline
-	}
-	account, err := userModel.GetUserAccount(accountID, appContext.GetUserID(ctx))
-	if err != nil {
-		return nil, err
-	}
-	timelines, errTimelines := timelineModel.GetAccountTimelines(account)
-	if errTimelines != nil {
-		return nil, errTimelines
+	errResolverResolve := container.Resolve(&resolver)
+	if errResolverResolve != nil {
+		utils.F("Couldnt resolve MyAccountTimelines resolver: %v", errResolverResolve)
+		return nil, errResolverResolve
 	}
 
-	return convert.ToShortTimelines(timelines), nil
+	return resolver.Resolve(ctx, accountID, appContext.GetUserID(ctx))
 }
 
 // Mutation returns MutationResolver implementation.
