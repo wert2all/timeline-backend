@@ -11,6 +11,7 @@ import (
 	"timeline/backend/graph/model"
 	"timeline/backend/graph/resolvers"
 	eventValidator "timeline/backend/graph/resolvers/mutation/event"
+	myAccountTimelines "timeline/backend/graph/resolvers/query/timeline"
 )
 
 func initOperationsResolvers() {
@@ -64,5 +65,9 @@ func initResolvers() {
 	})
 	initService(func(eventRepository event.Repository) resolvers.Resolver[model.Status, resolvers.ValidDeleteEventArguments] {
 		return resolvers.NewDeleteEventResolver(eventRepository)
+	})
+
+	initService(func(timelineModel timelineModel.Timeline, userModel user.UserModel) myAccountTimelines.Resolver {
+		return myAccountTimelines.NewMyAccountTimelinesResolver(timelineModel, userModel)
 	})
 }
