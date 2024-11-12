@@ -7,6 +7,7 @@ import (
 
 	"timeline/backend/app/config"
 	eventModel "timeline/backend/db/model/event"
+	settingsModel "timeline/backend/db/model/settings"
 	tagModel "timeline/backend/db/model/tag"
 	timelineModel "timeline/backend/db/model/timeline"
 	userModel "timeline/backend/db/model/user"
@@ -47,7 +48,6 @@ func initModels() {
 	initService(func(userRepository user.Repository, accountRepository account.Repository) userModel.UserModel {
 		return userModel.NewUserModel(userRepository, accountRepository)
 	})
-
 	initService(func(repository tag.Repository) tagModel.Model {
 		return tagModel.NewTagModel(repository)
 	})
@@ -56,6 +56,9 @@ func initModels() {
 	})
 	initService(func(repository event.Repository, timelineModel timelineModel.Timeline, tagModel tagModel.Model) eventModel.Model {
 		return eventModel.NewEventModel(repository, tagModel, timelineModel)
+	})
+	initService(func(repository settings.Repository) settingsModel.Model {
+		return settingsModel.NewModel(repository)
 	})
 }
 
