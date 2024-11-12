@@ -66,8 +66,8 @@ func NewAuthMiddleware(userModel user.Authorize, googleClientID string) func(htt
 				http.Error(w, "Blocked", http.StatusForbidden)
 				return
 			}
-
-			req = req.WithContext(appContext.SetUserID(req.Context(), userCheck.ID, userCheck.IsNew))
+			contextWithdata := appContext.SetUserID(req.Context(), userCheck.ID, userCheck.IsNew, token)
+			req = req.WithContext(contextWithdata)
 			next.ServeHTTP(w, req)
 		})
 	}

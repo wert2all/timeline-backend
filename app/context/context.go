@@ -7,11 +7,15 @@ import (
 type (
 	userKey      struct{}
 	userIsNewKey struct{}
+	tokenKey     struct{}
 )
 
-func SetUserID(ctx context.Context, id int, isNew bool) context.Context {
-	newCtx := context.WithValue(ctx, userIsNewKey{}, isNew)
-	return context.WithValue(newCtx, userKey{}, id)
+func SetUserID(ctx context.Context, id int, isNew bool, token string) context.Context {
+	ctxWithIsNew := context.WithValue(ctx, userIsNewKey{}, isNew)
+	ctxWithUser := context.WithValue(ctxWithIsNew, userKey{}, id)
+	ctxWithToken := context.WithValue(ctxWithUser, tokenKey{}, token)
+
+	return ctxWithToken
 }
 
 func GetUserID(ctx context.Context) int {
@@ -21,5 +25,10 @@ func GetUserID(ctx context.Context) int {
 
 func GetIsNew(ctx context.Context) bool {
 	val, _ := ctx.Value(userIsNewKey{}).(bool)
+	return val
+}
+
+func GetToken(ctx context.Context) string {
+	val, _ := ctx.Value(tokenKey{}).(string)
 	return val
 }
