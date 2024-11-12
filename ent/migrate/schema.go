@@ -56,6 +56,27 @@ var (
 			},
 		},
 	}
+	// SettingsColumns holds the columns for the "settings" table.
+	SettingsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "type", Type: field.TypeEnum, Enums: []string{"ACCOUNT"}, Default: "ACCOUNT"},
+		{Name: "entity_id", Type: field.TypeInt},
+		{Name: "key", Type: field.TypeString},
+		{Name: "value", Type: field.TypeString, Default: ""},
+	}
+	// SettingsTable holds the schema information for the "settings" table.
+	SettingsTable = &schema.Table{
+		Name:       "settings",
+		Columns:    SettingsColumns,
+		PrimaryKey: []*schema.Column{SettingsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "settings_type_entity_id_key",
+				Unique:  true,
+				Columns: []*schema.Column{SettingsColumns[1], SettingsColumns[2], SettingsColumns[3]},
+			},
+		},
+	}
 	// TagsColumns holds the columns for the "tags" table.
 	TagsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -134,6 +155,7 @@ var (
 	Tables = []*schema.Table{
 		AccountsTable,
 		EventsTable,
+		SettingsTable,
 		TagsTable,
 		TimelinesTable,
 		UsersTable,

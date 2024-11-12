@@ -10,6 +10,7 @@ import (
 	"sync"
 	"timeline/backend/ent/account"
 	"timeline/backend/ent/event"
+	"timeline/backend/ent/settings"
 	"timeline/backend/ent/tag"
 	"timeline/backend/ent/timeline"
 	"timeline/backend/ent/user"
@@ -79,6 +80,7 @@ func checkColumn(table, column string) error {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
 			account.Table:  account.ValidColumn,
 			event.Table:    event.ValidColumn,
+			settings.Table: settings.ValidColumn,
 			tag.Table:      tag.ValidColumn,
 			timeline.Table: timeline.ValidColumn,
 			user.Table:     user.ValidColumn,
