@@ -12,6 +12,7 @@ import (
 	userModel "timeline/backend/db/model/user"
 	"timeline/backend/db/repository/account"
 	"timeline/backend/db/repository/event"
+	"timeline/backend/db/repository/settings"
 	"timeline/backend/db/repository/tag"
 	"timeline/backend/db/repository/timeline"
 	"timeline/backend/db/repository/user"
@@ -36,6 +37,9 @@ func initRepositories() {
 	})
 	initService(func(ctx context.Context, client *ent.Client) account.Repository {
 		return account.NewRepository(ctx, client)
+	})
+	initService(func(ctx context.Context, client *ent.Client) settings.Repository {
+		return settings.NewRepository(ctx, client)
 	})
 }
 

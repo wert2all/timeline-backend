@@ -6,6 +6,7 @@ import (
 	"time"
 	"timeline/backend/ent/event"
 	"timeline/backend/ent/schema"
+	"timeline/backend/ent/settings"
 	"timeline/backend/ent/user"
 )
 
@@ -23,6 +24,20 @@ func init() {
 	eventDescShowTime := eventFields[4].Descriptor()
 	// event.DefaultShowTime holds the default value on creation for the showTime field.
 	event.DefaultShowTime = eventDescShowTime.Default.(bool)
+	settingsFields := schema.Settings{}.Fields()
+	_ = settingsFields
+	// settingsDescEntityID is the schema descriptor for entity_id field.
+	settingsDescEntityID := settingsFields[1].Descriptor()
+	// settings.EntityIDValidator is a validator for the "entity_id" field. It is called by the builders before save.
+	settings.EntityIDValidator = settingsDescEntityID.Validators[0].(func(int) error)
+	// settingsDescKey is the schema descriptor for key field.
+	settingsDescKey := settingsFields[2].Descriptor()
+	// settings.KeyValidator is a validator for the "key" field. It is called by the builders before save.
+	settings.KeyValidator = settingsDescKey.Validators[0].(func(string) error)
+	// settingsDescValue is the schema descriptor for value field.
+	settingsDescValue := settingsFields[3].Descriptor()
+	// settings.DefaultValue holds the default value on creation for the value field.
+	settings.DefaultValue = settingsDescValue.Default.(string)
 	userFields := schema.User{}.Fields()
 	_ = userFields
 	// userDescUUID is the schema descriptor for uuid field.

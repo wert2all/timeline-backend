@@ -16,6 +16,8 @@ type Tx struct {
 	Account *AccountClient
 	// Event is the client for interacting with the Event builders.
 	Event *EventClient
+	// Settings is the client for interacting with the Settings builders.
+	Settings *SettingsClient
 	// Tag is the client for interacting with the Tag builders.
 	Tag *TagClient
 	// Timeline is the client for interacting with the Timeline builders.
@@ -155,6 +157,7 @@ func (tx *Tx) Client() *Client {
 func (tx *Tx) init() {
 	tx.Account = NewAccountClient(tx.config)
 	tx.Event = NewEventClient(tx.config)
+	tx.Settings = NewSettingsClient(tx.config)
 	tx.Tag = NewTagClient(tx.config)
 	tx.Timeline = NewTimelineClient(tx.config)
 	tx.User = NewUserClient(tx.config)
