@@ -26,6 +26,19 @@ type ShortAccount {
   id: Int!
   name: String
   avatar: String
+  settings: [AccountSettings!]!
+}
+
+type Account {
+  id: Int!
+  name: String
+  avatar: String
+  settings: [AccountSettings!]!
+}
+
+type AccountSettings {
+  key: String!
+  value: String!
 }
 
 type User {
