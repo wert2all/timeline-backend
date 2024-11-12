@@ -9,6 +9,18 @@ import (
 	"time"
 )
 
+type Account struct {
+	ID       int                `json:"id"`
+	Name     *string            `json:"name,omitempty"`
+	Avatar   *string            `json:"avatar,omitempty"`
+	Settings []*AccountSettings `json:"settings"`
+}
+
+type AccountSettings struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
+}
+
 type AddTimeline struct {
 	Name      *string `json:"name,omitempty"`
 	AccountID int     `json:"accountId"`
@@ -38,9 +50,10 @@ type Query struct {
 }
 
 type ShortAccount struct {
-	ID     int     `json:"id"`
-	Name   *string `json:"name,omitempty"`
-	Avatar *string `json:"avatar,omitempty"`
+	ID       int                `json:"id"`
+	Name     *string            `json:"name,omitempty"`
+	Avatar   *string            `json:"avatar,omitempty"`
+	Settings []*AccountSettings `json:"settings"`
 }
 
 type ShortTimeline struct {
