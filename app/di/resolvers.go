@@ -2,6 +2,7 @@ package di
 
 import (
 	eventModel "timeline/backend/db/model/event"
+	"timeline/backend/db/model/settings"
 	tagModel "timeline/backend/db/model/tag"
 	"timeline/backend/db/model/timeline"
 	timelineModel "timeline/backend/db/model/timeline"
@@ -51,8 +52,8 @@ func initValidators() {
 }
 
 func initResolvers() {
-	initService(func(timelineModel timelineModel.Timeline, userModel user.UserModel) resolvers.Resolver[*model.User, resolvers.ValidAuthorizeArguments] {
-		return resolvers.NewAutorizeResolver(timelineModel, userModel)
+	initService(func(timelineModel timelineModel.Timeline, userModel user.UserModel, settings settings.Model) resolvers.Resolver[*model.User, resolvers.ValidAuthorizeArguments] {
+		return resolvers.NewAutorizeResolver(timelineModel, userModel, settings)
 	})
 	initService(func(timelineModel timelineModel.Timeline, userModel userModel.UserModel) resolvers.Resolver[*model.ShortTimeline, resolvers.ValidAddTimelineArguments] {
 		return resolvers.NewAddTimelineResolver(userModel, timelineModel)

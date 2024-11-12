@@ -4,10 +4,12 @@ import (
 	"context"
 
 	appContext "timeline/backend/app/context"
+	"timeline/backend/db/model/settings"
 	"timeline/backend/db/model/timeline"
 	"timeline/backend/db/model/user"
 	"timeline/backend/ent"
 	"timeline/backend/graph/model"
+	enumvalues "timeline/backend/lib/enum-values"
 )
 
 type ValidAuthorizeArguments struct {
@@ -18,6 +20,7 @@ type ValidAuthorizeArguments struct {
 type authorizeResolverImpl struct {
 	timeline timeline.Timeline
 	users    user.UserModel
+	settings settings.Model
 }
 
 type authorizeValidator struct {
@@ -45,20 +48,40 @@ func (a authorizeResolverImpl) Resolve(_ context.Context, arguments ValidArgumen
 	if err != nil {
 		return nil, err
 	}
+
+	gqlAccounts := make([]*model.ShortAccount, len(accounts))
+	for i, accountEntity := range accounts {
+		settings := a.settings.GetSettings(enumvalues.Account, accountEntity.ID)
+		gqlSettings := make([]*model.AccountSettings, len(settings))
+
+		for i, setting := range settings {
+			gqlSettings[i] = &model.AccountSettings{
+				Key:   setting.Key,
+				Value: setting.Value,
+			}
+		}
+		gqlAccounts[i] = &model.ShortAccount{
+			Name:     &accountEntity.Name,
+			Avatar:   accountEntity.Avatar,
+			ID:       accountEntity.ID,
+			Settings: gqlSettings,
+		}
+	}
+
 	return &model.User{
 		ID:       userEntity.ID,
 		Name:     userEntity.Name,
 		Email:    userEntity.Email,
 		Avatar:   userEntity.Avatar,
 		IsNew:    arguments.GetArguments().IsNew,
-		Accounts: a.convertAccounts(accounts),
+		Accounts: gqlAccounts,
 	}, nil
 }
 
 func (a AuthorizeArgumentFactory) New() Arguments[AuthorizeArguments] { return AuthorizeArguments{} }
 
-func NewAutorizeResolver(timeline timeline.Timeline, userModel user.UserModel) Resolver[*model.User, ValidAuthorizeArguments] {
-	return authorizeResolverImpl{timeline: timeline, users: userModel}
+func NewAutorizeResolver(timeline timeline.Timeline, userModel user.UserModel, settings settings.Model) Resolver[*model.User, ValidAuthorizeArguments] {
+	return authorizeResolverImpl{timeline: timeline, users: userModel, settings: settings}
 }
 
 func NewAuthorizeValidator(userModel user.UserModel) Validator[AuthorizeArguments, ValidAuthorizeArguments] {
@@ -72,17 +95,3 @@ func NewAuthorizeValidator(userModel user.UserModel) Validator[AuthorizeArgument
 // 	}
 // 	return gqlTimelines
 // }
-
-func (a authorizeResolverImpl) convertAccounts(accounts []*ent.Account) []*model.ShortAccount {
-	gqlSettings := make([]*model.AccountSettings, 0)
-	gqlAccounts := make([]*model.ShortAccount, len(accounts))
-	for i, accountEntity := range accounts {
-		gqlAccounts[i] = &model.ShortAccount{
-			Name:     &accountEntity.Name,
-			Avatar:   accountEntity.Avatar,
-			ID:       accountEntity.ID,
-			Settings: gqlSettings,
-		}
-	}
-	return gqlAccounts
-}
