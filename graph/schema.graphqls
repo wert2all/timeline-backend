@@ -16,7 +16,7 @@ type Mutation {
   editEvent(event: ExistTimelineEventInput!): TimelineEvent!
   deleteEvent(eventId: Int!): Status!
 
-  saveSettings(accountId: Int!, settings: [AccountSettingInput]): Status
+  saveSettings(accountId: Int!, settings: [AccountSettingInput]): Status!
 }
 
 type ShortTimeline {
