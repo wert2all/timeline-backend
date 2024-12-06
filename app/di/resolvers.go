@@ -54,8 +54,8 @@ func initValidators() {
 	initService(func(userModel userModel.UserModel, eventModel eventModel.Model) resolvers.Validator[resolvers.DeleteEventArguments, resolvers.ValidDeleteEventArguments] {
 		return resolvers.NewDeleteEventValidator(userModel, eventModel)
 	})
-	initService(func() resolvers.Validator[settingsResolver.SaveSettingsArguments, settingsResolver.ValidSaveSettingsArguments] {
-		return settingsResolver.NewSaveSettingsValidator()
+	initService(func(userModel userModel.UserModel) resolvers.Validator[settingsResolver.SaveSettingsArguments, settingsResolver.ValidSaveSettingsArguments] {
+		return settingsResolver.NewSaveSettingsValidator(userModel)
 	})
 }
 
