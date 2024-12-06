@@ -61,11 +61,12 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		AddEvent    func(childComplexity int, event model.TimelineEventInput) int
-		AddTimeline func(childComplexity int, timeline *model.AddTimeline) int
-		Authorize   func(childComplexity int) int
-		DeleteEvent func(childComplexity int, eventID int) int
-		EditEvent   func(childComplexity int, event model.ExistTimelineEventInput) int
+		AddEvent     func(childComplexity int, event model.TimelineEventInput) int
+		AddTimeline  func(childComplexity int, timeline *model.AddTimeline) int
+		Authorize    func(childComplexity int) int
+		DeleteEvent  func(childComplexity int, eventID int) int
+		EditEvent    func(childComplexity int, event model.ExistTimelineEventInput) int
+		SaveSettings func(childComplexity int, accountID int, settings []*model.AccountSettingInput) int
 	}
 
 	Query struct {
@@ -112,6 +113,7 @@ type MutationResolver interface {
 	AddEvent(ctx context.Context, event model.TimelineEventInput) (*model.TimelineEvent, error)
 	EditEvent(ctx context.Context, event model.ExistTimelineEventInput) (*model.TimelineEvent, error)
 	DeleteEvent(ctx context.Context, eventID int) (model.Status, error)
+	SaveSettings(ctx context.Context, accountID int, settings []*model.AccountSettingInput) (*model.Status, error)
 }
 type QueryResolver interface {
 	TimelineEvents(ctx context.Context, timelineID int, limit *model.Limit) ([]*model.TimelineEvent, error)
@@ -233,6 +235,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.EditEvent(childComplexity, args["event"].(model.ExistTimelineEventInput)), true
+
+	case "Mutation.saveSettings":
+		if e.complexity.Mutation.SaveSettings == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_saveSettings_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.SaveSettings(childComplexity, args["accountId"].(int), args["settings"].([]*model.AccountSettingInput)), true
 
 	case "Query.myAccountTimelines":
 		if e.complexity.Query.MyAccountTimelines == nil {
@@ -406,6 +420,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	opCtx := graphql.GetOperationContext(ctx)
 	ec := executionContext{opCtx, e, 0, 0, make(chan graphql.DeferredResult)}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
+		ec.unmarshalInputAccountSettingInput,
 		ec.unmarshalInputAddTimeline,
 		ec.unmarshalInputExistTimelineEventInput,
 		ec.unmarshalInputLimit,
@@ -651,6 +666,65 @@ func (ec *executionContext) field_Mutation_editEvent_argsEvent(
 	}
 
 	var zeroVal model.ExistTimelineEventInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_saveSettings_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Mutation_saveSettings_argsAccountID(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["accountId"] = arg0
+	arg1, err := ec.field_Mutation_saveSettings_argsSettings(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["settings"] = arg1
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_saveSettings_argsAccountID(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (int, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["accountId"]
+	if !ok {
+		var zeroVal int
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("accountId"))
+	if tmp, ok := rawArgs["accountId"]; ok {
+		return ec.unmarshalNInt2int(ctx, tmp)
+	}
+
+	var zeroVal int
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_saveSettings_argsSettings(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]*model.AccountSettingInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["settings"]
+	if !ok {
+		var zeroVal []*model.AccountSettingInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("settings"))
+	if tmp, ok := rawArgs["settings"]; ok {
+		return ec.unmarshalOAccountSettingInput2ᚕᚖtimelineᚋbackendᚋgraphᚋmodelᚐAccountSettingInput(ctx, tmp)
+	}
+
+	var zeroVal []*model.AccountSettingInput
 	return zeroVal, nil
 }
 
@@ -1424,6 +1498,58 @@ func (ec *executionContext) fieldContext_Mutation_deleteEvent(ctx context.Contex
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_deleteEvent_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_saveSettings(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_saveSettings(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().SaveSettings(rctx, fc.Args["accountId"].(int), fc.Args["settings"].([]*model.AccountSettingInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.Status)
+	fc.Result = res
+	return ec.marshalOStatus2ᚖtimelineᚋbackendᚋgraphᚋmodelᚐStatus(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_saveSettings(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Status does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_saveSettings_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -4335,6 +4461,40 @@ func (ec *executionContext) fieldContext___Type_specifiedByURL(_ context.Context
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputAccountSettingInput(ctx context.Context, obj interface{}) (model.AccountSettingInput, error) {
+	var it model.AccountSettingInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"key", "value"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "key":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("key"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Key = data
+		case "value":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("value"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Value = data
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputAddTimeline(ctx context.Context, obj interface{}) (model.AddTimeline, error) {
 	var it model.AddTimeline
 	asMap := map[string]interface{}{}
@@ -4720,6 +4880,10 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "saveSettings":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_saveSettings(ctx, field)
+			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -5955,6 +6119,34 @@ func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel a
 	return res
 }
 
+func (ec *executionContext) unmarshalOAccountSettingInput2ᚕᚖtimelineᚋbackendᚋgraphᚋmodelᚐAccountSettingInput(ctx context.Context, v interface{}) ([]*model.AccountSettingInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*model.AccountSettingInput, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalOAccountSettingInput2ᚖtimelineᚋbackendᚋgraphᚋmodelᚐAccountSettingInput(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalOAccountSettingInput2ᚖtimelineᚋbackendᚋgraphᚋmodelᚐAccountSettingInput(ctx context.Context, v interface{}) (*model.AccountSettingInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputAccountSettingInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalOAddTimeline2ᚖtimelineᚋbackendᚋgraphᚋmodelᚐAddTimeline(ctx context.Context, v interface{}) (*model.AddTimeline, error) {
 	if v == nil {
 		return nil, nil
@@ -6018,6 +6210,22 @@ func (ec *executionContext) marshalOShortAccount2ᚖtimelineᚋbackendᚋgraph�
 		return graphql.Null
 	}
 	return ec._ShortAccount(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOStatus2ᚖtimelineᚋbackendᚋgraphᚋmodelᚐStatus(ctx context.Context, v interface{}) (*model.Status, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var res = new(model.Status)
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOStatus2ᚖtimelineᚋbackendᚋgraphᚋmodelᚐStatus(ctx context.Context, sel ast.SelectionSet, v *model.Status) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return v
 }
 
 func (ec *executionContext) unmarshalOString2ᚕstringᚄ(ctx context.Context, v interface{}) ([]string, error) {

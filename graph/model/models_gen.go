@@ -16,6 +16,11 @@ type Account struct {
 	Settings []*AccountSettings `json:"settings"`
 }
 
+type AccountSettingInput struct {
+	Key   string  `json:"key"`
+	Value *string `json:"value,omitempty"`
+}
+
 type AccountSettings struct {
 	Key   string `json:"key"`
 	Value string `json:"value"`
