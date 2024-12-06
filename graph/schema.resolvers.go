@@ -6,7 +6,6 @@ package graph
 
 import (
 	"context"
-	"fmt"
 
 	appContext "timeline/backend/app/context"
 	tagModel "timeline/backend/db/model/tag"
@@ -14,6 +13,7 @@ import (
 	"timeline/backend/graph/convert"
 	"timeline/backend/graph/model"
 	"timeline/backend/graph/resolvers"
+	"timeline/backend/graph/resolvers/mutation/account/settings"
 	myAccountTimelines "timeline/backend/graph/resolvers/query/timeline"
 	"timeline/backend/lib/utils"
 
@@ -138,19 +138,19 @@ func (r *mutationResolver) DeleteEvent(ctx context.Context, eventID int) (model.
 
 	errFactoryResolve := container.Resolve(&factory)
 	if errFactoryResolve != nil {
-		utils.F("Couldnt resolve AddEvent factory: %v", errFactoryResolve)
+		utils.F("Couldnt resolve DeleteEvent factory: %v", errFactoryResolve)
 		return model.StatusError, errFactoryResolve
 	}
 
 	errValidatorResolve := container.Resolve(&validator)
 	if errValidatorResolve != nil {
-		utils.F("Couldnt resolve AddEvent validator: %v", errValidatorResolve)
+		utils.F("Couldnt resolve DeleteEvent validator: %v", errValidatorResolve)
 		return model.StatusError, errValidatorResolve
 	}
 
 	errResolverResolve := container.Resolve(&resolver)
 	if errResolverResolve != nil {
-		utils.F("Couldnt resolve AddEvent resolver: %v", errResolverResolve)
+		utils.F("Couldnt resolve DeleteEvent resolver: %v", errResolverResolve)
 		return model.StatusError, errResolverResolve
 	}
 
@@ -158,8 +158,30 @@ func (r *mutationResolver) DeleteEvent(ctx context.Context, eventID int) (model.
 }
 
 // SaveSettings is the resolver for the saveSettings field.
-func (r *mutationResolver) SaveSettings(ctx context.Context, accountID int, settings []*model.AccountSettingInput) (*model.Status, error) {
-	panic(fmt.Errorf("not implemented: SaveSettings - saveSettings"))
+func (r *mutationResolver) SaveSettings(ctx context.Context, accountID int, settingsInput []*model.AccountSettingInput) (model.Status, error) {
+	var factory settings.SaveSettingsArgumentFactory
+	var validator resolvers.Validator[settings.SaveSettingsArguments, settings.ValidSaveSettingsArguments]
+	var resolver resolvers.Resolver[model.Status, settings.ValidSaveSettingsArguments]
+
+	errFactoryResolve := container.Resolve(&factory)
+	if errFactoryResolve != nil {
+		utils.F("Couldnt resolve SaveSettings factory: %v", errFactoryResolve)
+		return model.StatusError, errFactoryResolve
+	}
+
+	errValidatorResolve := container.Resolve(&validator)
+	if errValidatorResolve != nil {
+		utils.F("Couldnt resolve SaveSettings validator: %v", errValidatorResolve)
+		return model.StatusError, errValidatorResolve
+	}
+
+	errResolverResolve := container.Resolve(&resolver)
+	if errResolverResolve != nil {
+		utils.F("Couldnt resolve SaveSettings resolver: %v", errResolverResolve)
+		return model.StatusError, errResolverResolve
+	}
+
+	return resolvers.Resolve(ctx, factory.New(accountID, appContext.GetUserID(ctx), settingsInput), validator, resolver)
 }
 
 // TimelineEvents is the resolver for the timelineEvents field.

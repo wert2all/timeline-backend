@@ -113,7 +113,7 @@ type MutationResolver interface {
 	AddEvent(ctx context.Context, event model.TimelineEventInput) (*model.TimelineEvent, error)
 	EditEvent(ctx context.Context, event model.ExistTimelineEventInput) (*model.TimelineEvent, error)
 	DeleteEvent(ctx context.Context, eventID int) (model.Status, error)
-	SaveSettings(ctx context.Context, accountID int, settings []*model.AccountSettingInput) (*model.Status, error)
+	SaveSettings(ctx context.Context, accountID int, settings []*model.AccountSettingInput) (model.Status, error)
 }
 type QueryResolver interface {
 	TimelineEvents(ctx context.Context, timelineID int, limit *model.Limit) ([]*model.TimelineEvent, error)
@@ -1525,11 +1525,14 @@ func (ec *executionContext) _Mutation_saveSettings(ctx context.Context, field gr
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.Status)
+	res := resTmp.(model.Status)
 	fc.Result = res
-	return ec.marshalOStatus2ᚖtimelineᚋbackendᚋgraphᚋmodelᚐStatus(ctx, field.Selections, res)
+	return ec.marshalNStatus2timelineᚋbackendᚋgraphᚋmodelᚐStatus(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_saveSettings(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -4884,6 +4887,9 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_saveSettings(ctx, field)
 			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -6210,22 +6216,6 @@ func (ec *executionContext) marshalOShortAccount2ᚖtimelineᚋbackendᚋgraph�
 		return graphql.Null
 	}
 	return ec._ShortAccount(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalOStatus2ᚖtimelineᚋbackendᚋgraphᚋmodelᚐStatus(ctx context.Context, v interface{}) (*model.Status, error) {
-	if v == nil {
-		return nil, nil
-	}
-	var res = new(model.Status)
-	err := res.UnmarshalGQL(v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalOStatus2ᚖtimelineᚋbackendᚋgraphᚋmodelᚐStatus(ctx context.Context, sel ast.SelectionSet, v *model.Status) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return v
 }
 
 func (ec *executionContext) unmarshalOString2ᚕstringᚄ(ctx context.Context, v interface{}) ([]string, error) {
