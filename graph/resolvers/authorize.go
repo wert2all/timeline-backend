@@ -10,6 +10,8 @@ import (
 	"timeline/backend/ent"
 	"timeline/backend/graph/model"
 	enumvalues "timeline/backend/lib/enum-values"
+
+	domainUser "timeline/backend/domain/user"
 )
 
 type ValidAuthorizeArguments struct {
@@ -24,7 +26,8 @@ type authorizeResolverImpl struct {
 }
 
 type authorizeValidator struct {
-	UsersModel user.UserModel
+	UsersModel    user.UserModel
+	userExtractor domainUser.UserExtractor
 }
 
 type AuthorizeArgumentFactory struct{}
@@ -34,12 +37,17 @@ type AuthorizeArguments struct{}
 func (v ValidAuthorizeArguments) GetArguments() ValidAuthorizeArguments { return v }
 func (a AuthorizeArguments) GetArguments() AuthorizeArguments           { return a }
 func (a authorizeValidator) Validate(ctx context.Context, _ Arguments[AuthorizeArguments]) (ValidArguments[ValidAuthorizeArguments], error) {
-	userEntity, err := a.UsersModel.GetUser(appContext.GetUserID(ctx))
+	token := appContext.GetToken(ctx)
+	extractedUser, err := a.userExtractor.ExtractUserFromToken(ctx, &token)
+	if err != nil {
+		return nil, err
+	}
+	userEntity, err := a.UsersModel.GetUser(extractedUser.ID)
 	if err != nil {
 		return nil, err
 	}
 
-	return ValidAuthorizeArguments{User: userEntity, IsNew: appContext.GetIsNew(ctx)}, nil
+	return ValidAuthorizeArguments{User: userEntity, IsNew: extractedUser.IsNew}, nil
 }
 
 func (a authorizeResolverImpl) Resolve(_ context.Context, arguments ValidArguments[ValidAuthorizeArguments]) (*model.User, error) {
@@ -84,14 +92,9 @@ func NewAutorizeResolver(timeline timeline.Timeline, userModel user.UserModel, s
 	return authorizeResolverImpl{timeline: timeline, users: userModel, settings: settings}
 }
 
-func NewAuthorizeValidator(userModel user.UserModel) Validator[AuthorizeArguments, ValidAuthorizeArguments] {
-	return authorizeValidator{UsersModel: userModel}
+func NewAuthorizeValidator(userModel user.UserModel, userExtractor domainUser.UserExtractor) Validator[AuthorizeArguments, ValidAuthorizeArguments] {
+	return authorizeValidator{
+		UsersModel:    userModel,
+		userExtractor: userExtractor,
+	}
 }
-
-// func (a authorizeResolverImpl) converTimelines(timelines []*ent.Timeline) []*model.ShortUserTimeline {
-// 	gqlTimelines := make([]*model.ShortUserTimeline, len(timelines))
-// 	for i, timelineEntity := range timelines {
-// 		gqlTimelines[i] = &model.ShortUserTimeline{ID: timelineEntity.ID, Name: &timelineEntity.Name}
-// 	}
-// 	return gqlTimelines
-// }

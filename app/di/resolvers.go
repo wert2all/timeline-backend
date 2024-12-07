@@ -9,6 +9,7 @@ import (
 	"timeline/backend/db/model/user"
 	userModel "timeline/backend/db/model/user"
 	"timeline/backend/db/repository/event"
+	domainUser "timeline/backend/domain/user"
 	"timeline/backend/graph/model"
 	"timeline/backend/graph/resolvers"
 	eventValidator "timeline/backend/graph/resolvers/mutation/event"
@@ -30,12 +31,12 @@ func initArgumentFactories() {
 }
 
 func initValidators() {
-	initService(func(timeline timelineModel.Timeline) eventValidator.BaseValidator {
-		return eventValidator.NewBaseValidator(timeline)
+	initService(func(timeline timelineModel.Timeline, userExtractor domainUser.UserExtractor) eventValidator.BaseValidator {
+		return eventValidator.NewBaseValidator(timeline, userExtractor)
 	})
 
-	initService(func(userModel userModel.UserModel) resolvers.Validator[resolvers.AuthorizeArguments, resolvers.ValidAuthorizeArguments] {
-		return resolvers.NewAuthorizeValidator(userModel)
+	initService(func(userModel userModel.UserModel, userExtractor domainUser.UserExtractor) resolvers.Validator[resolvers.AuthorizeArguments, resolvers.ValidAuthorizeArguments] {
+		return resolvers.NewAuthorizeValidator(userModel, userExtractor)
 	})
 	initService(func(userModel userModel.UserModel) resolvers.Validator[resolvers.AddTimelineArguments, resolvers.ValidAddTimelineArguments] {
 		return resolvers.NewAddtimelineValidator(userModel)
