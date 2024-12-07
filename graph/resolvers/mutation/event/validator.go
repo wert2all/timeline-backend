@@ -12,6 +12,8 @@ import (
 	"timeline/backend/graph/model"
 	"timeline/backend/lib/utils"
 
+	domainUser "timeline/backend/domain/user"
+
 	"github.com/microcosm-cc/bluemonday"
 	"golang.org/x/exp/maps"
 )
@@ -44,11 +46,12 @@ type (
 
 	baseValidatorImpl struct {
 		timelineModel timeline.Timeline
+		userExtractor domainUser.UserExtractor
 	}
 )
 
-func NewBaseValidator(timelineModel timeline.Timeline) BaseValidator {
-	return baseValidatorImpl{timelineModel: timelineModel}
+func NewBaseValidator(timelineModel timeline.Timeline, userExtractor domainUser.UserExtractor) BaseValidator {
+	return baseValidatorImpl{timelineModel: timelineModel, userExtractor: userExtractor}
 }
 
 func (b baseValidatorImpl) GetBaseValidEventInput(input GQLInput, ctx context.Context) (*BaseValidEventInput, error) {
@@ -58,7 +61,13 @@ func (b baseValidatorImpl) GetBaseValidEventInput(input GQLInput, ctx context.Co
 		return nil, err
 	}
 
-	errCheckUser := b.timelineModel.CheckUserTimeline(timelineEntity, appContext.GetUserID(ctx))
+	token := appContext.GetToken(ctx)
+	user, err := b.userExtractor.ExtractUserFromToken(ctx, &token)
+	if err != nil {
+		return nil, err
+	}
+	errCheckUser := b.timelineModel.CheckUserTimeline(timelineEntity, user.ID)
+
 	if errCheckUser != nil {
 		return nil, errCheckUser
 	}

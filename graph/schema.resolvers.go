@@ -6,6 +6,7 @@ package graph
 
 import (
 	"context"
+
 	appContext "timeline/backend/app/context"
 	tagModel "timeline/backend/db/model/tag"
 	"timeline/backend/db/model/timeline"
@@ -14,6 +15,8 @@ import (
 	"timeline/backend/graph/resolvers"
 	myAccountTimelines "timeline/backend/graph/resolvers/query/timeline"
 	"timeline/backend/lib/utils"
+
+	domainUser "timeline/backend/domain/user"
 
 	container "github.com/golobby/container/v3"
 )
@@ -195,6 +198,7 @@ func (r *queryResolver) TimelineEvents(ctx context.Context, timelineID int, limi
 // MyAccountTimelines is the resolver for the myAccountTimelines field.
 func (r *queryResolver) MyAccountTimelines(ctx context.Context, accountID int) ([]*model.ShortTimeline, error) {
 	var resolver myAccountTimelines.Resolver
+	var userExtractor domainUser.UserExtractor
 
 	errResolverResolve := container.Resolve(&resolver)
 	if errResolverResolve != nil {
@@ -202,7 +206,19 @@ func (r *queryResolver) MyAccountTimelines(ctx context.Context, accountID int) (
 		return nil, errResolverResolve
 	}
 
-	return resolver.Resolve(ctx, accountID, appContext.GetUserID(ctx))
+	errExtractorResolve := container.Resolve(&userExtractor)
+	if errExtractorResolve != nil {
+		utils.F("Couldnt resolve MyAccountTimelines extractor: %v", errExtractorResolve)
+		return nil, errExtractorResolve
+	}
+
+	token := appContext.GetToken(ctx)
+	user, err := userExtractor.ExtractUserFromToken(ctx, &token)
+	if err != nil {
+		return nil, err
+	}
+
+	return resolver.Resolve(ctx, accountID, user.ID)
 }
 
 // Mutation returns MutationResolver implementation.
@@ -211,5 +227,7 @@ func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 // Query returns QueryResolver implementation.
 func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
-type mutationResolver struct{ *Resolver }
-type queryResolver struct{ *Resolver }
+type (
+	mutationResolver struct{ *Resolver }
+	queryResolver    struct{ *Resolver }
+)

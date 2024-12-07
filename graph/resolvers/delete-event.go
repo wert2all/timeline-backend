@@ -8,6 +8,7 @@ import (
 	"timeline/backend/db/model/event"
 	"timeline/backend/db/model/user"
 	eventRepository "timeline/backend/db/repository/event"
+	domainUser "timeline/backend/domain/user"
 	"timeline/backend/ent"
 	"timeline/backend/graph/model"
 )
@@ -22,8 +23,9 @@ type (
 		eventRepository eventRepository.Repository
 	}
 	validatorDeleteEventImpl struct {
-		usersModel  user.UserModel
-		eventsModel event.Model
+		usersModel    user.UserModel
+		eventsModel   event.Model
+		userExtractor domainUser.UserExtractor
 	}
 )
 
@@ -50,7 +52,14 @@ func (v validatorDeleteEventImpl) Validate(ctx context.Context, input Arguments[
 	if err != nil {
 		return nil, err
 	}
-	_, errAccount := v.usersModel.GetUserAccount(account.ID, appContext.GetUserID(ctx))
+
+	token := appContext.GetToken(ctx)
+	user, errUser := v.userExtractor.ExtractUserFromToken(ctx, &token)
+	if errUser != nil {
+		return nil, errUser
+	}
+	_, errAccount := v.usersModel.GetUserAccount(account.ID, user.ID)
+
 	if errAccount != nil {
 		return nil, errors.New("could not delete event")
 	}

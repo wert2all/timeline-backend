@@ -7,6 +7,7 @@ import (
 	appContext "timeline/backend/app/context"
 	"timeline/backend/db/model/timeline"
 	"timeline/backend/db/model/user"
+	domainUser "timeline/backend/domain/user"
 	"timeline/backend/ent"
 	"timeline/backend/graph/model"
 	"timeline/backend/lib/utils"
@@ -24,7 +25,8 @@ type (
 		account *ent.Account
 	}
 	addTimelineValidator struct {
-		UsersModel user.UserModel
+		UsersModel    user.UserModel
+		userExtractor domainUser.UserExtractor
 	}
 	addTimelimeMutation struct {
 		Users    user.UserModel
@@ -38,7 +40,12 @@ func (f AddTimelineArgumentFactory) New(timeline *model.AddTimeline) Arguments[A
 
 func (a addTimelineValidator) Validate(ctx context.Context, input Arguments[AddTimelineArguments]) (ValidArguments[ValidAddTimelineArguments], error) {
 	p := bluemonday.StrictPolicy()
-	account, error := a.UsersModel.GetUserAccount(input.GetArguments().timeline.AccountID, appContext.GetUserID(ctx))
+	token := appContext.GetToken(ctx)
+	user, err := a.userExtractor.ExtractUserFromToken(ctx, &token)
+	if err != nil {
+		return nil, err
+	}
+	account, error := a.UsersModel.GetUserAccount(input.GetArguments().timeline.AccountID, user.ID)
 	if error != nil {
 		return nil, error
 	}

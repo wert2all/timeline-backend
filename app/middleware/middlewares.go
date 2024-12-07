@@ -40,14 +40,9 @@ func NewMiddlewares() Middlewares {
 func NewAuthMiddleware(domainUserExtractor domainUser.UserExtractor) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-			// fmt.Printf("User ID: %d\n", context.GetUserID())
+			// fmt.Pritf("User ID: %d\n", context.GetUserID())
 			token := extractToken(req)
-			user, err := domainUserExtractor.ExtractUserFromToken(req.Context(), &token)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusForbidden)
-				return
-			}
-			contextWithdata := appContext.SetUserID(req.Context(), user.ID, user.IsNew, token)
+			contextWithdata := appContext.SetUserID(req.Context(), token)
 			next.ServeHTTP(w, req.WithContext(contextWithdata))
 		})
 	}

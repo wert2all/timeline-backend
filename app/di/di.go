@@ -34,8 +34,6 @@ func InitContainer(config config.Config, appContext context.Context) {
 	initRepositories()
 	initModels()
 
-	initOperationsResolvers()
-
 	initService(func(userRepository user.Repository, accountRepository account.Repository) userModel.Authorize {
 		return userModel.NewUserModel(userRepository, accountRepository)
 	})
@@ -43,11 +41,13 @@ func InitContainer(config config.Config, appContext context.Context) {
 		return domainUser.NewUserExtractor(config.Google.ClientID, userModel)
 	})
 
+	initOperationsResolvers()
+
 	initApplication(config)
 }
 
 func initApplication(config config.Config) {
-	initService(func(entClient *ent.Client, userModel userModel.Authorize, extractor domainUser.UserExtractor) app.Application {
+	initService(func(entClient *ent.Client, extractor domainUser.UserExtractor) app.Application {
 		return app.NewApplication(
 			newRouter(middlewares.NewMiddlewares(), middlewares.NewAuthMiddleware(extractor)),
 			config.App.Listen,
