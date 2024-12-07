@@ -19,6 +19,8 @@ import (
 
 	"github.com/getsentry/sentry-go"
 	"github.com/golobby/container/v3"
+
+	domainUser "timeline/backend/domain/user"
 )
 
 func InitContainer(config config.Config, appContext context.Context) {
@@ -37,14 +39,17 @@ func InitContainer(config config.Config, appContext context.Context) {
 	initService(func(userRepository user.Repository, accountRepository account.Repository) userModel.Authorize {
 		return userModel.NewUserModel(userRepository, accountRepository)
 	})
+	initService(func(userModel userModel.Authorize) domainUser.UserExtractor {
+		return domainUser.NewUserExtractor(config.Google.ClientID, userModel)
+	})
 
 	initApplication(config)
 }
 
 func initApplication(config config.Config) {
-	initService(func(entClient *ent.Client, userModel userModel.Authorize) app.Application {
+	initService(func(entClient *ent.Client, userModel userModel.Authorize, extractor domainUser.UserExtractor) app.Application {
 		return app.NewApplication(
-			newRouter(middlewares.NewMiddlewares(), middlewares.NewAuthMiddleware(userModel, config.Google.ClientID)),
+			newRouter(middlewares.NewMiddlewares(), middlewares.NewAuthMiddleware(extractor)),
 			config.App.Listen,
 			func() {
 				entClient.Close()

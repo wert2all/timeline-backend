@@ -4,13 +4,12 @@ import (
 	"net/http"
 	"strings"
 
-	"timeline/backend/db/model/user"
-
 	appContext "timeline/backend/app/context"
+
+	domainUser "timeline/backend/domain/user"
 
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/rs/cors"
-	"google.golang.org/api/idtoken"
 )
 
 type (
@@ -38,37 +37,18 @@ func NewMiddlewares() Middlewares {
 	}
 }
 
-func NewAuthMiddleware(userModel user.Authorize, googleClientID string) func(http.Handler) http.Handler {
+func NewAuthMiddleware(domainUserExtractor domainUser.UserExtractor) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 			// fmt.Printf("User ID: %d\n", context.GetUserID())
-
 			token := extractToken(req)
-			if token == "" {
-				http.Error(w, "Empty token", http.StatusForbidden)
-				return
-			}
-
-			payload, err := idtoken.Validate(req.Context(), token, googleClientID)
+			user, err := domainUserExtractor.ExtractUserFromToken(req.Context(), &token)
 			if err != nil {
-				http.Error(w, "Invalid token", http.StatusForbidden)
+				http.Error(w, err.Error(), http.StatusForbidden)
 				return
 			}
-
-			someUser := user.NewSomeUser(payload.Claims["sub"].(string),
-				payload.Claims["name"].(string),
-				payload.Claims["email"].(string),
-				payload.Claims["picture"].(string),
-			)
-
-			userCheck, error := userModel.CheckOrCreate(someUser)
-			if error != nil {
-				http.Error(w, "Blocked", http.StatusForbidden)
-				return
-			}
-			contextWithdata := appContext.SetUserID(req.Context(), userCheck.ID, userCheck.IsNew, token)
-			req = req.WithContext(contextWithdata)
-			next.ServeHTTP(w, req)
+			contextWithdata := appContext.SetUserID(req.Context(), user.ID, user.IsNew, token)
+			next.ServeHTTP(w, req.WithContext(contextWithdata))
 		})
 	}
 }
