@@ -1,5 +1,28 @@
 # Changelog
 
+## [1.5.0](https://github.com/wert2all/timeline-backend/compare/v1.4.1...v1.5.0) (2024-12-08)
+
+
+### Features
+
+* (db) create settings entity ([cc59338](https://github.com/wert2all/timeline-backend/commit/cc59338be6041b3139edb8d2529f95ad0b95bda1))
+* (db) create settings model ([75134ef](https://github.com/wert2all/timeline-backend/commit/75134efe9e9802f187cfff6b7aeaec9590bee18d))
+* (gql) expose account settings ([cf062bf](https://github.com/wert2all/timeline-backend/commit/cf062bf65258a932ec1014be81b0919e5a413dd0))
+* (gql) expose account settings ([70cdb55](https://github.com/wert2all/timeline-backend/commit/70cdb55e15c841471323d54055baf0e044e40859))
+* add GQL query for expose account timelines ([0262dd1](https://github.com/wert2all/timeline-backend/commit/0262dd1a100df8a530c28b5ddf3a4c431da4bab5))
+* add interfaces for saveSettings mutation ([1b69441](https://github.com/wert2all/timeline-backend/commit/1b694419507a1a1f9bd1dc92e0c815b179af727d))
+* add save setting GQL mutation ([4e9d0ff](https://github.com/wert2all/timeline-backend/commit/4e9d0ff89552fb443d5b6a081beef72c4309c006))
+* add token to context ([9e7456c](https://github.com/wert2all/timeline-backend/commit/9e7456c8e9584db66ed46dae695d67095b5d6e83))
+* saving account setings ([a75bf80](https://github.com/wert2all/timeline-backend/commit/a75bf80de7f3e8119f87516b9d50a66d4aae60b4))
+* validate input of saveSettings method ([3b8f4e8](https://github.com/wert2all/timeline-backend/commit/3b8f4e8bb0c3d7367204608088e75b1232c977c4))
+
+
+### Bug Fixes
+
+* fix assign event to timeline ([bf448d4](https://github.com/wert2all/timeline-backend/commit/bf448d4527ccb0b9996816f4630eb234b5fb6279))
+* rename account type on authorization ([5e65d8e](https://github.com/wert2all/timeline-backend/commit/5e65d8ef2d562d7cde72fd89ca26363e87e17ca5))
+* upsert account setting ([f5758b8](https://github.com/wert2all/timeline-backend/commit/f5758b880d2e1bcb6ac36979092d302a602ca151))
+
 ## [1.4.1](https://github.com/wert2all/timeline-backend/compare/v1.4.0...v1.4.1) (2024-11-07)
 
 
