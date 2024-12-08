@@ -54,8 +54,8 @@ func initValidators() {
 	initService(func(userModel userModel.UserModel, eventModel eventModel.Model) resolvers.Validator[resolvers.DeleteEventArguments, resolvers.ValidDeleteEventArguments] {
 		return resolvers.NewDeleteEventValidator(userModel, eventModel)
 	})
-	initService(func(userModel userModel.UserModel) resolvers.Validator[settingsResolver.SaveSettingsArguments, settingsResolver.ValidSaveSettingsArguments] {
-		return settingsResolver.NewSaveSettingsValidator(userModel)
+	initService(func(userModel userModel.UserModel, userExtractor domainUser.UserExtractor) resolvers.Validator[settingsResolver.SaveSettingsArguments, settingsResolver.ValidSaveSettingsArguments] {
+		return settingsResolver.NewSaveSettingsValidator(userModel, userExtractor)
 	})
 }
 
@@ -78,7 +78,7 @@ func initResolvers() {
 	initService(func(timelineModel timelineModel.Timeline, userModel user.UserModel) myAccountTimelines.Resolver {
 		return myAccountTimelines.NewMyAccountTimelinesResolver(timelineModel, userModel)
 	})
-	initService(func() resolvers.Resolver[model.Status, settingsResolver.ValidSaveSettingsArguments] {
-		return settingsResolver.NewSaveSettingsResolver()
+	initService(func(settingsModel settings.Model) resolvers.Resolver[model.Status, settingsResolver.ValidSaveSettingsArguments] {
+		return settingsResolver.NewSaveSettingsResolver(settingsModel)
 	})
 }
