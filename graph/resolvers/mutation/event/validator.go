@@ -62,7 +62,7 @@ func (b baseValidatorImpl) GetBaseValidEventInput(input GQLInput, ctx context.Co
 	}
 
 	token := appContext.GetToken(ctx)
-	user, err := b.userExtractor.ExtractUserFromToken(ctx, &token)
+	user, err := b.userExtractor.ExtractUserFromToken(ctx, token)
 	if err != nil {
 		return nil, err
 	}

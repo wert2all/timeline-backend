@@ -41,7 +41,7 @@ func (f AddTimelineArgumentFactory) New(timeline *model.AddTimeline) Arguments[A
 func (a addTimelineValidator) Validate(ctx context.Context, input Arguments[AddTimelineArguments]) (ValidArguments[ValidAddTimelineArguments], error) {
 	p := bluemonday.StrictPolicy()
 	token := appContext.GetToken(ctx)
-	user, err := a.userExtractor.ExtractUserFromToken(ctx, &token)
+	user, err := a.userExtractor.ExtractUserFromToken(ctx, token)
 	if err != nil {
 		return nil, err
 	}

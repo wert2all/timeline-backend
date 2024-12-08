@@ -6,8 +6,6 @@ import (
 
 	appContext "timeline/backend/app/context"
 
-	domainUser "timeline/backend/domain/user"
-
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/rs/cors"
 )
@@ -33,28 +31,28 @@ func NewMiddlewares() Middlewares {
 				Debug:              true,
 			}).
 				Handler,
+			saveTokenMiddleware(),
 		},
 	}
 }
 
-func NewAuthMiddleware(domainUserExtractor domainUser.UserExtractor) func(http.Handler) http.Handler {
+func saveTokenMiddleware() func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-			// fmt.Pritf("User ID: %d\n", context.GetUserID())
 			token := extractToken(req)
-			contextWithdata := appContext.SetUserID(req.Context(), token)
-			next.ServeHTTP(w, req.WithContext(contextWithdata))
+			contextWithData := appContext.SetToken(req.Context(), token)
+			next.ServeHTTP(w, req.WithContext(contextWithData))
 		})
 	}
 }
 
-func extractToken(req *http.Request) string {
+func extractToken(req *http.Request) *string {
 	authHeader := req.Header.Get("Authorization")
 	splitted := strings.Split(authHeader, "Bearer ")
 
 	if len(splitted) == 2 {
-		return splitted[1]
+		return &splitted[1]
 	} else {
-		return ""
+		return nil
 	}
 }

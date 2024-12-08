@@ -10,7 +10,7 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-func newRouter(middlewares middlewares.Middlewares, authMiddleware func(http.Handler) http.Handler) *chi.Mux {
+func newRouter(middlewares middlewares.Middlewares) *chi.Mux {
 	gqlHandler := createGQLHandler()
 
 	router := chi.NewRouter()
@@ -19,7 +19,6 @@ func newRouter(middlewares middlewares.Middlewares, authMiddleware func(http.Han
 	router.Options("/graphql", gqlHandler)
 	router.Group(func(chiRouter chi.Router) {
 		chiRouter.Use(middlewares.List...)
-		chiRouter.Use(authMiddleware)
 		chiRouter.Post("/graphql", gqlHandler)
 	})
 
