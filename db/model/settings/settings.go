@@ -9,7 +9,7 @@ import (
 type (
 	Model interface {
 		GetSettings(enumvalues.SettingsType, int) []*ent.Settings
-		SaveSettings(enumvalues.SettingsType, int, map[string]string) ([]*ent.Settings, error)
+		SaveSettings(enumvalues.SettingsType, int, map[string]string) error
 	}
 	modelImpl struct {
 		repository settings.Repository
@@ -17,7 +17,7 @@ type (
 )
 
 // SaveSettings implements Model.
-func (m modelImpl) SaveSettings(entityType enumvalues.SettingsType, entityID int, settings map[string]string) ([]*ent.Settings, error) {
+func (m modelImpl) SaveSettings(entityType enumvalues.SettingsType, entityID int, settings map[string]string) error {
 	return m.repository.UpsetSettings(entityType, entityID, settings)
 }
 

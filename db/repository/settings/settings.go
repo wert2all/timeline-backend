@@ -6,12 +6,14 @@ import (
 	"timeline/backend/ent"
 	"timeline/backend/ent/settings"
 	enumvalues "timeline/backend/lib/enum-values"
+
+	"entgo.io/ent/dialect/sql"
 )
 
 type (
 	Repository interface {
 		GetSettings(enumvalues.SettingsType, int) []*ent.Settings
-		UpsetSettings(enumvalues.SettingsType, int, map[string]string) ([]*ent.Settings, error)
+		UpsetSettings(enumvalues.SettingsType, int, map[string]string) error
 	}
 
 	repositoryImpl struct {
@@ -21,14 +23,7 @@ type (
 )
 
 // UpsetSettings implements Repository.
-func (r repositoryImpl) UpsetSettings(entityType enumvalues.SettingsType, entityID int, settingsValues map[string]string) ([]*ent.Settings, error) {
-	_, err := r.client.Settings.
-		Delete().
-		Where(settings.TypeEQ(entityType), settings.EntityID(entityID)).
-		Exec(r.context)
-	if err != nil {
-		return nil, err
-	}
+func (r repositoryImpl) UpsetSettings(entityType enumvalues.SettingsType, entityID int, settingsValues map[string]string) error {
 	settingsBuilders := make([]*ent.SettingsCreate, len(settingsValues))
 
 	i := 0
@@ -40,8 +35,13 @@ func (r repositoryImpl) UpsetSettings(entityType enumvalues.SettingsType, entity
 			SetValue(value)
 		i++
 	}
-
-	return r.client.Settings.CreateBulk(settingsBuilders...).Save(r.context)
+	return r.client.Settings.
+		CreateBulk(settingsBuilders...).
+		OnConflict(
+			sql.ConflictColumns(settings.FieldType, settings.FieldEntityID, settings.FieldKey),
+		).
+		UpdateValue().
+		Exec(r.context)
 }
 
 // GetSettings implements Repository.
