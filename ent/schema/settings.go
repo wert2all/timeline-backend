@@ -16,7 +16,7 @@ type Settings struct {
 // Fields of the Settings.
 func (Settings) Fields() []ent.Field {
 	return []ent.Field{
-		field.Enum("type").GoType(enumvalues.SettingsType("")).Default(string(enumvalues.Account)),
+		field.Enum("type").GoType(enumvalues.SettingsType("")).Default(string(enumvalues.SettingsTypeAccount)),
 		field.Int("entity_id").Positive(),
 		field.String("key").NotEmpty(),
 		field.String("value").Default(""),

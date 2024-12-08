@@ -4,15 +4,18 @@ import (
 	"context"
 	"errors"
 
+	appContext "timeline/backend/app/context"
+	"timeline/backend/db/model/settings"
 	"timeline/backend/db/model/user"
+	domainUser "timeline/backend/domain/user"
 	"timeline/backend/graph/model"
 	"timeline/backend/graph/resolvers"
+	enumvalues "timeline/backend/lib/enum-values"
 )
 
 type (
 	SaveSettingsArguments struct {
 		accountID int
-		userID    int
 		settings  []*model.AccountSettingInput
 	}
 	ValidSaveSettingsArguments struct {
@@ -22,9 +25,12 @@ type (
 	SaveSettingsArgumentFactory struct{}
 
 	validatorImpl struct {
-		userModel user.UserModel
+		userModel     user.UserModel
+		userExtractor domainUser.UserExtractor
 	}
-	resolverImpl struct{}
+	resolverImpl struct {
+		settingsModel settings.Model
+	}
 )
 
 // GetArguments implements resolvers.ValidArguments.
@@ -35,13 +41,23 @@ func (s SaveSettingsArguments) GetArguments() SaveSettingsArguments { return s }
 
 // Resolve implements resolvers.Resolver.
 func (r resolverImpl) Resolve(ctx context.Context, arguments resolvers.ValidArguments[ValidSaveSettingsArguments]) (model.Status, error) {
-	panic("unimplemented")
+	_, err := r.settingsModel.SaveSettings(enumvalues.SettingsTypeAccount, arguments.GetArguments().accountID, arguments.GetArguments().settings)
+	if err != nil {
+		return model.StatusError, errors.New("could not save settings")
+	} else {
+		return model.StatusSuccess, nil
+	}
 }
 
 // Validate implements resolvers.Validator.
 func (v validatorImpl) Validate(ctx context.Context, arguments resolvers.Arguments[SaveSettingsArguments]) (resolvers.ValidArguments[ValidSaveSettingsArguments], error) {
+	token := appContext.GetToken(ctx)
+	user, errExtraction := v.userExtractor.ExtractUserFromToken(ctx, &token)
+	if errExtraction != nil {
+		return nil, errors.New("could not save settings")
+	}
 	args := arguments.GetArguments()
-	_, err := v.userModel.GetUserAccount(args.accountID, args.userID)
+	_, err := v.userModel.GetUserAccount(args.accountID, user.ID)
 	if err != nil {
 		return nil, errors.New("could not save settings")
 	}
@@ -63,18 +79,17 @@ func (v validatorImpl) Validate(ctx context.Context, arguments resolvers.Argumen
 	}, nil
 }
 
-func (f SaveSettingsArgumentFactory) New(accountID int, userID int, settingsInput []*model.AccountSettingInput) resolvers.Arguments[SaveSettingsArguments] {
+func (f SaveSettingsArgumentFactory) New(accountID int, settingsInput []*model.AccountSettingInput) resolvers.Arguments[SaveSettingsArguments] {
 	return SaveSettingsArguments{
 		accountID: accountID,
-		userID:    userID,
 		settings:  settingsInput,
 	}
 }
 
-func NewSaveSettingsValidator(userModel user.UserModel) resolvers.Validator[SaveSettingsArguments, ValidSaveSettingsArguments] {
-	return validatorImpl{userModel: userModel}
+func NewSaveSettingsValidator(userModel user.UserModel, userExtractor domainUser.UserExtractor) resolvers.Validator[SaveSettingsArguments, ValidSaveSettingsArguments] {
+	return validatorImpl{userModel: userModel, userExtractor: userExtractor}
 }
 
-func NewSaveSettingsResolver() resolvers.Resolver[model.Status, ValidSaveSettingsArguments] {
-	return resolverImpl{}
+func NewSaveSettingsResolver(settingsModel settings.Model) resolvers.Resolver[model.Status, ValidSaveSettingsArguments] {
+	return resolverImpl{settingsModel: settingsModel}
 }

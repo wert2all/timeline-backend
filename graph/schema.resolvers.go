@@ -6,18 +6,16 @@ package graph
 
 import (
 	"context"
-
 	appContext "timeline/backend/app/context"
 	tagModel "timeline/backend/db/model/tag"
 	"timeline/backend/db/model/timeline"
+	domainUser "timeline/backend/domain/user"
 	"timeline/backend/graph/convert"
 	"timeline/backend/graph/model"
 	"timeline/backend/graph/resolvers"
-	"timeline/backend/graph/resolvers/mutation/account/settings"
+	settingsResolver "timeline/backend/graph/resolvers/mutation/account/settings"
 	myAccountTimelines "timeline/backend/graph/resolvers/query/timeline"
 	"timeline/backend/lib/utils"
-
-	domainUser "timeline/backend/domain/user"
 
 	container "github.com/golobby/container/v3"
 )
@@ -158,10 +156,10 @@ func (r *mutationResolver) DeleteEvent(ctx context.Context, eventID int) (model.
 }
 
 // SaveSettings is the resolver for the saveSettings field.
-func (r *mutationResolver) SaveSettings(ctx context.Context, accountID int, settingsInput []*model.AccountSettingInput) (model.Status, error) {
-	var factory settings.SaveSettingsArgumentFactory
-	var validator resolvers.Validator[settings.SaveSettingsArguments, settings.ValidSaveSettingsArguments]
-	var resolver resolvers.Resolver[model.Status, settings.ValidSaveSettingsArguments]
+func (r *mutationResolver) SaveSettings(ctx context.Context, accountID int, settings []*model.AccountSettingInput) (model.Status, error) {
+	var factory settingsResolver.SaveSettingsArgumentFactory
+	var validator resolvers.Validator[settingsResolver.SaveSettingsArguments, settingsResolver.ValidSaveSettingsArguments]
+	var resolver resolvers.Resolver[model.Status, settingsResolver.ValidSaveSettingsArguments]
 
 	errFactoryResolve := container.Resolve(&factory)
 	if errFactoryResolve != nil {
@@ -181,7 +179,7 @@ func (r *mutationResolver) SaveSettings(ctx context.Context, accountID int, sett
 		return model.StatusError, errResolverResolve
 	}
 
-	return resolvers.Resolve(ctx, factory.New(accountID, appContext.GetUserID(ctx), settingsInput), validator, resolver)
+	return resolvers.Resolve(ctx, factory.New(accountID, settings), validator, resolver)
 }
 
 // TimelineEvents is the resolver for the timelineEvents field.
@@ -255,7 +253,5 @@ func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 // Query returns QueryResolver implementation.
 func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
-type (
-	mutationResolver struct{ *Resolver }
-	queryResolver    struct{ *Resolver }
-)
+type mutationResolver struct{ *Resolver }
+type queryResolver struct{ *Resolver }

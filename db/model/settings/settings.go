@@ -9,11 +9,17 @@ import (
 type (
 	Model interface {
 		GetSettings(enumvalues.SettingsType, int) []*ent.Settings
+		SaveSettings(enumvalues.SettingsType, int, map[string]string) ([]*ent.Settings, error)
 	}
 	modelImpl struct {
 		repository settings.Repository
 	}
 )
+
+// SaveSettings implements Model.
+func (m modelImpl) SaveSettings(entityType enumvalues.SettingsType, entityID int, settings map[string]string) ([]*ent.Settings, error) {
+	return m.repository.UpsetSettings(entityType, entityID, settings)
+}
 
 // GetSettings implements Model.
 func (m modelImpl) GetSettings(entityType enumvalues.SettingsType, entityID int) []*ent.Settings {

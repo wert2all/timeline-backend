@@ -59,7 +59,7 @@ func (a authorizeResolverImpl) Resolve(_ context.Context, arguments ValidArgumen
 
 	gqlAccounts := make([]*model.ShortAccount, len(accounts))
 	for i, accountEntity := range accounts {
-		settings := a.settings.GetSettings(enumvalues.Account, accountEntity.ID)
+		settings := a.settings.GetSettings(enumvalues.SettingsTypeAccount, accountEntity.ID)
 		gqlSettings := make([]*model.AccountSettings, len(settings))
 
 		for i, setting := range settings {
