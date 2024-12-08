@@ -54,7 +54,7 @@ func (v validatorDeleteEventImpl) Validate(ctx context.Context, input Arguments[
 	}
 
 	token := appContext.GetToken(ctx)
-	user, errUser := v.userExtractor.ExtractUserFromToken(ctx, &token)
+	user, errUser := v.userExtractor.ExtractUserFromToken(ctx, token)
 	if errUser != nil {
 		return nil, errUser
 	}

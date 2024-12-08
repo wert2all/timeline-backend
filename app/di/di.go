@@ -47,9 +47,9 @@ func InitContainer(config config.Config, appContext context.Context) {
 }
 
 func initApplication(config config.Config) {
-	initService(func(entClient *ent.Client, extractor domainUser.UserExtractor) app.Application {
+	initService(func(entClient *ent.Client) app.Application {
 		return app.NewApplication(
-			newRouter(middlewares.NewMiddlewares(), middlewares.NewAuthMiddleware(extractor)),
+			newRouter(middlewares.NewMiddlewares()),
 			config.App.Listen,
 			func() {
 				entClient.Close()

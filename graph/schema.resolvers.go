@@ -6,6 +6,7 @@ package graph
 
 import (
 	"context"
+
 	appContext "timeline/backend/app/context"
 	tagModel "timeline/backend/db/model/tag"
 	"timeline/backend/db/model/timeline"
@@ -239,7 +240,7 @@ func (r *queryResolver) MyAccountTimelines(ctx context.Context, accountID int) (
 	}
 
 	token := appContext.GetToken(ctx)
-	user, err := userExtractor.ExtractUserFromToken(ctx, &token)
+	user, err := userExtractor.ExtractUserFromToken(ctx, token)
 	if err != nil {
 		return nil, err
 	}
@@ -253,5 +254,7 @@ func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 // Query returns QueryResolver implementation.
 func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
-type mutationResolver struct{ *Resolver }
-type queryResolver struct{ *Resolver }
+type (
+	mutationResolver struct{ *Resolver }
+	queryResolver    struct{ *Resolver }
+)

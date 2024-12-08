@@ -38,7 +38,7 @@ func (v ValidAuthorizeArguments) GetArguments() ValidAuthorizeArguments { return
 func (a AuthorizeArguments) GetArguments() AuthorizeArguments           { return a }
 func (a authorizeValidator) Validate(ctx context.Context, _ Arguments[AuthorizeArguments]) (ValidArguments[ValidAuthorizeArguments], error) {
 	token := appContext.GetToken(ctx)
-	extractedUser, err := a.userExtractor.ExtractUserFromToken(ctx, &token)
+	extractedUser, err := a.userExtractor.ExtractUserFromToken(ctx, token)
 	if err != nil {
 		return nil, err
 	}

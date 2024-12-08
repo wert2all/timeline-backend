@@ -52,7 +52,7 @@ func (r resolverImpl) Resolve(ctx context.Context, arguments resolvers.ValidArgu
 // Validate implements resolvers.Validator.
 func (v validatorImpl) Validate(ctx context.Context, arguments resolvers.Arguments[SaveSettingsArguments]) (resolvers.ValidArguments[ValidSaveSettingsArguments], error) {
 	token := appContext.GetToken(ctx)
-	user, errExtraction := v.userExtractor.ExtractUserFromToken(ctx, &token)
+	user, errExtraction := v.userExtractor.ExtractUserFromToken(ctx, token)
 	if errExtraction != nil {
 		return nil, errors.New("could not save settings")
 	}
