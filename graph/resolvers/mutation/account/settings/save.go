@@ -41,7 +41,7 @@ func (s SaveSettingsArguments) GetArguments() SaveSettingsArguments { return s }
 
 // Resolve implements resolvers.Resolver.
 func (r resolverImpl) Resolve(ctx context.Context, arguments resolvers.ValidArguments[ValidSaveSettingsArguments]) (model.Status, error) {
-	_, err := r.settingsModel.SaveSettings(enumvalues.SettingsTypeAccount, arguments.GetArguments().accountID, arguments.GetArguments().settings)
+	err := r.settingsModel.SaveSettings(enumvalues.SettingsTypeAccount, arguments.GetArguments().accountID, arguments.GetArguments().settings)
 	if err != nil {
 		return model.StatusError, errors.New("could not save settings")
 	} else {
