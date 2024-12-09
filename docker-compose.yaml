@@ -1,7 +1,6 @@
 services:
   db:
     image: postgres:16.2
-    restart: always
     environment:
       POSTGRES_USER: timeline
       POSTGRES_PASSWORD: timeline
