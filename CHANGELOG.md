@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.5.1](https://github.com/wert2all/timeline-backend/compare/v1.5.0...v1.5.1) (2024-12-09)
+
+
+### Bug Fixes
+
+* docker container should not restart always ([6a52825](https://github.com/wert2all/timeline-backend/commit/6a528257894e1d1180ad1655306b7f2d25f5e5d8))
+* fix static test ([ab10517](https://github.com/wert2all/timeline-backend/commit/ab10517adaba6c2cb3aca2d1cdc9c482c900bb16))
+* remove auth middleware at all ([e2977a5](https://github.com/wert2all/timeline-backend/commit/e2977a5c0797f05d709b329463f2f19ee11d389f))
+
 ## [1.5.0](https://github.com/wert2all/timeline-backend/compare/v1.4.1...v1.5.0) (2024-12-08)
 
 
