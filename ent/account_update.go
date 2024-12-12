@@ -43,6 +43,20 @@ func (au *AccountUpdate) SetNillableName(s *string) *AccountUpdate {
 	return au
 }
 
+// SetPreviewlyToken sets the "previewly_token" field.
+func (au *AccountUpdate) SetPreviewlyToken(s string) *AccountUpdate {
+	au.mutation.SetPreviewlyToken(s)
+	return au
+}
+
+// SetNillablePreviewlyToken sets the "previewly_token" field if the given value is not nil.
+func (au *AccountUpdate) SetNillablePreviewlyToken(s *string) *AccountUpdate {
+	if s != nil {
+		au.SetPreviewlyToken(*s)
+	}
+	return au
+}
+
 // SetAvatar sets the "avatar" field.
 func (au *AccountUpdate) SetAvatar(s string) *AccountUpdate {
 	au.mutation.SetAvatar(s)
@@ -150,7 +164,20 @@ func (au *AccountUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (au *AccountUpdate) check() error {
+	if v, ok := au.mutation.PreviewlyToken(); ok {
+		if err := account.PreviewlyTokenValidator(v); err != nil {
+			return &ValidationError{Name: "previewly_token", err: fmt.Errorf(`ent: validator failed for field "Account.previewly_token": %w`, err)}
+		}
+	}
+	return nil
+}
+
 func (au *AccountUpdate) sqlSave(ctx context.Context) (n int, err error) {
+	if err := au.check(); err != nil {
+		return n, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(account.Table, account.Columns, sqlgraph.NewFieldSpec(account.FieldID, field.TypeInt))
 	if ps := au.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -161,6 +188,9 @@ func (au *AccountUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := au.mutation.Name(); ok {
 		_spec.SetField(account.FieldName, field.TypeString, value)
+	}
+	if value, ok := au.mutation.PreviewlyToken(); ok {
+		_spec.SetField(account.FieldPreviewlyToken, field.TypeString, value)
 	}
 	if value, ok := au.mutation.Avatar(); ok {
 		_spec.SetField(account.FieldAvatar, field.TypeString, value)
@@ -269,6 +299,20 @@ func (auo *AccountUpdateOne) SetName(s string) *AccountUpdateOne {
 func (auo *AccountUpdateOne) SetNillableName(s *string) *AccountUpdateOne {
 	if s != nil {
 		auo.SetName(*s)
+	}
+	return auo
+}
+
+// SetPreviewlyToken sets the "previewly_token" field.
+func (auo *AccountUpdateOne) SetPreviewlyToken(s string) *AccountUpdateOne {
+	auo.mutation.SetPreviewlyToken(s)
+	return auo
+}
+
+// SetNillablePreviewlyToken sets the "previewly_token" field if the given value is not nil.
+func (auo *AccountUpdateOne) SetNillablePreviewlyToken(s *string) *AccountUpdateOne {
+	if s != nil {
+		auo.SetPreviewlyToken(*s)
 	}
 	return auo
 }
@@ -393,7 +437,20 @@ func (auo *AccountUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (auo *AccountUpdateOne) check() error {
+	if v, ok := auo.mutation.PreviewlyToken(); ok {
+		if err := account.PreviewlyTokenValidator(v); err != nil {
+			return &ValidationError{Name: "previewly_token", err: fmt.Errorf(`ent: validator failed for field "Account.previewly_token": %w`, err)}
+		}
+	}
+	return nil
+}
+
 func (auo *AccountUpdateOne) sqlSave(ctx context.Context) (_node *Account, err error) {
+	if err := auo.check(); err != nil {
+		return _node, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(account.Table, account.Columns, sqlgraph.NewFieldSpec(account.FieldID, field.TypeInt))
 	id, ok := auo.mutation.ID()
 	if !ok {
@@ -421,6 +478,9 @@ func (auo *AccountUpdateOne) sqlSave(ctx context.Context) (_node *Account, err e
 	}
 	if value, ok := auo.mutation.Name(); ok {
 		_spec.SetField(account.FieldName, field.TypeString, value)
+	}
+	if value, ok := auo.mutation.PreviewlyToken(); ok {
+		_spec.SetField(account.FieldPreviewlyToken, field.TypeString, value)
 	}
 	if value, ok := auo.mutation.Avatar(); ok {
 		_spec.SetField(account.FieldAvatar, field.TypeString, value)

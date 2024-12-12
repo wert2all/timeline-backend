@@ -19,6 +19,8 @@ type Account struct {
 	ID int `json:"id,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
+	// PreviewlyToken holds the value of the "previewly_token" field.
+	PreviewlyToken string `json:"previewly_token,omitempty"`
 	// Avatar holds the value of the "avatar" field.
 	Avatar *string `json:"avatar,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -66,7 +68,7 @@ func (*Account) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case account.FieldID:
 			values[i] = new(sql.NullInt64)
-		case account.FieldName, account.FieldAvatar:
+		case account.FieldName, account.FieldPreviewlyToken, account.FieldAvatar:
 			values[i] = new(sql.NullString)
 		case account.ForeignKeys[0]: // user_account
 			values[i] = new(sql.NullInt64)
@@ -96,6 +98,12 @@ func (a *Account) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
 			} else if value.Valid {
 				a.Name = value.String
+			}
+		case account.FieldPreviewlyToken:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field previewly_token", values[i])
+			} else if value.Valid {
+				a.PreviewlyToken = value.String
 			}
 		case account.FieldAvatar:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -159,6 +167,9 @@ func (a *Account) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v, ", a.ID))
 	builder.WriteString("name=")
 	builder.WriteString(a.Name)
+	builder.WriteString(", ")
+	builder.WriteString("previewly_token=")
+	builder.WriteString(a.PreviewlyToken)
 	builder.WriteString(", ")
 	if v := a.Avatar; v != nil {
 		builder.WriteString("avatar=")

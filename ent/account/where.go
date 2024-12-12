@@ -59,6 +59,11 @@ func Name(v string) predicate.Account {
 	return predicate.Account(sql.FieldEQ(FieldName, v))
 }
 
+// PreviewlyToken applies equality check predicate on the "previewly_token" field. It's identical to PreviewlyTokenEQ.
+func PreviewlyToken(v string) predicate.Account {
+	return predicate.Account(sql.FieldEQ(FieldPreviewlyToken, v))
+}
+
 // Avatar applies equality check predicate on the "avatar" field. It's identical to AvatarEQ.
 func Avatar(v string) predicate.Account {
 	return predicate.Account(sql.FieldEQ(FieldAvatar, v))
@@ -127,6 +132,71 @@ func NameEqualFold(v string) predicate.Account {
 // NameContainsFold applies the ContainsFold predicate on the "name" field.
 func NameContainsFold(v string) predicate.Account {
 	return predicate.Account(sql.FieldContainsFold(FieldName, v))
+}
+
+// PreviewlyTokenEQ applies the EQ predicate on the "previewly_token" field.
+func PreviewlyTokenEQ(v string) predicate.Account {
+	return predicate.Account(sql.FieldEQ(FieldPreviewlyToken, v))
+}
+
+// PreviewlyTokenNEQ applies the NEQ predicate on the "previewly_token" field.
+func PreviewlyTokenNEQ(v string) predicate.Account {
+	return predicate.Account(sql.FieldNEQ(FieldPreviewlyToken, v))
+}
+
+// PreviewlyTokenIn applies the In predicate on the "previewly_token" field.
+func PreviewlyTokenIn(vs ...string) predicate.Account {
+	return predicate.Account(sql.FieldIn(FieldPreviewlyToken, vs...))
+}
+
+// PreviewlyTokenNotIn applies the NotIn predicate on the "previewly_token" field.
+func PreviewlyTokenNotIn(vs ...string) predicate.Account {
+	return predicate.Account(sql.FieldNotIn(FieldPreviewlyToken, vs...))
+}
+
+// PreviewlyTokenGT applies the GT predicate on the "previewly_token" field.
+func PreviewlyTokenGT(v string) predicate.Account {
+	return predicate.Account(sql.FieldGT(FieldPreviewlyToken, v))
+}
+
+// PreviewlyTokenGTE applies the GTE predicate on the "previewly_token" field.
+func PreviewlyTokenGTE(v string) predicate.Account {
+	return predicate.Account(sql.FieldGTE(FieldPreviewlyToken, v))
+}
+
+// PreviewlyTokenLT applies the LT predicate on the "previewly_token" field.
+func PreviewlyTokenLT(v string) predicate.Account {
+	return predicate.Account(sql.FieldLT(FieldPreviewlyToken, v))
+}
+
+// PreviewlyTokenLTE applies the LTE predicate on the "previewly_token" field.
+func PreviewlyTokenLTE(v string) predicate.Account {
+	return predicate.Account(sql.FieldLTE(FieldPreviewlyToken, v))
+}
+
+// PreviewlyTokenContains applies the Contains predicate on the "previewly_token" field.
+func PreviewlyTokenContains(v string) predicate.Account {
+	return predicate.Account(sql.FieldContains(FieldPreviewlyToken, v))
+}
+
+// PreviewlyTokenHasPrefix applies the HasPrefix predicate on the "previewly_token" field.
+func PreviewlyTokenHasPrefix(v string) predicate.Account {
+	return predicate.Account(sql.FieldHasPrefix(FieldPreviewlyToken, v))
+}
+
+// PreviewlyTokenHasSuffix applies the HasSuffix predicate on the "previewly_token" field.
+func PreviewlyTokenHasSuffix(v string) predicate.Account {
+	return predicate.Account(sql.FieldHasSuffix(FieldPreviewlyToken, v))
+}
+
+// PreviewlyTokenEqualFold applies the EqualFold predicate on the "previewly_token" field.
+func PreviewlyTokenEqualFold(v string) predicate.Account {
+	return predicate.Account(sql.FieldEqualFold(FieldPreviewlyToken, v))
+}
+
+// PreviewlyTokenContainsFold applies the ContainsFold predicate on the "previewly_token" field.
+func PreviewlyTokenContainsFold(v string) predicate.Account {
+	return predicate.Account(sql.FieldContainsFold(FieldPreviewlyToken, v))
 }
 
 // AvatarEQ applies the EQ predicate on the "avatar" field.

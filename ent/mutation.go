@@ -45,6 +45,7 @@ type AccountMutation struct {
 	typ             string
 	id              *int
 	name            *string
+	previewly_token *string
 	avatar          *string
 	clearedFields   map[string]struct{}
 	timeline        map[int]struct{}
@@ -189,6 +190,42 @@ func (m *AccountMutation) OldName(ctx context.Context) (v string, err error) {
 // ResetName resets all changes to the "name" field.
 func (m *AccountMutation) ResetName() {
 	m.name = nil
+}
+
+// SetPreviewlyToken sets the "previewly_token" field.
+func (m *AccountMutation) SetPreviewlyToken(s string) {
+	m.previewly_token = &s
+}
+
+// PreviewlyToken returns the value of the "previewly_token" field in the mutation.
+func (m *AccountMutation) PreviewlyToken() (r string, exists bool) {
+	v := m.previewly_token
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPreviewlyToken returns the old "previewly_token" field's value of the Account entity.
+// If the Account object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AccountMutation) OldPreviewlyToken(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPreviewlyToken is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPreviewlyToken requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPreviewlyToken: %w", err)
+	}
+	return oldValue.PreviewlyToken, nil
+}
+
+// ResetPreviewlyToken resets all changes to the "previewly_token" field.
+func (m *AccountMutation) ResetPreviewlyToken() {
+	m.previewly_token = nil
 }
 
 // SetAvatar sets the "avatar" field.
@@ -354,9 +391,12 @@ func (m *AccountMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *AccountMutation) Fields() []string {
-	fields := make([]string, 0, 2)
+	fields := make([]string, 0, 3)
 	if m.name != nil {
 		fields = append(fields, account.FieldName)
+	}
+	if m.previewly_token != nil {
+		fields = append(fields, account.FieldPreviewlyToken)
 	}
 	if m.avatar != nil {
 		fields = append(fields, account.FieldAvatar)
@@ -371,6 +411,8 @@ func (m *AccountMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case account.FieldName:
 		return m.Name()
+	case account.FieldPreviewlyToken:
+		return m.PreviewlyToken()
 	case account.FieldAvatar:
 		return m.Avatar()
 	}
@@ -384,6 +426,8 @@ func (m *AccountMutation) OldField(ctx context.Context, name string) (ent.Value,
 	switch name {
 	case account.FieldName:
 		return m.OldName(ctx)
+	case account.FieldPreviewlyToken:
+		return m.OldPreviewlyToken(ctx)
 	case account.FieldAvatar:
 		return m.OldAvatar(ctx)
 	}
@@ -401,6 +445,13 @@ func (m *AccountMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetName(v)
+		return nil
+	case account.FieldPreviewlyToken:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPreviewlyToken(v)
 		return nil
 	case account.FieldAvatar:
 		v, ok := value.(string)
@@ -460,6 +511,9 @@ func (m *AccountMutation) ResetField(name string) error {
 	switch name {
 	case account.FieldName:
 		m.ResetName()
+		return nil
+	case account.FieldPreviewlyToken:
+		m.ResetPreviewlyToken()
 		return nil
 	case account.FieldAvatar:
 		m.ResetAvatar()

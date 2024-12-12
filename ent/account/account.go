@@ -14,6 +14,8 @@ const (
 	FieldID = "id"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
+	// FieldPreviewlyToken holds the string denoting the previewly_token field in the database.
+	FieldPreviewlyToken = "previewly_token"
 	// FieldAvatar holds the string denoting the avatar field in the database.
 	FieldAvatar = "avatar"
 	// EdgeTimeline holds the string denoting the timeline edge name in mutations.
@@ -42,6 +44,7 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldName,
+	FieldPreviewlyToken,
 	FieldAvatar,
 }
 
@@ -66,6 +69,13 @@ func ValidColumn(column string) bool {
 	return false
 }
 
+var (
+	// DefaultPreviewlyToken holds the default value on creation for the "previewly_token" field.
+	DefaultPreviewlyToken string
+	// PreviewlyTokenValidator is a validator for the "previewly_token" field. It is called by the builders before save.
+	PreviewlyTokenValidator func(string) error
+)
+
 // OrderOption defines the ordering options for the Account queries.
 type OrderOption func(*sql.Selector)
 
@@ -77,6 +87,11 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 // ByName orders the results by the name field.
 func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
+}
+
+// ByPreviewlyToken orders the results by the previewly_token field.
+func ByPreviewlyToken(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPreviewlyToken, opts...).ToFunc()
 }
 
 // ByAvatar orders the results by the avatar field.
