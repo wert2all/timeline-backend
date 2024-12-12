@@ -55,10 +55,11 @@ type Query struct {
 }
 
 type ShortAccount struct {
-	ID       int                `json:"id"`
-	Name     *string            `json:"name,omitempty"`
-	Avatar   *string            `json:"avatar,omitempty"`
-	Settings []*AccountSettings `json:"settings"`
+	ID             int                `json:"id"`
+	Name           *string            `json:"name,omitempty"`
+	PreviewlyToken string             `json:"previewlyToken"`
+	Avatar         *string            `json:"avatar,omitempty"`
+	Settings       []*AccountSettings `json:"settings"`
 }
 
 type ShortTimeline struct {
