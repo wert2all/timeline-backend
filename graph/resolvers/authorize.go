@@ -69,10 +69,11 @@ func (a authorizeResolverImpl) Resolve(_ context.Context, arguments ValidArgumen
 			}
 		}
 		gqlAccounts[i] = &model.ShortAccount{
-			Name:     &accountEntity.Name,
-			Avatar:   accountEntity.Avatar,
-			ID:       accountEntity.ID,
-			Settings: gqlSettings,
+			Name:           &accountEntity.Name,
+			Avatar:         accountEntity.Avatar,
+			ID:             accountEntity.ID,
+			PreviewlyToken: accountEntity.PreviewlyToken,
+			Settings:       gqlSettings,
 		}
 	}
 

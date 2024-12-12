@@ -27,6 +27,7 @@ type ShortTimeline {
 type ShortAccount {
   id: Int!
   name: String
+  previewlyToken: String!
   avatar: String
   settings: [AccountSettings!]!
 }
