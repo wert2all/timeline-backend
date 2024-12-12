@@ -29,6 +29,20 @@ func (ac *AccountCreate) SetName(s string) *AccountCreate {
 	return ac
 }
 
+// SetPreviewlyToken sets the "previewly_token" field.
+func (ac *AccountCreate) SetPreviewlyToken(s string) *AccountCreate {
+	ac.mutation.SetPreviewlyToken(s)
+	return ac
+}
+
+// SetNillablePreviewlyToken sets the "previewly_token" field if the given value is not nil.
+func (ac *AccountCreate) SetNillablePreviewlyToken(s *string) *AccountCreate {
+	if s != nil {
+		ac.SetPreviewlyToken(*s)
+	}
+	return ac
+}
+
 // SetAvatar sets the "avatar" field.
 func (ac *AccountCreate) SetAvatar(s string) *AccountCreate {
 	ac.mutation.SetAvatar(s)
@@ -76,6 +90,7 @@ func (ac *AccountCreate) Mutation() *AccountMutation {
 
 // Save creates the Account in the database.
 func (ac *AccountCreate) Save(ctx context.Context) (*Account, error) {
+	ac.defaults()
 	return withHooks(ctx, ac.sqlSave, ac.mutation, ac.hooks)
 }
 
@@ -101,10 +116,26 @@ func (ac *AccountCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (ac *AccountCreate) defaults() {
+	if _, ok := ac.mutation.PreviewlyToken(); !ok {
+		v := account.DefaultPreviewlyToken
+		ac.mutation.SetPreviewlyToken(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (ac *AccountCreate) check() error {
 	if _, ok := ac.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Account.name"`)}
+	}
+	if _, ok := ac.mutation.PreviewlyToken(); !ok {
+		return &ValidationError{Name: "previewly_token", err: errors.New(`ent: missing required field "Account.previewly_token"`)}
+	}
+	if v, ok := ac.mutation.PreviewlyToken(); ok {
+		if err := account.PreviewlyTokenValidator(v); err != nil {
+			return &ValidationError{Name: "previewly_token", err: fmt.Errorf(`ent: validator failed for field "Account.previewly_token": %w`, err)}
+		}
 	}
 	if _, ok := ac.mutation.Avatar(); !ok {
 		return &ValidationError{Name: "avatar", err: errors.New(`ent: missing required field "Account.avatar"`)}
@@ -139,6 +170,10 @@ func (ac *AccountCreate) createSpec() (*Account, *sqlgraph.CreateSpec) {
 	if value, ok := ac.mutation.Name(); ok {
 		_spec.SetField(account.FieldName, field.TypeString, value)
 		_node.Name = value
+	}
+	if value, ok := ac.mutation.PreviewlyToken(); ok {
+		_spec.SetField(account.FieldPreviewlyToken, field.TypeString, value)
+		_node.PreviewlyToken = value
 	}
 	if value, ok := ac.mutation.Avatar(); ok {
 		_spec.SetField(account.FieldAvatar, field.TypeString, value)
@@ -241,6 +276,18 @@ func (u *AccountUpsert) UpdateName() *AccountUpsert {
 	return u
 }
 
+// SetPreviewlyToken sets the "previewly_token" field.
+func (u *AccountUpsert) SetPreviewlyToken(v string) *AccountUpsert {
+	u.Set(account.FieldPreviewlyToken, v)
+	return u
+}
+
+// UpdatePreviewlyToken sets the "previewly_token" field to the value that was provided on create.
+func (u *AccountUpsert) UpdatePreviewlyToken() *AccountUpsert {
+	u.SetExcluded(account.FieldPreviewlyToken)
+	return u
+}
+
 // SetAvatar sets the "avatar" field.
 func (u *AccountUpsert) SetAvatar(v string) *AccountUpsert {
 	u.Set(account.FieldAvatar, v)
@@ -304,6 +351,20 @@ func (u *AccountUpsertOne) SetName(v string) *AccountUpsertOne {
 func (u *AccountUpsertOne) UpdateName() *AccountUpsertOne {
 	return u.Update(func(s *AccountUpsert) {
 		s.UpdateName()
+	})
+}
+
+// SetPreviewlyToken sets the "previewly_token" field.
+func (u *AccountUpsertOne) SetPreviewlyToken(v string) *AccountUpsertOne {
+	return u.Update(func(s *AccountUpsert) {
+		s.SetPreviewlyToken(v)
+	})
+}
+
+// UpdatePreviewlyToken sets the "previewly_token" field to the value that was provided on create.
+func (u *AccountUpsertOne) UpdatePreviewlyToken() *AccountUpsertOne {
+	return u.Update(func(s *AccountUpsert) {
+		s.UpdatePreviewlyToken()
 	})
 }
 
@@ -373,6 +434,7 @@ func (acb *AccountCreateBulk) Save(ctx context.Context) ([]*Account, error) {
 	for i := range acb.builders {
 		func(i int, root context.Context) {
 			builder := acb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*AccountMutation)
 				if !ok {
@@ -535,6 +597,20 @@ func (u *AccountUpsertBulk) SetName(v string) *AccountUpsertBulk {
 func (u *AccountUpsertBulk) UpdateName() *AccountUpsertBulk {
 	return u.Update(func(s *AccountUpsert) {
 		s.UpdateName()
+	})
+}
+
+// SetPreviewlyToken sets the "previewly_token" field.
+func (u *AccountUpsertBulk) SetPreviewlyToken(v string) *AccountUpsertBulk {
+	return u.Update(func(s *AccountUpsert) {
+		s.SetPreviewlyToken(v)
+	})
+}
+
+// UpdatePreviewlyToken sets the "previewly_token" field to the value that was provided on create.
+func (u *AccountUpsertBulk) UpdatePreviewlyToken() *AccountUpsertBulk {
+	return u.Update(func(s *AccountUpsert) {
+		s.UpdatePreviewlyToken()
 	})
 }
 

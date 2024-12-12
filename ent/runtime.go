@@ -4,6 +4,7 @@ package ent
 
 import (
 	"time"
+	"timeline/backend/ent/account"
 	"timeline/backend/ent/event"
 	"timeline/backend/ent/schema"
 	"timeline/backend/ent/settings"
@@ -14,6 +15,14 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	accountFields := schema.Account{}.Fields()
+	_ = accountFields
+	// accountDescPreviewlyToken is the schema descriptor for previewly_token field.
+	accountDescPreviewlyToken := accountFields[1].Descriptor()
+	// account.DefaultPreviewlyToken holds the default value on creation for the previewly_token field.
+	account.DefaultPreviewlyToken = accountDescPreviewlyToken.Default.(string)
+	// account.PreviewlyTokenValidator is a validator for the "previewly_token" field. It is called by the builders before save.
+	account.PreviewlyTokenValidator = accountDescPreviewlyToken.Validators[0].(func(string) error)
 	eventFields := schema.Event{}.Fields()
 	_ = eventFields
 	// eventDescCreatedAt is the schema descriptor for created_at field.

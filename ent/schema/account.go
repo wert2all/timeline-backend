@@ -15,6 +15,7 @@ type Account struct {
 func (Account) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("name"),
+		field.String("previewly_token").NotEmpty().Default(""),
 		field.String("avatar").Nillable(),
 	}
 }
