@@ -53,9 +53,9 @@ func (u userModelImp) CheckOrCreate(googleUser SomeUser) (*CheckOrCreate, error)
 	error, notFound := error.(*ent.NotFoundError)
 
 	if notFound {
-		createdUser, error := u.userRepository.Create(googleUser.UUID, googleUser.Name, googleUser.Email, googleUser.Avatar)
-		if error != nil {
-			return nil, error
+		createdUser, err := u.userRepository.Create(googleUser.UUID, googleUser.Name, googleUser.Email, googleUser.Avatar)
+		if err != nil {
+			return nil, err
 		}
 		account, errorAccount := u.accountRepository.Create(createdUser.ID, googleUser.Name, googleUser.Avatar)
 		if errorAccount != nil {
