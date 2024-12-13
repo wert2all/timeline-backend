@@ -3,11 +3,13 @@ package di
 import (
 	"context"
 	"log/slog"
+	"net/http"
 	"time"
 
 	"timeline/backend/app"
 	"timeline/backend/app/config"
 	middlewares "timeline/backend/app/middleware"
+	"timeline/backend/graph/client/previewly"
 
 	"timeline/backend/ent"
 	"timeline/backend/lib/log"
@@ -17,6 +19,7 @@ import (
 	"timeline/backend/db/repository/account"
 	"timeline/backend/db/repository/user"
 
+	"github.com/Khan/genqlient/graphql"
 	"github.com/getsentry/sentry-go"
 	"github.com/golobby/container/v3"
 
@@ -31,12 +34,20 @@ func InitContainer(config config.Config, appContext context.Context) {
 		return createClient(context, config.Postgres)
 	})
 
+	initService(func() graphql.Client { return graphql.NewClient(config.Previewly.API, http.DefaultClient) })
+	initService(func(client graphql.Client) previewly.MutationClient { return previewly.NewMutationClient(client) })
+
 	initRepositories()
 	initModels()
 
-	initService(func(userRepository user.Repository, accountRepository account.Repository) userModel.Authorize {
-		return userModel.NewUserModel(userRepository, accountRepository)
-	})
+	initService(
+		func(userRepository user.Repository,
+			accountRepository account.Repository,
+			mutationClient previewly.MutationClient,
+		) userModel.Authorize {
+			return userModel.NewUserModel(userRepository, accountRepository, mutationClient)
+		},
+	)
 	initService(func(userModel userModel.Authorize) domainUser.UserExtractor {
 		return domainUser.NewUserExtractor(config.Google.ClientID, userModel)
 	})

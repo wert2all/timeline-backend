@@ -1,11 +1,13 @@
 package user
 
 import (
+	"context"
 	"time"
 
 	"timeline/backend/db/repository/account"
 	"timeline/backend/db/repository/user"
 	"timeline/backend/ent"
+	"timeline/backend/graph/client/previewly"
 )
 
 type SomeUser struct {
@@ -18,7 +20,7 @@ type CheckOrCreate struct {
 }
 
 type Authorize interface {
-	CheckOrCreate(someUser SomeUser) (*CheckOrCreate, error)
+	CheckOrCreate(context.Context, SomeUser) (*CheckOrCreate, error)
 	Authorize(int) (*ent.User, error)
 }
 
@@ -30,8 +32,9 @@ type UserModel interface {
 }
 
 type userModelImp struct {
-	userRepository    user.Repository
-	accountRepository account.Repository
+	userRepository          user.Repository
+	accountRepository       account.Repository
+	previewlyMutationClient previewly.MutationClient
 }
 
 // GetUserAccount implements UserModel.
@@ -48,16 +51,20 @@ func (u userModelImp) GetUser(userID int) (*ent.User, error) {
 	return u.userRepository.FindByID(userID)
 }
 
-func (u userModelImp) CheckOrCreate(googleUser SomeUser) (*CheckOrCreate, error) {
+func (u userModelImp) CheckOrCreate(ctx context.Context, googleUser SomeUser) (*CheckOrCreate, error) {
 	user, error := u.userRepository.FindByUUID(googleUser.UUID)
 	error, notFound := error.(*ent.NotFoundError)
 
 	if notFound {
+		token, err := u.previewlyMutationClient.CreateToken(ctx)
+		if err != nil {
+			return nil, err
+		}
 		createdUser, err := u.userRepository.Create(googleUser.UUID, googleUser.Name, googleUser.Email, googleUser.Avatar)
 		if err != nil {
 			return nil, err
 		}
-		account, errorAccount := u.accountRepository.Create(createdUser.ID, googleUser.Name, googleUser.Avatar)
+		account, errorAccount := u.accountRepository.Create(createdUser.ID, googleUser.Name, googleUser.Avatar, *token)
 		if errorAccount != nil {
 			return nil, errorAccount
 		}
@@ -87,9 +94,13 @@ func NewSomeUser(uuid, name, email, avatar string) SomeUser {
 	return SomeUser{UUID: uuid, Name: name, Email: email, Avatar: avatar}
 }
 
-func NewUserModel(userRepository user.Repository, accountRepository account.Repository) UserModel {
+func NewUserModel(userRepository user.Repository,
+	accountRepository account.Repository,
+	mutationClient previewly.MutationClient,
+) UserModel {
 	return userModelImp{
-		userRepository:    userRepository,
-		accountRepository: accountRepository,
+		userRepository:          userRepository,
+		accountRepository:       accountRepository,
+		previewlyMutationClient: mutationClient,
 	}
 }
