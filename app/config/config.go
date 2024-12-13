@@ -33,12 +33,17 @@ type (
 		ClientID string
 	}
 
+	Previewly struct {
+		API string
+	}
+
 	Config struct {
 		App      App
 		Postgres Postgres
 
-		Google Google
-		Sentry sentry.ClientOptions
+		Google    Google
+		Previewly Previewly
+		Sentry    sentry.ClientOptions
 	}
 )
 
@@ -54,6 +59,7 @@ func NewConfig() Config {
 		postgresPassword   string
 		sentryDsnFlag      string
 		googleClientIDFlag string
+		previewlyAPI       string
 	)
 
 	flag.StringVar(&listenHostFlag, "listen-host", "localhost", "Listen host")
@@ -69,6 +75,7 @@ func NewConfig() Config {
 
 	flag.StringVar(&googleClientIDFlag, "google-client-id", "", "Google client ID")
 	flag.StringVar(&sentryDsnFlag, "sentry-dsn", "", "Sentry DSN")
+	flag.StringVar(&previewlyAPI, "previewly-api", "https://api.previewly.top/graphql", "Previewly API URL")
 	flag.Parse()
 
 	config := Config{
@@ -96,6 +103,10 @@ func NewConfig() Config {
 		Sentry: sentry.ClientOptions{
 			Dsn:           sentryDsnFlag,
 			EnableTracing: false,
+		},
+
+		Previewly: Previewly{
+			API: previewlyAPI,
 		},
 	}
 

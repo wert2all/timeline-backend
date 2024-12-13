@@ -19,6 +19,7 @@ import (
 	"timeline/backend/db/repository/user"
 	"timeline/backend/ent"
 	"timeline/backend/ent/migrate"
+	"timeline/backend/graph/client/previewly"
 
 	_ "github.com/lib/pq"
 )
@@ -45,8 +46,8 @@ func initRepositories() {
 }
 
 func initModels() {
-	initService(func(userRepository user.Repository, accountRepository account.Repository) userModel.UserModel {
-		return userModel.NewUserModel(userRepository, accountRepository)
+	initService(func(userRepository user.Repository, accountRepository account.Repository, mutationClient previewly.MutationClient) userModel.UserModel {
+		return userModel.NewUserModel(userRepository, accountRepository, mutationClient)
 	})
 	initService(func(repository tag.Repository) tagModel.Model {
 		return tagModel.NewTagModel(repository)
