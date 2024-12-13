@@ -72,6 +72,6 @@ func NewAddTimelineResolver(users user.UserModel, timeline timeline.Timeline) Re
 	return addTimelimeMutation{Users: users, Timeline: timeline}
 }
 
-func NewAddtimelineValidator(userModel user.UserModel) Validator[AddTimelineArguments, ValidAddTimelineArguments] {
-	return addTimelineValidator{UsersModel: userModel}
+func NewAddtimelineValidator(userModel user.UserModel, userExtractor domainUser.UserExtractor) Validator[AddTimelineArguments, ValidAddTimelineArguments] {
+	return addTimelineValidator{UsersModel: userModel, userExtractor: userExtractor}
 }
