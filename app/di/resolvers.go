@@ -42,8 +42,8 @@ func initValidators() {
 	initService(func(userModel userModel.UserModel, userExtractor domainUser.UserExtractor) resolvers.Validator[resolvers.AuthorizeArguments, resolvers.ValidAuthorizeArguments] {
 		return resolvers.NewAuthorizeValidator(userModel, userExtractor)
 	})
-	initService(func(userModel userModel.UserModel) resolvers.Validator[resolvers.AddTimelineArguments, resolvers.ValidAddTimelineArguments] {
-		return resolvers.NewAddtimelineValidator(userModel)
+	initService(func(userModel userModel.UserModel, userExtractor domainUser.UserExtractor) resolvers.Validator[resolvers.AddTimelineArguments, resolvers.ValidAddTimelineArguments] {
+		return resolvers.NewAddtimelineValidator(userModel, userExtractor)
 	})
 	initService(func(baseValidator eventValidator.BaseValidator) resolvers.Validator[resolvers.AddEventArguments, resolvers.ValidAddEventArguments] {
 		return resolvers.NewAddEventValidator(baseValidator)

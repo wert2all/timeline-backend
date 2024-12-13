@@ -29,6 +29,7 @@ func (u UserExtractor) ExtractUserFromToken(ctx context.Context, token *string) 
 		payload.Claims["email"].(string),
 		payload.Claims["picture"].(string),
 	)
+
 	userCheck, err := u.userModel.CheckOrCreate(ctx, someUser)
 	if err != nil {
 		return nil, errors.New("Blocked")
