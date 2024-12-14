@@ -73,8 +73,8 @@ func (f DeleteEventArgumentFactory) New(eventID int) Arguments[DeleteEventArgume
 	return DeleteEventArguments{eventID: eventID}
 }
 
-func NewDeleteEventValidator(usersModel user.UserModel, eventsModel event.Model) Validator[DeleteEventArguments, ValidDeleteEventArguments] {
-	return validatorDeleteEventImpl{usersModel: usersModel, eventsModel: eventsModel}
+func NewDeleteEventValidator(usersModel user.UserModel, eventsModel event.Model, userExtractor domainUser.UserExtractor) Validator[DeleteEventArguments, ValidDeleteEventArguments] {
+	return validatorDeleteEventImpl{usersModel: usersModel, eventsModel: eventsModel, userExtractor: userExtractor}
 }
 
 func NewDeleteEventResolver(eventRepository eventRepository.Repository) Resolver[model.Status, ValidDeleteEventArguments] {
