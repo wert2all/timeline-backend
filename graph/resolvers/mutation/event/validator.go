@@ -23,25 +23,27 @@ type (
 		GetBaseValidEventInput(GQLInput, context.Context) (*BaseValidEventInput, error)
 	}
 	GQLInput struct {
-		TimelineID  int
-		Date        time.Time
-		Type        *model.TimelineType
-		Title       *string
-		Description *string
-		ShowTime    *bool
-		URL         *string
-		Tags        []string
+		TimelineID       int
+		Date             time.Time
+		Type             *model.TimelineType
+		Title            *string
+		Description      *string
+		ShowTime         *bool
+		URL              *string
+		Tags             []string
+		PreviewlyImageID *int
 	}
 
 	BaseValidEventInput struct {
-		Timeline    *ent.Timeline
-		EventType   entEvent.Type
-		Date        time.Time
-		Title       string
-		Description string
-		ShowTime    bool
-		Url         *url.URL
-		Tags        []string
+		Timeline         *ent.Timeline
+		EventType        entEvent.Type
+		Date             time.Time
+		Title            string
+		Description      string
+		ShowTime         bool
+		Url              *url.URL
+		Tags             []string
+		PreviewlyImageID *int
 	}
 
 	baseValidatorImpl struct {
@@ -91,14 +93,15 @@ func (b baseValidatorImpl) GetBaseValidEventInput(input GQLInput, ctx context.Co
 	}
 
 	return &BaseValidEventInput{
-		Timeline:    timelineEntity,
-		EventType:   eventType,
-		Date:        input.Date,
-		Title:       p.Sanitize(utils.DerefString(input.Title)),
-		Description: p.Sanitize(utils.DerefString(input.Description)),
-		ShowTime:    showTime,
-		Url:         b.getLink(input.URL),
-		Tags:        maps.Values(groupedTags),
+		Timeline:         timelineEntity,
+		EventType:        eventType,
+		Date:             input.Date,
+		Title:            p.Sanitize(utils.DerefString(input.Title)),
+		Description:      p.Sanitize(utils.DerefString(input.Description)),
+		ShowTime:         showTime,
+		Url:              b.getLink(input.URL),
+		Tags:             maps.Values(groupedTags),
+		PreviewlyImageID: input.PreviewlyImageID,
 	}, nil
 }
 

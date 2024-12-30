@@ -32,15 +32,16 @@ type AddTimeline struct {
 }
 
 type ExistTimelineEventInput struct {
-	ID          int           `json:"id"`
-	TimelineID  int           `json:"timelineId"`
-	Date        time.Time     `json:"date"`
-	Type        *TimelineType `json:"type,omitempty"`
-	Title       *string       `json:"title,omitempty"`
-	Description *string       `json:"description,omitempty"`
-	ShowTime    *bool         `json:"showTime,omitempty"`
-	URL         *string       `json:"url,omitempty"`
-	Tags        []string      `json:"tags,omitempty"`
+	ID               int           `json:"id"`
+	TimelineID       int           `json:"timelineId"`
+	Date             time.Time     `json:"date"`
+	Type             *TimelineType `json:"type,omitempty"`
+	Title            *string       `json:"title,omitempty"`
+	Description      *string       `json:"description,omitempty"`
+	ShowTime         *bool         `json:"showTime,omitempty"`
+	URL              *string       `json:"url,omitempty"`
+	Tags             []string      `json:"tags,omitempty"`
+	PreviewlyImageID *int          `json:"previewlyImageId,omitempty"`
 }
 
 type Limit struct {
@@ -79,15 +80,16 @@ type TimelineEvent struct {
 }
 
 type TimelineEventInput struct {
-	ID          *int          `json:"id,omitempty"`
-	TimelineID  int           `json:"timelineId"`
-	Date        time.Time     `json:"date"`
-	Type        *TimelineType `json:"type,omitempty"`
-	Title       *string       `json:"title,omitempty"`
-	Description *string       `json:"description,omitempty"`
-	ShowTime    *bool         `json:"showTime,omitempty"`
-	URL         *string       `json:"url,omitempty"`
-	Tags        []string      `json:"tags,omitempty"`
+	ID               *int          `json:"id,omitempty"`
+	TimelineID       int           `json:"timelineId"`
+	Date             time.Time     `json:"date"`
+	Type             *TimelineType `json:"type,omitempty"`
+	Title            *string       `json:"title,omitempty"`
+	Description      *string       `json:"description,omitempty"`
+	ShowTime         *bool         `json:"showTime,omitempty"`
+	URL              *string       `json:"url,omitempty"`
+	Tags             []string      `json:"tags,omitempty"`
+	PreviewlyImageID *int          `json:"previewlyImageId,omitempty"`
 }
 
 type User struct {

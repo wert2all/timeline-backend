@@ -40,6 +40,7 @@ func (m modelImpl) UpdateEvent(event *ent.Event, input *eventValidator.BaseValid
 		SetTitle(input.Title).
 		SetDescription(input.Description).
 		SetShowTime(input.ShowTime).
+		SetNillablePreviewlyImageID(input.PreviewlyImageID).
 		AddTags(tags...).
 		ClearTimeline()
 

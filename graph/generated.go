@@ -4593,7 +4593,7 @@ func (ec *executionContext) unmarshalInputExistTimelineEventInput(ctx context.Co
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"id", "timelineId", "date", "type", "title", "description", "showTime", "url", "tags"}
+	fieldsInOrder := [...]string{"id", "timelineId", "date", "type", "title", "description", "showTime", "url", "tags", "previewlyImageId"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -4663,6 +4663,13 @@ func (ec *executionContext) unmarshalInputExistTimelineEventInput(ctx context.Co
 				return it, err
 			}
 			it.Tags = data
+		case "previewlyImageId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("previewlyImageId"))
+			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.PreviewlyImageID = data
 		}
 	}
 
@@ -4710,7 +4717,7 @@ func (ec *executionContext) unmarshalInputTimelineEventInput(ctx context.Context
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"id", "timelineId", "date", "type", "title", "description", "showTime", "url", "tags"}
+	fieldsInOrder := [...]string{"id", "timelineId", "date", "type", "title", "description", "showTime", "url", "tags", "previewlyImageId"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -4780,6 +4787,13 @@ func (ec *executionContext) unmarshalInputTimelineEventInput(ctx context.Context
 				return it, err
 			}
 			it.Tags = data
+		case "previewlyImageId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("previewlyImageId"))
+			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.PreviewlyImageID = data
 		}
 	}
 

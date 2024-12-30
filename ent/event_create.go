@@ -128,6 +128,20 @@ func (ec *EventCreate) SetNillableURL(s *string) *EventCreate {
 	return ec
 }
 
+// SetPreviewlyImageID sets the "previewly_image_id" field.
+func (ec *EventCreate) SetPreviewlyImageID(i int) *EventCreate {
+	ec.mutation.SetPreviewlyImageID(i)
+	return ec
+}
+
+// SetNillablePreviewlyImageID sets the "previewly_image_id" field if the given value is not nil.
+func (ec *EventCreate) SetNillablePreviewlyImageID(i *int) *EventCreate {
+	if i != nil {
+		ec.SetPreviewlyImageID(*i)
+	}
+	return ec
+}
+
 // SetTimelineID sets the "timeline" edge to the Timeline entity by ID.
 func (ec *EventCreate) SetTimelineID(id int) *EventCreate {
 	ec.mutation.SetTimelineID(id)
@@ -288,6 +302,10 @@ func (ec *EventCreate) createSpec() (*Event, *sqlgraph.CreateSpec) {
 	if value, ok := ec.mutation.URL(); ok {
 		_spec.SetField(event.FieldURL, field.TypeString, value)
 		_node.URL = value
+	}
+	if value, ok := ec.mutation.PreviewlyImageID(); ok {
+		_spec.SetField(event.FieldPreviewlyImageID, field.TypeInt, value)
+		_node.PreviewlyImageID = &value
 	}
 	if nodes := ec.mutation.TimelineIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -482,6 +500,30 @@ func (u *EventUpsert) ClearURL() *EventUpsert {
 	return u
 }
 
+// SetPreviewlyImageID sets the "previewly_image_id" field.
+func (u *EventUpsert) SetPreviewlyImageID(v int) *EventUpsert {
+	u.Set(event.FieldPreviewlyImageID, v)
+	return u
+}
+
+// UpdatePreviewlyImageID sets the "previewly_image_id" field to the value that was provided on create.
+func (u *EventUpsert) UpdatePreviewlyImageID() *EventUpsert {
+	u.SetExcluded(event.FieldPreviewlyImageID)
+	return u
+}
+
+// AddPreviewlyImageID adds v to the "previewly_image_id" field.
+func (u *EventUpsert) AddPreviewlyImageID(v int) *EventUpsert {
+	u.Add(event.FieldPreviewlyImageID, v)
+	return u
+}
+
+// ClearPreviewlyImageID clears the value of the "previewly_image_id" field.
+func (u *EventUpsert) ClearPreviewlyImageID() *EventUpsert {
+	u.SetNull(event.FieldPreviewlyImageID)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
@@ -650,6 +692,34 @@ func (u *EventUpsertOne) UpdateURL() *EventUpsertOne {
 func (u *EventUpsertOne) ClearURL() *EventUpsertOne {
 	return u.Update(func(s *EventUpsert) {
 		s.ClearURL()
+	})
+}
+
+// SetPreviewlyImageID sets the "previewly_image_id" field.
+func (u *EventUpsertOne) SetPreviewlyImageID(v int) *EventUpsertOne {
+	return u.Update(func(s *EventUpsert) {
+		s.SetPreviewlyImageID(v)
+	})
+}
+
+// AddPreviewlyImageID adds v to the "previewly_image_id" field.
+func (u *EventUpsertOne) AddPreviewlyImageID(v int) *EventUpsertOne {
+	return u.Update(func(s *EventUpsert) {
+		s.AddPreviewlyImageID(v)
+	})
+}
+
+// UpdatePreviewlyImageID sets the "previewly_image_id" field to the value that was provided on create.
+func (u *EventUpsertOne) UpdatePreviewlyImageID() *EventUpsertOne {
+	return u.Update(func(s *EventUpsert) {
+		s.UpdatePreviewlyImageID()
+	})
+}
+
+// ClearPreviewlyImageID clears the value of the "previewly_image_id" field.
+func (u *EventUpsertOne) ClearPreviewlyImageID() *EventUpsertOne {
+	return u.Update(func(s *EventUpsert) {
+		s.ClearPreviewlyImageID()
 	})
 }
 
@@ -987,6 +1057,34 @@ func (u *EventUpsertBulk) UpdateURL() *EventUpsertBulk {
 func (u *EventUpsertBulk) ClearURL() *EventUpsertBulk {
 	return u.Update(func(s *EventUpsert) {
 		s.ClearURL()
+	})
+}
+
+// SetPreviewlyImageID sets the "previewly_image_id" field.
+func (u *EventUpsertBulk) SetPreviewlyImageID(v int) *EventUpsertBulk {
+	return u.Update(func(s *EventUpsert) {
+		s.SetPreviewlyImageID(v)
+	})
+}
+
+// AddPreviewlyImageID adds v to the "previewly_image_id" field.
+func (u *EventUpsertBulk) AddPreviewlyImageID(v int) *EventUpsertBulk {
+	return u.Update(func(s *EventUpsert) {
+		s.AddPreviewlyImageID(v)
+	})
+}
+
+// UpdatePreviewlyImageID sets the "previewly_image_id" field to the value that was provided on create.
+func (u *EventUpsertBulk) UpdatePreviewlyImageID() *EventUpsertBulk {
+	return u.Update(func(s *EventUpsert) {
+		s.UpdatePreviewlyImageID()
+	})
+}
+
+// ClearPreviewlyImageID clears the value of the "previewly_image_id" field.
+func (u *EventUpsertBulk) ClearPreviewlyImageID() *EventUpsertBulk {
+	return u.Update(func(s *EventUpsert) {
+		s.ClearPreviewlyImageID()
 	})
 }
 

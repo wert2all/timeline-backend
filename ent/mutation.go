@@ -627,26 +627,28 @@ func (m *AccountMutation) ResetEdge(name string) error {
 // EventMutation represents an operation that mutates the Event nodes in the graph.
 type EventMutation struct {
 	config
-	op              Op
-	typ             string
-	id              *int
-	created_at      *time.Time
-	date            *time.Time
-	_type           *event.Type
-	time            *string
-	showTime        *bool
-	title           *string
-	description     *string
-	url             *string
-	clearedFields   map[string]struct{}
-	timeline        *int
-	clearedtimeline bool
-	tags            map[int]struct{}
-	removedtags     map[int]struct{}
-	clearedtags     bool
-	done            bool
-	oldValue        func(context.Context) (*Event, error)
-	predicates      []predicate.Event
+	op                    Op
+	typ                   string
+	id                    *int
+	created_at            *time.Time
+	date                  *time.Time
+	_type                 *event.Type
+	time                  *string
+	showTime              *bool
+	title                 *string
+	description           *string
+	url                   *string
+	previewly_image_id    *int
+	addpreviewly_image_id *int
+	clearedFields         map[string]struct{}
+	timeline              *int
+	clearedtimeline       bool
+	tags                  map[int]struct{}
+	removedtags           map[int]struct{}
+	clearedtags           bool
+	done                  bool
+	oldValue              func(context.Context) (*Event, error)
+	predicates            []predicate.Event
 }
 
 var _ ent.Mutation = (*EventMutation)(nil)
@@ -1087,6 +1089,76 @@ func (m *EventMutation) ResetURL() {
 	delete(m.clearedFields, event.FieldURL)
 }
 
+// SetPreviewlyImageID sets the "previewly_image_id" field.
+func (m *EventMutation) SetPreviewlyImageID(i int) {
+	m.previewly_image_id = &i
+	m.addpreviewly_image_id = nil
+}
+
+// PreviewlyImageID returns the value of the "previewly_image_id" field in the mutation.
+func (m *EventMutation) PreviewlyImageID() (r int, exists bool) {
+	v := m.previewly_image_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPreviewlyImageID returns the old "previewly_image_id" field's value of the Event entity.
+// If the Event object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventMutation) OldPreviewlyImageID(ctx context.Context) (v *int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPreviewlyImageID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPreviewlyImageID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPreviewlyImageID: %w", err)
+	}
+	return oldValue.PreviewlyImageID, nil
+}
+
+// AddPreviewlyImageID adds i to the "previewly_image_id" field.
+func (m *EventMutation) AddPreviewlyImageID(i int) {
+	if m.addpreviewly_image_id != nil {
+		*m.addpreviewly_image_id += i
+	} else {
+		m.addpreviewly_image_id = &i
+	}
+}
+
+// AddedPreviewlyImageID returns the value that was added to the "previewly_image_id" field in this mutation.
+func (m *EventMutation) AddedPreviewlyImageID() (r int, exists bool) {
+	v := m.addpreviewly_image_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearPreviewlyImageID clears the value of the "previewly_image_id" field.
+func (m *EventMutation) ClearPreviewlyImageID() {
+	m.previewly_image_id = nil
+	m.addpreviewly_image_id = nil
+	m.clearedFields[event.FieldPreviewlyImageID] = struct{}{}
+}
+
+// PreviewlyImageIDCleared returns if the "previewly_image_id" field was cleared in this mutation.
+func (m *EventMutation) PreviewlyImageIDCleared() bool {
+	_, ok := m.clearedFields[event.FieldPreviewlyImageID]
+	return ok
+}
+
+// ResetPreviewlyImageID resets all changes to the "previewly_image_id" field.
+func (m *EventMutation) ResetPreviewlyImageID() {
+	m.previewly_image_id = nil
+	m.addpreviewly_image_id = nil
+	delete(m.clearedFields, event.FieldPreviewlyImageID)
+}
+
 // SetTimelineID sets the "timeline" edge to the Timeline entity by id.
 func (m *EventMutation) SetTimelineID(id int) {
 	m.timeline = &id
@@ -1214,7 +1286,7 @@ func (m *EventMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *EventMutation) Fields() []string {
-	fields := make([]string, 0, 8)
+	fields := make([]string, 0, 9)
 	if m.created_at != nil {
 		fields = append(fields, event.FieldCreatedAt)
 	}
@@ -1238,6 +1310,9 @@ func (m *EventMutation) Fields() []string {
 	}
 	if m.url != nil {
 		fields = append(fields, event.FieldURL)
+	}
+	if m.previewly_image_id != nil {
+		fields = append(fields, event.FieldPreviewlyImageID)
 	}
 	return fields
 }
@@ -1263,6 +1338,8 @@ func (m *EventMutation) Field(name string) (ent.Value, bool) {
 		return m.Description()
 	case event.FieldURL:
 		return m.URL()
+	case event.FieldPreviewlyImageID:
+		return m.PreviewlyImageID()
 	}
 	return nil, false
 }
@@ -1288,6 +1365,8 @@ func (m *EventMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldDescription(ctx)
 	case event.FieldURL:
 		return m.OldURL(ctx)
+	case event.FieldPreviewlyImageID:
+		return m.OldPreviewlyImageID(ctx)
 	}
 	return nil, fmt.Errorf("unknown Event field %s", name)
 }
@@ -1353,6 +1432,13 @@ func (m *EventMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetURL(v)
 		return nil
+	case event.FieldPreviewlyImageID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPreviewlyImageID(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Event field %s", name)
 }
@@ -1360,13 +1446,21 @@ func (m *EventMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *EventMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	if m.addpreviewly_image_id != nil {
+		fields = append(fields, event.FieldPreviewlyImageID)
+	}
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *EventMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case event.FieldPreviewlyImageID:
+		return m.AddedPreviewlyImageID()
+	}
 	return nil, false
 }
 
@@ -1375,6 +1469,13 @@ func (m *EventMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *EventMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case event.FieldPreviewlyImageID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddPreviewlyImageID(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Event numeric field %s", name)
 }
@@ -1394,6 +1495,9 @@ func (m *EventMutation) ClearedFields() []string {
 	}
 	if m.FieldCleared(event.FieldURL) {
 		fields = append(fields, event.FieldURL)
+	}
+	if m.FieldCleared(event.FieldPreviewlyImageID) {
+		fields = append(fields, event.FieldPreviewlyImageID)
 	}
 	return fields
 }
@@ -1420,6 +1524,9 @@ func (m *EventMutation) ClearField(name string) error {
 		return nil
 	case event.FieldURL:
 		m.ClearURL()
+		return nil
+	case event.FieldPreviewlyImageID:
+		m.ClearPreviewlyImageID()
 		return nil
 	}
 	return fmt.Errorf("unknown Event nullable field %s", name)
@@ -1452,6 +1559,9 @@ func (m *EventMutation) ResetField(name string) error {
 		return nil
 	case event.FieldURL:
 		m.ResetURL()
+		return nil
+	case event.FieldPreviewlyImageID:
+		m.ResetPreviewlyImageID()
 		return nil
 	}
 	return fmt.Errorf("unknown Event field %s", name)

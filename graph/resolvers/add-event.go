@@ -29,6 +29,7 @@ type ValidAddEventArguments struct {
 	showTime    bool
 	url         *url.URL
 	tags        []string
+	imageID     *int
 }
 
 type AddEventArguments struct {
@@ -103,14 +104,15 @@ type addEventvalidatorImpl struct {
 func (a addEventvalidatorImpl) Validate(ctx context.Context, arguments Arguments[AddEventArguments]) (ValidArguments[ValidAddEventArguments], error) {
 	input := arguments.GetArguments().eventInput
 	gqlInput := eventValidator.GQLInput{
-		TimelineID:  input.TimelineID,
-		Type:        input.Type,
-		Date:        input.Date,
-		Title:       input.Title,
-		Description: input.Description,
-		ShowTime:    input.ShowTime,
-		URL:         input.URL,
-		Tags:        input.Tags,
+		TimelineID:       input.TimelineID,
+		Type:             input.Type,
+		Date:             input.Date,
+		Title:            input.Title,
+		Description:      input.Description,
+		ShowTime:         input.ShowTime,
+		URL:              input.URL,
+		Tags:             input.Tags,
+		PreviewlyImageID: input.PreviewlyImageID,
 	}
 
 	baseEvent, err := a.baseValidator.GetBaseValidEventInput(gqlInput, ctx)
@@ -126,6 +128,7 @@ func (a addEventvalidatorImpl) Validate(ctx context.Context, arguments Arguments
 		showTime:    baseEvent.ShowTime,
 		url:         baseEvent.Url,
 		tags:        baseEvent.Tags,
+		imageID:     baseEvent.PreviewlyImageID,
 	}, err
 }
 
