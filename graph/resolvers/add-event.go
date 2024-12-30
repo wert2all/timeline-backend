@@ -88,12 +88,13 @@ func (a addEventResolverImpl) Resolve(ctx context.Context, arguments ValidArgume
 	}
 
 	return &model.TimelineEvent{
-		ID:          updatedEntity.ID,
-		Date:        updatedEntity.Date,
-		Type:        model.TimelineType(updatedEntity.Type.String()),
-		Title:       &updatedEntity.Title,
-		Description: &updatedEntity.Description,
-		Tags:        entityTags,
+		ID:               updatedEntity.ID,
+		Date:             updatedEntity.Date,
+		Type:             model.TimelineType(updatedEntity.Type.String()),
+		Title:            &updatedEntity.Title,
+		Description:      &updatedEntity.Description,
+		Tags:             entityTags,
+		PreviewlyImageID: updatedEntity.PreviewlyImageID,
 	}, nil
 }
 

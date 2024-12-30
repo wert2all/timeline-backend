@@ -88,14 +88,15 @@ type ComplexityRoot struct {
 	}
 
 	TimelineEvent struct {
-		Date        func(childComplexity int) int
-		Description func(childComplexity int) int
-		ID          func(childComplexity int) int
-		ShowTime    func(childComplexity int) int
-		Tags        func(childComplexity int) int
-		Title       func(childComplexity int) int
-		Type        func(childComplexity int) int
-		URL         func(childComplexity int) int
+		Date             func(childComplexity int) int
+		Description      func(childComplexity int) int
+		ID               func(childComplexity int) int
+		PreviewlyImageID func(childComplexity int) int
+		ShowTime         func(childComplexity int) int
+		Tags             func(childComplexity int) int
+		Title            func(childComplexity int) int
+		Type             func(childComplexity int) int
+		URL              func(childComplexity int) int
 	}
 
 	User struct {
@@ -342,6 +343,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.TimelineEvent.ID(childComplexity), true
+
+	case "TimelineEvent.previewlyImageId":
+		if e.complexity.TimelineEvent.PreviewlyImageID == nil {
+			break
+		}
+
+		return e.complexity.TimelineEvent.PreviewlyImageID(childComplexity), true
 
 	case "TimelineEvent.showTime":
 		if e.complexity.TimelineEvent.ShowTime == nil {
@@ -1366,6 +1374,8 @@ func (ec *executionContext) fieldContext_Mutation_addEvent(ctx context.Context, 
 				return ec.fieldContext_TimelineEvent_url(ctx, field)
 			case "tags":
 				return ec.fieldContext_TimelineEvent_tags(ctx, field)
+			case "previewlyImageId":
+				return ec.fieldContext_TimelineEvent_previewlyImageId(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type TimelineEvent", field.Name)
 		},
@@ -1439,6 +1449,8 @@ func (ec *executionContext) fieldContext_Mutation_editEvent(ctx context.Context,
 				return ec.fieldContext_TimelineEvent_url(ctx, field)
 			case "tags":
 				return ec.fieldContext_TimelineEvent_tags(ctx, field)
+			case "previewlyImageId":
+				return ec.fieldContext_TimelineEvent_previewlyImageId(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type TimelineEvent", field.Name)
 		},
@@ -1622,6 +1634,8 @@ func (ec *executionContext) fieldContext_Query_timelineEvents(ctx context.Contex
 				return ec.fieldContext_TimelineEvent_url(ctx, field)
 			case "tags":
 				return ec.fieldContext_TimelineEvent_tags(ctx, field)
+			case "previewlyImageId":
+				return ec.fieldContext_TimelineEvent_previewlyImageId(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type TimelineEvent", field.Name)
 		},
@@ -2470,6 +2484,47 @@ func (ec *executionContext) fieldContext_TimelineEvent_tags(_ context.Context, f
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TimelineEvent_previewlyImageId(ctx context.Context, field graphql.CollectedField, obj *model.TimelineEvent) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_TimelineEvent_previewlyImageId(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PreviewlyImageID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_TimelineEvent_previewlyImageId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TimelineEvent",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
 		},
 	}
 	return fc, nil
@@ -5208,6 +5263,8 @@ func (ec *executionContext) _TimelineEvent(ctx context.Context, sel ast.Selectio
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "previewlyImageId":
+			out.Values[i] = ec._TimelineEvent_previewlyImageId(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

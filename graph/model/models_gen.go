@@ -69,14 +69,15 @@ type ShortTimeline struct {
 }
 
 type TimelineEvent struct {
-	ID          int          `json:"id"`
-	Date        time.Time    `json:"date"`
-	Type        TimelineType `json:"type"`
-	Title       *string      `json:"title,omitempty"`
-	Description *string      `json:"description,omitempty"`
-	ShowTime    *bool        `json:"showTime,omitempty"`
-	URL         *string      `json:"url,omitempty"`
-	Tags        []string     `json:"tags"`
+	ID               int          `json:"id"`
+	Date             time.Time    `json:"date"`
+	Type             TimelineType `json:"type"`
+	Title            *string      `json:"title,omitempty"`
+	Description      *string      `json:"description,omitempty"`
+	ShowTime         *bool        `json:"showTime,omitempty"`
+	URL              *string      `json:"url,omitempty"`
+	Tags             []string     `json:"tags"`
+	PreviewlyImageID *int         `json:"previewlyImageId,omitempty"`
 }
 
 type TimelineEventInput struct {

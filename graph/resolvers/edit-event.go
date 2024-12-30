@@ -45,12 +45,13 @@ func (e editEventResolverImpl) Resolve(ctx context.Context, arguments ValidArgum
 	}
 
 	return &model.TimelineEvent{
-		ID:          updatedEntity.ID,
-		Date:        updatedEntity.Date,
-		Type:        model.TimelineType(updatedEntity.Type.String()),
-		Title:       &updatedEntity.Title,
-		Description: &updatedEntity.Description,
-		Tags:        arguments.GetArguments().baseInput.Tags,
+		ID:               updatedEntity.ID,
+		Date:             updatedEntity.Date,
+		Type:             model.TimelineType(updatedEntity.Type.String()),
+		Title:            &updatedEntity.Title,
+		Description:      &updatedEntity.Description,
+		Tags:             arguments.GetArguments().baseInput.Tags,
+		PreviewlyImageID: updatedEntity.PreviewlyImageID,
 	}, nil
 }
 
