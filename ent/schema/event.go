@@ -1,8 +1,9 @@
 package schema
 
 import (
-	"entgo.io/ent/schema/edge"
 	"time"
+
+	"entgo.io/ent/schema/edge"
 
 	"entgo.io/ent"
 	"entgo.io/ent/schema/field"
@@ -24,6 +25,7 @@ func (Event) Fields() []ent.Field {
 		field.String("title").Optional(),
 		field.String("description").Optional(),
 		field.String("url").Optional(),
+		field.Int("previewly_image_id").Optional().Nillable(),
 	}
 }
 

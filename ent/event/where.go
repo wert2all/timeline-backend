@@ -90,6 +90,11 @@ func URL(v string) predicate.Event {
 	return predicate.Event(sql.FieldEQ(FieldURL, v))
 }
 
+// PreviewlyImageID applies equality check predicate on the "previewly_image_id" field. It's identical to PreviewlyImageIDEQ.
+func PreviewlyImageID(v int) predicate.Event {
+	return predicate.Event(sql.FieldEQ(FieldPreviewlyImageID, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.Event {
 	return predicate.Event(sql.FieldEQ(FieldCreatedAt, v))
@@ -498,6 +503,56 @@ func URLEqualFold(v string) predicate.Event {
 // URLContainsFold applies the ContainsFold predicate on the "url" field.
 func URLContainsFold(v string) predicate.Event {
 	return predicate.Event(sql.FieldContainsFold(FieldURL, v))
+}
+
+// PreviewlyImageIDEQ applies the EQ predicate on the "previewly_image_id" field.
+func PreviewlyImageIDEQ(v int) predicate.Event {
+	return predicate.Event(sql.FieldEQ(FieldPreviewlyImageID, v))
+}
+
+// PreviewlyImageIDNEQ applies the NEQ predicate on the "previewly_image_id" field.
+func PreviewlyImageIDNEQ(v int) predicate.Event {
+	return predicate.Event(sql.FieldNEQ(FieldPreviewlyImageID, v))
+}
+
+// PreviewlyImageIDIn applies the In predicate on the "previewly_image_id" field.
+func PreviewlyImageIDIn(vs ...int) predicate.Event {
+	return predicate.Event(sql.FieldIn(FieldPreviewlyImageID, vs...))
+}
+
+// PreviewlyImageIDNotIn applies the NotIn predicate on the "previewly_image_id" field.
+func PreviewlyImageIDNotIn(vs ...int) predicate.Event {
+	return predicate.Event(sql.FieldNotIn(FieldPreviewlyImageID, vs...))
+}
+
+// PreviewlyImageIDGT applies the GT predicate on the "previewly_image_id" field.
+func PreviewlyImageIDGT(v int) predicate.Event {
+	return predicate.Event(sql.FieldGT(FieldPreviewlyImageID, v))
+}
+
+// PreviewlyImageIDGTE applies the GTE predicate on the "previewly_image_id" field.
+func PreviewlyImageIDGTE(v int) predicate.Event {
+	return predicate.Event(sql.FieldGTE(FieldPreviewlyImageID, v))
+}
+
+// PreviewlyImageIDLT applies the LT predicate on the "previewly_image_id" field.
+func PreviewlyImageIDLT(v int) predicate.Event {
+	return predicate.Event(sql.FieldLT(FieldPreviewlyImageID, v))
+}
+
+// PreviewlyImageIDLTE applies the LTE predicate on the "previewly_image_id" field.
+func PreviewlyImageIDLTE(v int) predicate.Event {
+	return predicate.Event(sql.FieldLTE(FieldPreviewlyImageID, v))
+}
+
+// PreviewlyImageIDIsNil applies the IsNil predicate on the "previewly_image_id" field.
+func PreviewlyImageIDIsNil() predicate.Event {
+	return predicate.Event(sql.FieldIsNull(FieldPreviewlyImageID))
+}
+
+// PreviewlyImageIDNotNil applies the NotNil predicate on the "previewly_image_id" field.
+func PreviewlyImageIDNotNil() predicate.Event {
+	return predicate.Event(sql.FieldNotNull(FieldPreviewlyImageID))
 }
 
 // HasTimeline applies the HasEdge predicate on the "timeline" edge.

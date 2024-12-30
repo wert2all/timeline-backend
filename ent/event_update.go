@@ -152,6 +152,33 @@ func (eu *EventUpdate) ClearURL() *EventUpdate {
 	return eu
 }
 
+// SetPreviewlyImageID sets the "previewly_image_id" field.
+func (eu *EventUpdate) SetPreviewlyImageID(i int) *EventUpdate {
+	eu.mutation.ResetPreviewlyImageID()
+	eu.mutation.SetPreviewlyImageID(i)
+	return eu
+}
+
+// SetNillablePreviewlyImageID sets the "previewly_image_id" field if the given value is not nil.
+func (eu *EventUpdate) SetNillablePreviewlyImageID(i *int) *EventUpdate {
+	if i != nil {
+		eu.SetPreviewlyImageID(*i)
+	}
+	return eu
+}
+
+// AddPreviewlyImageID adds i to the "previewly_image_id" field.
+func (eu *EventUpdate) AddPreviewlyImageID(i int) *EventUpdate {
+	eu.mutation.AddPreviewlyImageID(i)
+	return eu
+}
+
+// ClearPreviewlyImageID clears the value of the "previewly_image_id" field.
+func (eu *EventUpdate) ClearPreviewlyImageID() *EventUpdate {
+	eu.mutation.ClearPreviewlyImageID()
+	return eu
+}
+
 // SetTimelineID sets the "timeline" edge to the Timeline entity by ID.
 func (eu *EventUpdate) SetTimelineID(id int) *EventUpdate {
 	eu.mutation.SetTimelineID(id)
@@ -299,6 +326,15 @@ func (eu *EventUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if eu.mutation.URLCleared() {
 		_spec.ClearField(event.FieldURL, field.TypeString)
+	}
+	if value, ok := eu.mutation.PreviewlyImageID(); ok {
+		_spec.SetField(event.FieldPreviewlyImageID, field.TypeInt, value)
+	}
+	if value, ok := eu.mutation.AddedPreviewlyImageID(); ok {
+		_spec.AddField(event.FieldPreviewlyImageID, field.TypeInt, value)
+	}
+	if eu.mutation.PreviewlyImageIDCleared() {
+		_spec.ClearField(event.FieldPreviewlyImageID, field.TypeInt)
 	}
 	if eu.mutation.TimelineCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -516,6 +552,33 @@ func (euo *EventUpdateOne) ClearURL() *EventUpdateOne {
 	return euo
 }
 
+// SetPreviewlyImageID sets the "previewly_image_id" field.
+func (euo *EventUpdateOne) SetPreviewlyImageID(i int) *EventUpdateOne {
+	euo.mutation.ResetPreviewlyImageID()
+	euo.mutation.SetPreviewlyImageID(i)
+	return euo
+}
+
+// SetNillablePreviewlyImageID sets the "previewly_image_id" field if the given value is not nil.
+func (euo *EventUpdateOne) SetNillablePreviewlyImageID(i *int) *EventUpdateOne {
+	if i != nil {
+		euo.SetPreviewlyImageID(*i)
+	}
+	return euo
+}
+
+// AddPreviewlyImageID adds i to the "previewly_image_id" field.
+func (euo *EventUpdateOne) AddPreviewlyImageID(i int) *EventUpdateOne {
+	euo.mutation.AddPreviewlyImageID(i)
+	return euo
+}
+
+// ClearPreviewlyImageID clears the value of the "previewly_image_id" field.
+func (euo *EventUpdateOne) ClearPreviewlyImageID() *EventUpdateOne {
+	euo.mutation.ClearPreviewlyImageID()
+	return euo
+}
+
 // SetTimelineID sets the "timeline" edge to the Timeline entity by ID.
 func (euo *EventUpdateOne) SetTimelineID(id int) *EventUpdateOne {
 	euo.mutation.SetTimelineID(id)
@@ -693,6 +756,15 @@ func (euo *EventUpdateOne) sqlSave(ctx context.Context) (_node *Event, err error
 	}
 	if euo.mutation.URLCleared() {
 		_spec.ClearField(event.FieldURL, field.TypeString)
+	}
+	if value, ok := euo.mutation.PreviewlyImageID(); ok {
+		_spec.SetField(event.FieldPreviewlyImageID, field.TypeInt, value)
+	}
+	if value, ok := euo.mutation.AddedPreviewlyImageID(); ok {
+		_spec.AddField(event.FieldPreviewlyImageID, field.TypeInt, value)
+	}
+	if euo.mutation.PreviewlyImageIDCleared() {
+		_spec.ClearField(event.FieldPreviewlyImageID, field.TypeInt)
 	}
 	if euo.mutation.TimelineCleared() {
 		edge := &sqlgraph.EdgeSpec{

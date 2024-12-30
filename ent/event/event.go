@@ -31,6 +31,8 @@ const (
 	FieldDescription = "description"
 	// FieldURL holds the string denoting the url field in the database.
 	FieldURL = "url"
+	// FieldPreviewlyImageID holds the string denoting the previewly_image_id field in the database.
+	FieldPreviewlyImageID = "previewly_image_id"
 	// EdgeTimeline holds the string denoting the timeline edge name in mutations.
 	EdgeTimeline = "timeline"
 	// EdgeTags holds the string denoting the tags edge name in mutations.
@@ -62,6 +64,7 @@ var Columns = []string{
 	FieldTitle,
 	FieldDescription,
 	FieldURL,
+	FieldPreviewlyImageID,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "events"
@@ -170,6 +173,11 @@ func ByDescription(opts ...sql.OrderTermOption) OrderOption {
 // ByURL orders the results by the url field.
 func ByURL(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldURL, opts...).ToFunc()
+}
+
+// ByPreviewlyImageID orders the results by the previewly_image_id field.
+func ByPreviewlyImageID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPreviewlyImageID, opts...).ToFunc()
 }
 
 // ByTimelineField orders the results by timeline field.

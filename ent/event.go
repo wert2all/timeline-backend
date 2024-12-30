@@ -34,6 +34,8 @@ type Event struct {
 	Description string `json:"description,omitempty"`
 	// URL holds the value of the "url" field.
 	URL string `json:"url,omitempty"`
+	// PreviewlyImageID holds the value of the "previewly_image_id" field.
+	PreviewlyImageID *int `json:"previewly_image_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the EventQuery when eager-loading is set.
 	Edges          EventEdges `json:"edges"`
@@ -79,7 +81,7 @@ func (*Event) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case event.FieldShowTime:
 			values[i] = new(sql.NullBool)
-		case event.FieldID:
+		case event.FieldID, event.FieldPreviewlyImageID:
 			values[i] = new(sql.NullInt64)
 		case event.FieldType, event.FieldTime, event.FieldTitle, event.FieldDescription, event.FieldURL:
 			values[i] = new(sql.NullString)
@@ -155,6 +157,13 @@ func (e *Event) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field url", values[i])
 			} else if value.Valid {
 				e.URL = value.String
+			}
+		case event.FieldPreviewlyImageID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field previewly_image_id", values[i])
+			} else if value.Valid {
+				e.PreviewlyImageID = new(int)
+				*e.PreviewlyImageID = int(value.Int64)
 			}
 		case event.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -232,6 +241,11 @@ func (e *Event) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("url=")
 	builder.WriteString(e.URL)
+	builder.WriteString(", ")
+	if v := e.PreviewlyImageID; v != nil {
+		builder.WriteString("previewly_image_id=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteByte(')')
 	return builder.String()
 }

@@ -79,6 +79,7 @@ input TimelineEventInput {
   showTime: Boolean
   url: String
   tags: [String!]
+  previewlyImageId: Int
 }
 
 input ExistTimelineEventInput {
@@ -91,6 +92,7 @@ input ExistTimelineEventInput {
   showTime: Boolean
   url: String
   tags: [String!]
+  previewlyImageId: Int
 }
 
 input Limit {

@@ -58,14 +58,15 @@ func (e editEventResolverImpl) Resolve(ctx context.Context, arguments ValidArgum
 func (e editEventvalidatorImpl) Validate(ctx context.Context, arguments Arguments[EditEventArguments]) (ValidArguments[ValidEditEventArguments], error) {
 	input := arguments.GetArguments().eventInput
 	gqlInput := eventValidator.GQLInput{
-		TimelineID:  input.TimelineID,
-		Type:        input.Type,
-		Date:        input.Date,
-		Title:       input.Title,
-		Description: input.Description,
-		ShowTime:    input.ShowTime,
-		URL:         input.URL,
-		Tags:        input.Tags,
+		TimelineID:       input.TimelineID,
+		Type:             input.Type,
+		Date:             input.Date,
+		Title:            input.Title,
+		Description:      input.Description,
+		ShowTime:         input.ShowTime,
+		URL:              input.URL,
+		Tags:             input.Tags,
+		PreviewlyImageID: input.PreviewlyImageID,
 	}
 	baseEvent, err := e.baseValidator.GetBaseValidEventInput(gqlInput, ctx)
 	if err != nil {
