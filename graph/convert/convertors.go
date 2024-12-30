@@ -8,14 +8,15 @@ import (
 
 func ToEvent(event *ent.Event, tags []string) *model.TimelineEvent {
 	return &model.TimelineEvent{
-		ID:          event.ID,
-		Date:        event.Date,
-		Type:        model.TimelineType(event.Type.String()),
-		Title:       &event.Title,
-		Description: &event.Description,
-		ShowTime:    &event.ShowTime,
-		URL:         &event.URL,
-		Tags:        tags,
+		ID:               event.ID,
+		Date:             event.Date,
+		Type:             model.TimelineType(event.Type.String()),
+		Title:            &event.Title,
+		Description:      &event.Description,
+		ShowTime:         &event.ShowTime,
+		URL:              &event.URL,
+		Tags:             tags,
+		PreviewlyImageID: event.PreviewlyImageID,
 	}
 }
 

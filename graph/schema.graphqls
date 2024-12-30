@@ -62,6 +62,7 @@ type TimelineEvent {
   showTime: Boolean
   url: String
   tags: [String!]!
+  previewlyImageId: Int
 }
 
 input AddTimeline {
