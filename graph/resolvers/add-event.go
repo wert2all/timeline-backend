@@ -63,6 +63,7 @@ func (a addEventResolverImpl) Resolve(ctx context.Context, arguments ValidArgume
 		SetTitle(arguments.GetArguments().title).
 		SetDescription(arguments.GetArguments().description).
 		SetShowTime(arguments.GetArguments().showTime).
+		SetNillablePreviewlyImageID(arguments.GetArguments().imageID).
 		AddTags(tags...)
 
 	if arguments.GetArguments().url != nil {
