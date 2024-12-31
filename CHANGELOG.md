@@ -1,5 +1,29 @@
 # Changelog
 
+## [1.6.0](https://github.com/wert2all/timeline-backend/compare/v1.5.0...v1.6.0) (2024-12-31)
+
+
+### Features
+
+* add previewly GQL scheme ([64e1433](https://github.com/wert2all/timeline-backend/commit/64e14332ea28cd3cbd4b30900d102a4bd42d771f))
+* add previewly token to account ([95f427d](https://github.com/wert2all/timeline-backend/commit/95f427dedb145931f3f646408e171fb38f5674dc))
+* expose account previewly token ([92c3a04](https://github.com/wert2all/timeline-backend/commit/92c3a044a1809fe2a44a8df3706d1638bef4819d))
+* expose previewly image ID ([640c334](https://github.com/wert2all/timeline-backend/commit/640c33416eabea437323e65fc1b7911cb47ec019))
+* expose token from previewly service ([df1ac02](https://github.com/wert2all/timeline-backend/commit/df1ac028f673ce5fdcf6521f6297c3a5512fecf1))
+* saving previewly image id ([d3f79cb](https://github.com/wert2all/timeline-backend/commit/d3f79cb3446ce20f7cc85b398f96e1e2cd04991b))
+
+
+### Bug Fixes
+
+* docker container should not restart always ([6a52825](https://github.com/wert2all/timeline-backend/commit/6a528257894e1d1180ad1655306b7f2d25f5e5d8))
+* fix adding timeline ([bf13ce8](https://github.com/wert2all/timeline-backend/commit/bf13ce883ccab2d7737e6d93d35b007e1badd7bc))
+* fix deleting event ([4de9f17](https://github.com/wert2all/timeline-backend/commit/4de9f17d02af11b573c3621c5974f43dd9d936cc))
+* fix error shadow ([313742c](https://github.com/wert2all/timeline-backend/commit/313742ce6ae0017a679fe69d32b10223fb4b246b))
+* fix saving image ID on adding event ([bbd9043](https://github.com/wert2all/timeline-backend/commit/bbd9043701a77d588d16910466c08f5ee476d2f3))
+* fix static test ([de12a12](https://github.com/wert2all/timeline-backend/commit/de12a12d4707c2bbe04ebab4be60032894afc93a))
+* fix static test ([ab10517](https://github.com/wert2all/timeline-backend/commit/ab10517adaba6c2cb3aca2d1cdc9c482c900bb16))
+* remove auth middleware at all ([e2977a5](https://github.com/wert2all/timeline-backend/commit/e2977a5c0797f05d709b329463f2f19ee11d389f))
+
 ## [1.5.0](https://github.com/wert2all/timeline-backend/compare/v1.4.1...v1.5.0) (2024-12-08)
 
 
