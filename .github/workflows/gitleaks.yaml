@@ -1,5 +1,14 @@
 name: gitleaks
-on: [pull_request, push, workflow_dispatch]
+
+on:
+  push:
+    branches:
+      - master
+      - main
+  pull_request:
+    paths:
+      - "ent/*"
+
 jobs:
   scan:
     name: gitleaks
