@@ -51,6 +51,7 @@ func (e editEventResolverImpl) Resolve(ctx context.Context, arguments ValidArgum
 		Title:            &updatedEntity.Title,
 		Description:      &updatedEntity.Description,
 		Tags:             arguments.GetArguments().baseInput.Tags,
+		ShowTime:         &updatedEntity.ShowTime,
 		PreviewlyImageID: updatedEntity.PreviewlyImageID,
 	}, nil
 }
