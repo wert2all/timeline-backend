@@ -50,6 +50,7 @@ func (e editEventResolverImpl) Resolve(ctx context.Context, arguments ValidArgum
 		Type:             model.TimelineType(updatedEntity.Type.String()),
 		Title:            &updatedEntity.Title,
 		Description:      &updatedEntity.Description,
+		URL:              &updatedEntity.URL,
 		Tags:             arguments.GetArguments().baseInput.Tags,
 		ShowTime:         &updatedEntity.ShowTime,
 		PreviewlyImageID: updatedEntity.PreviewlyImageID,
