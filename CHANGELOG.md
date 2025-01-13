@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.6.1](https://github.com/wert2all/timeline-backend/compare/v1.6.0...v1.6.1) (2025-01-13)
+
+
+### Bug Fixes
+
+* fix go mod ([13dffb5](https://github.com/wert2all/timeline-backend/commit/13dffb5350c846d29ab4b361e3b10e6f1526ec09))
+* fix gql server handler ([745dcba](https://github.com/wert2all/timeline-backend/commit/745dcba955c913673007fa5b650198136287033d))
+* fix saving date ([7adce94](https://github.com/wert2all/timeline-backend/commit/7adce944e041d248492fa854af15641616b8120c))
+* fix showing showTime after update ([4408ccb](https://github.com/wert2all/timeline-backend/commit/4408ccbe5cb252226215df8b6afbfa9b0c87809b))
+* fix url value after update event ([2e9db3b](https://github.com/wert2all/timeline-backend/commit/2e9db3bafd320b8ac97a08f10209d36b4089c1fd))
+
 ## [1.6.0](https://github.com/wert2all/timeline-backend/compare/v1.5.0...v1.6.0) (2024-12-31)
 
 
