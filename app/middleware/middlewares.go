@@ -1,6 +1,7 @@
 package middlewares
 
 import (
+	"encoding/base64"
 	"net/http"
 	"strings"
 
@@ -51,7 +52,9 @@ func extractToken(req *http.Request) *string {
 	splitted := strings.Split(authHeader, "Bearer ")
 
 	if len(splitted) == 2 {
-		return &splitted[1]
+		decoded, _ := base64.StdEncoding.DecodeString(splitted[1])
+		result := string(decoded)
+		return &result
 	} else {
 		return nil
 	}
