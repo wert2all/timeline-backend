@@ -15,6 +15,8 @@ import (
 	settingsResolver "timeline/backend/graph/resolvers/mutation/account/settings"
 	eventValidator "timeline/backend/graph/resolvers/mutation/event"
 	myAccountTimelines "timeline/backend/graph/resolvers/query/timeline"
+
+	getEventsResolver "timeline/backend/graph/resolvers/query/getevents"
 )
 
 func initOperationsResolvers() {
@@ -31,6 +33,9 @@ func initArgumentFactories() {
 	initService(func() resolvers.DeleteEventArgumentFactory { return resolvers.DeleteEventArgumentFactory{} })
 	initService(func() settingsResolver.SaveSettingsArgumentFactory {
 		return settingsResolver.SaveSettingsArgumentFactory{}
+	})
+	initService(func() getEventsResolver.GetCursorEventsArgumentFactory {
+		return getEventsResolver.GetCursorEventsArgumentFactory{}
 	})
 }
 
@@ -57,6 +62,9 @@ func initValidators() {
 	initService(func(userModel userModel.UserModel, userExtractor domainUser.UserExtractor) resolvers.Validator[settingsResolver.SaveSettingsArguments, settingsResolver.ValidSaveSettingsArguments] {
 		return settingsResolver.NewSaveSettingsValidator(userModel, userExtractor)
 	})
+	initService(func(userModel userModel.UserModel, timelineModel timeline.Timeline, userExtractor domainUser.UserExtractor) resolvers.Validator[getEventsResolver.GetCursorEventsArguments, getEventsResolver.ValidGetCursorEventsArguments] {
+		return getEventsResolver.NewValidator(userModel, timelineModel, userExtractor)
+	})
 }
 
 func initResolvers() {
@@ -80,5 +88,8 @@ func initResolvers() {
 	})
 	initService(func(settingsModel settings.Model) resolvers.Resolver[model.Status, settingsResolver.ValidSaveSettingsArguments] {
 		return settingsResolver.NewSaveSettingsResolver(settingsModel)
+	})
+	initService(func(eventModel eventModel.Model, tagModel tagModel.Model) resolvers.Resolver[*model.TimelineEvents, getEventsResolver.ValidGetCursorEventsArguments] {
+		return getEventsResolver.NewResolver(eventModel, tagModel)
 	})
 }

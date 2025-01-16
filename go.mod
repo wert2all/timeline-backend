@@ -20,6 +20,7 @@ require (
 	github.com/gookit/goutil v0.6.18
 	github.com/lib/pq v1.10.9
 	github.com/microcosm-cc/bluemonday v1.0.27
+	github.com/xorcare/pointer v1.2.2
 	golang.org/x/exp v0.0.0-20250106191152-7588d65b2ba8
 )
 

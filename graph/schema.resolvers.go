@@ -14,6 +14,7 @@ import (
 	"timeline/backend/graph/model"
 	"timeline/backend/graph/resolvers"
 	settingsResolver "timeline/backend/graph/resolvers/mutation/account/settings"
+	getEventsResolver "timeline/backend/graph/resolvers/query/getevents"
 	myAccountTimelines "timeline/backend/graph/resolvers/query/timeline"
 	"timeline/backend/lib/utils"
 
@@ -219,6 +220,33 @@ func (r *queryResolver) TimelineEvents(ctx context.Context, timelineID int, limi
 	}
 
 	return convert.ToEvents(events, tags), nil
+}
+
+// TimelineCursorEvents is the resolver for the timelineCursorEvents field.
+func (r *queryResolver) TimelineCursorEvents(ctx context.Context, accountID int, timelineID int, limit *model.Limit, cursor *string) (*model.TimelineEvents, error) {
+	var factory getEventsResolver.GetCursorEventsArgumentFactory
+	var validator resolvers.Validator[getEventsResolver.GetCursorEventsArguments, getEventsResolver.ValidGetCursorEventsArguments]
+	var resolver resolvers.Resolver[*model.TimelineEvents, getEventsResolver.ValidGetCursorEventsArguments]
+
+	errFactoryResolve := container.Resolve(&factory)
+	if errFactoryResolve != nil {
+		utils.F("Couldnt resolve GetCursorEvents factory: %v", errFactoryResolve)
+		return nil, errFactoryResolve
+	}
+
+	errValidatorResolve := container.Resolve(&validator)
+	if errValidatorResolve != nil {
+		utils.F("Couldnt resolve GetCursorEvents validator: %v", errValidatorResolve)
+		return nil, errValidatorResolve
+	}
+
+	errResolverResolve := container.Resolve(&resolver)
+	if errResolverResolve != nil {
+		utils.F("Couldnt resolve GetCursorEvents resolver: %v", errResolverResolve)
+		return nil, errResolverResolve
+	}
+
+	return resolvers.Resolve(ctx, factory.New(accountID, timelineID, limit, cursor), validator, resolver)
 }
 
 // MyAccountTimelines is the resolver for the myAccountTimelines field.

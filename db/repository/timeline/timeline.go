@@ -16,6 +16,8 @@ type Repository interface {
 	FindByID(ID int) (*ent.Timeline, error)
 
 	GetAccountTimelines(*ent.Account) ([]*ent.Timeline, error)
+	GetAccountTimeline(account *ent.Account, timelineID int) (*ent.Timeline, error)
+
 	GetTimelineEvents(*ent.Timeline, query.Limit) ([]*ent.Event, error)
 
 	CheckUserTimeline(*ent.Timeline, int) error
@@ -64,6 +66,10 @@ func (t timelineRepositoryImpl) Create(name string, account *ent.Account) (*ent.
 
 func (t timelineRepositoryImpl) GetAccountTimelines(user *ent.Account) ([]*ent.Timeline, error) {
 	return t.client.Account.QueryTimeline(user).All(t.context)
+}
+
+func (t timelineRepositoryImpl) GetAccountTimeline(account *ent.Account, timelineID int) (*ent.Timeline, error) {
+	return t.client.Account.QueryTimeline(account).Where(timeline.ID(timelineID)).Only(t.context)
 }
 
 func NewTimelineRepository(ctx context.Context, client *ent.Client) Repository {

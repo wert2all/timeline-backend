@@ -69,9 +69,16 @@ type ComplexityRoot struct {
 		SaveSettings func(childComplexity int, accountID int, settings []*model.AccountSettingInput) int
 	}
 
+	PageInfo struct {
+		EndCursor   func(childComplexity int) int
+		HasNextPage func(childComplexity int) int
+		StartCursor func(childComplexity int) int
+	}
+
 	Query struct {
-		MyAccountTimelines func(childComplexity int, accountID int) int
-		TimelineEvents     func(childComplexity int, timelineID int, limit *model.Limit) int
+		MyAccountTimelines   func(childComplexity int, accountID int) int
+		TimelineCursorEvents func(childComplexity int, accountID int, timelineID int, limit *model.Limit, cursor *string) int
+		TimelineEvents       func(childComplexity int, timelineID int, limit *model.Limit) int
 	}
 
 	ShortAccount struct {
@@ -99,6 +106,11 @@ type ComplexityRoot struct {
 		URL              func(childComplexity int) int
 	}
 
+	TimelineEvents struct {
+		Events func(childComplexity int) int
+		Page   func(childComplexity int) int
+	}
+
 	User struct {
 		Accounts func(childComplexity int) int
 		Avatar   func(childComplexity int) int
@@ -119,6 +131,7 @@ type MutationResolver interface {
 }
 type QueryResolver interface {
 	TimelineEvents(ctx context.Context, timelineID int, limit *model.Limit) ([]*model.TimelineEvent, error)
+	TimelineCursorEvents(ctx context.Context, accountID int, timelineID int, limit *model.Limit, cursor *string) (*model.TimelineEvents, error)
 	MyAccountTimelines(ctx context.Context, accountID int) ([]*model.ShortTimeline, error)
 }
 
@@ -250,6 +263,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.SaveSettings(childComplexity, args["accountId"].(int), args["settings"].([]*model.AccountSettingInput)), true
 
+	case "PageInfo.endCursor":
+		if e.complexity.PageInfo.EndCursor == nil {
+			break
+		}
+
+		return e.complexity.PageInfo.EndCursor(childComplexity), true
+
+	case "PageInfo.hasNextPage":
+		if e.complexity.PageInfo.HasNextPage == nil {
+			break
+		}
+
+		return e.complexity.PageInfo.HasNextPage(childComplexity), true
+
+	case "PageInfo.startCursor":
+		if e.complexity.PageInfo.StartCursor == nil {
+			break
+		}
+
+		return e.complexity.PageInfo.StartCursor(childComplexity), true
+
 	case "Query.myAccountTimelines":
 		if e.complexity.Query.MyAccountTimelines == nil {
 			break
@@ -261,6 +295,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.MyAccountTimelines(childComplexity, args["accountId"].(int)), true
+
+	case "Query.timelineCursorEvents":
+		if e.complexity.Query.TimelineCursorEvents == nil {
+			break
+		}
+
+		args, err := ec.field_Query_timelineCursorEvents_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.TimelineCursorEvents(childComplexity, args["accountId"].(int), args["timelineId"].(int), args["limit"].(*model.Limit), args["cursor"].(*string)), true
 
 	case "Query.timelineEvents":
 		if e.complexity.Query.TimelineEvents == nil {
@@ -385,6 +431,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.TimelineEvent.URL(childComplexity), true
+
+	case "TimelineEvents.events":
+		if e.complexity.TimelineEvents.Events == nil {
+			break
+		}
+
+		return e.complexity.TimelineEvents.Events(childComplexity), true
+
+	case "TimelineEvents.page":
+		if e.complexity.TimelineEvents.Page == nil {
+			break
+		}
+
+		return e.complexity.TimelineEvents.Page(childComplexity), true
 
 	case "User.accounts":
 		if e.complexity.User.Accounts == nil {
@@ -773,6 +833,103 @@ func (ec *executionContext) field_Query_myAccountTimelines_argsAccountID(
 	}
 
 	var zeroVal int
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_timelineCursorEvents_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := ec.field_Query_timelineCursorEvents_argsAccountID(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["accountId"] = arg0
+	arg1, err := ec.field_Query_timelineCursorEvents_argsTimelineID(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["timelineId"] = arg1
+	arg2, err := ec.field_Query_timelineCursorEvents_argsLimit(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["limit"] = arg2
+	arg3, err := ec.field_Query_timelineCursorEvents_argsCursor(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["cursor"] = arg3
+	return args, nil
+}
+func (ec *executionContext) field_Query_timelineCursorEvents_argsAccountID(
+	ctx context.Context,
+	rawArgs map[string]any,
+) (int, error) {
+	if _, ok := rawArgs["accountId"]; !ok {
+		var zeroVal int
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("accountId"))
+	if tmp, ok := rawArgs["accountId"]; ok {
+		return ec.unmarshalNInt2int(ctx, tmp)
+	}
+
+	var zeroVal int
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_timelineCursorEvents_argsTimelineID(
+	ctx context.Context,
+	rawArgs map[string]any,
+) (int, error) {
+	if _, ok := rawArgs["timelineId"]; !ok {
+		var zeroVal int
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("timelineId"))
+	if tmp, ok := rawArgs["timelineId"]; ok {
+		return ec.unmarshalNInt2int(ctx, tmp)
+	}
+
+	var zeroVal int
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_timelineCursorEvents_argsLimit(
+	ctx context.Context,
+	rawArgs map[string]any,
+) (*model.Limit, error) {
+	if _, ok := rawArgs["limit"]; !ok {
+		var zeroVal *model.Limit
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("limit"))
+	if tmp, ok := rawArgs["limit"]; ok {
+		return ec.unmarshalOLimit2ᚖtimelineᚋbackendᚋgraphᚋmodelᚐLimit(ctx, tmp)
+	}
+
+	var zeroVal *model.Limit
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_timelineCursorEvents_argsCursor(
+	ctx context.Context,
+	rawArgs map[string]any,
+) (*string, error) {
+	if _, ok := rawArgs["cursor"]; !ok {
+		var zeroVal *string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("cursor"))
+	if tmp, ok := rawArgs["cursor"]; ok {
+		return ec.unmarshalOString2ᚖstring(ctx, tmp)
+	}
+
+	var zeroVal *string
 	return zeroVal, nil
 }
 
@@ -1531,6 +1688,132 @@ func (ec *executionContext) fieldContext_Mutation_saveSettings(ctx context.Conte
 	return fc, nil
 }
 
+func (ec *executionContext) _PageInfo_startCursor(ctx context.Context, field graphql.CollectedField, obj *model.PageInfo) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_PageInfo_startCursor(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.StartCursor, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_PageInfo_startCursor(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PageInfo",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PageInfo_endCursor(ctx context.Context, field graphql.CollectedField, obj *model.PageInfo) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_PageInfo_endCursor(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.EndCursor, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_PageInfo_endCursor(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PageInfo",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PageInfo_hasNextPage(ctx context.Context, field graphql.CollectedField, obj *model.PageInfo) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_PageInfo_hasNextPage(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.HasNextPage, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_PageInfo_hasNextPage(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PageInfo",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query_timelineEvents(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Query_timelineEvents(ctx, field)
 	if err != nil {
@@ -1600,6 +1883,67 @@ func (ec *executionContext) fieldContext_Query_timelineEvents(ctx context.Contex
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_timelineEvents_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_timelineCursorEvents(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_timelineCursorEvents(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().TimelineCursorEvents(rctx, fc.Args["accountId"].(int), fc.Args["timelineId"].(int), fc.Args["limit"].(*model.Limit), fc.Args["cursor"].(*string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.TimelineEvents)
+	fc.Result = res
+	return ec.marshalNTimelineEvents2ᚖtimelineᚋbackendᚋgraphᚋmodelᚐTimelineEvents(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_timelineCursorEvents(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "events":
+				return ec.fieldContext_TimelineEvents_events(ctx, field)
+			case "page":
+				return ec.fieldContext_TimelineEvents_page(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type TimelineEvents", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_timelineCursorEvents_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -2477,6 +2821,122 @@ func (ec *executionContext) fieldContext_TimelineEvent_previewlyImageId(_ contex
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TimelineEvents_events(ctx context.Context, field graphql.CollectedField, obj *model.TimelineEvents) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_TimelineEvents_events(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Events, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.TimelineEvent)
+	fc.Result = res
+	return ec.marshalNTimelineEvent2ᚕᚖtimelineᚋbackendᚋgraphᚋmodelᚐTimelineEventᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_TimelineEvents_events(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TimelineEvents",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_TimelineEvent_id(ctx, field)
+			case "date":
+				return ec.fieldContext_TimelineEvent_date(ctx, field)
+			case "type":
+				return ec.fieldContext_TimelineEvent_type(ctx, field)
+			case "title":
+				return ec.fieldContext_TimelineEvent_title(ctx, field)
+			case "description":
+				return ec.fieldContext_TimelineEvent_description(ctx, field)
+			case "showTime":
+				return ec.fieldContext_TimelineEvent_showTime(ctx, field)
+			case "url":
+				return ec.fieldContext_TimelineEvent_url(ctx, field)
+			case "tags":
+				return ec.fieldContext_TimelineEvent_tags(ctx, field)
+			case "previewlyImageId":
+				return ec.fieldContext_TimelineEvent_previewlyImageId(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type TimelineEvent", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TimelineEvents_page(ctx context.Context, field graphql.CollectedField, obj *model.TimelineEvents) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_TimelineEvents_page(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Page, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.PageInfo)
+	fc.Result = res
+	return ec.marshalNPageInfo2ᚖtimelineᚋbackendᚋgraphᚋmodelᚐPageInfo(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_TimelineEvents_page(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TimelineEvents",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "startCursor":
+				return ec.fieldContext_PageInfo_startCursor(ctx, field)
+			case "endCursor":
+				return ec.fieldContext_PageInfo_endCursor(ctx, field)
+			case "hasNextPage":
+				return ec.fieldContext_PageInfo_hasNextPage(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type PageInfo", field.Name)
 		},
 	}
 	return fc, nil
@@ -4988,6 +5448,49 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 	return out
 }
 
+var pageInfoImplementors = []string{"PageInfo"}
+
+func (ec *executionContext) _PageInfo(ctx context.Context, sel ast.SelectionSet, obj *model.PageInfo) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, pageInfoImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PageInfo")
+		case "startCursor":
+			out.Values[i] = ec._PageInfo_startCursor(ctx, field, obj)
+		case "endCursor":
+			out.Values[i] = ec._PageInfo_endCursor(ctx, field, obj)
+		case "hasNextPage":
+			out.Values[i] = ec._PageInfo_hasNextPage(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var queryImplementors = []string{"Query"}
 
 func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
@@ -5017,6 +5520,28 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_timelineEvents(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "timelineCursorEvents":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_timelineCursorEvents(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -5217,6 +5742,50 @@ func (ec *executionContext) _TimelineEvent(ctx context.Context, sel ast.Selectio
 			}
 		case "previewlyImageId":
 			out.Values[i] = ec._TimelineEvent_previewlyImageId(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var timelineEventsImplementors = []string{"TimelineEvents"}
+
+func (ec *executionContext) _TimelineEvents(ctx context.Context, sel ast.SelectionSet, obj *model.TimelineEvents) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, timelineEventsImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("TimelineEvents")
+		case "events":
+			out.Values[i] = ec._TimelineEvents_events(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "page":
+			out.Values[i] = ec._TimelineEvents_page(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -5713,6 +6282,16 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 	return res
 }
 
+func (ec *executionContext) marshalNPageInfo2ᚖtimelineᚋbackendᚋgraphᚋmodelᚐPageInfo(ctx context.Context, sel ast.SelectionSet, v *model.PageInfo) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._PageInfo(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalNShortAccount2ᚕᚖtimelineᚋbackendᚋgraphᚋmodelᚐShortAccount(ctx context.Context, sel ast.SelectionSet, v []*model.ShortAccount) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
@@ -5942,6 +6521,20 @@ func (ec *executionContext) marshalNTimelineEvent2ᚖtimelineᚋbackendᚋgraph�
 func (ec *executionContext) unmarshalNTimelineEventInput2timelineᚋbackendᚋgraphᚋmodelᚐTimelineEventInput(ctx context.Context, v any) (model.TimelineEventInput, error) {
 	res, err := ec.unmarshalInputTimelineEventInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNTimelineEvents2timelineᚋbackendᚋgraphᚋmodelᚐTimelineEvents(ctx context.Context, sel ast.SelectionSet, v model.TimelineEvents) graphql.Marshaler {
+	return ec._TimelineEvents(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNTimelineEvents2ᚖtimelineᚋbackendᚋgraphᚋmodelᚐTimelineEvents(ctx context.Context, sel ast.SelectionSet, v *model.TimelineEvents) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._TimelineEvents(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNTimelineType2timelineᚋbackendᚋgraphᚋmodelᚐTimelineType(ctx context.Context, v any) (model.TimelineType, error) {
