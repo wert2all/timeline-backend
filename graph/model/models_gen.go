@@ -52,6 +52,12 @@ type Limit struct {
 type Mutation struct {
 }
 
+type PageInfo struct {
+	StartCursor *string `json:"startCursor,omitempty"`
+	EndCursor   *string `json:"endCursor,omitempty"`
+	HasNextPage bool    `json:"hasNextPage"`
+}
+
 type Query struct {
 }
 
@@ -91,6 +97,11 @@ type TimelineEventInput struct {
 	URL              *string       `json:"url,omitempty"`
 	Tags             []string      `json:"tags,omitempty"`
 	PreviewlyImageID *int          `json:"previewlyImageId,omitempty"`
+}
+
+type TimelineEvents struct {
+	Events []*TimelineEvent `json:"events"`
+	Page   *PageInfo        `json:"page"`
 }
 
 type User struct {

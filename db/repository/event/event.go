@@ -4,8 +4,13 @@ import (
 	"context"
 	"time"
 
+	"timeline/backend/db/query"
+	"timeline/backend/domain/db/cursor"
 	"timeline/backend/ent"
 	"timeline/backend/ent/event"
+	"timeline/backend/ent/timeline"
+
+	"entgo.io/ent/dialect/sql"
 )
 
 type Repository interface {
@@ -13,11 +18,34 @@ type Repository interface {
 	CreateEvent(date time.Time, eventType event.Type) (*ent.Event, error)
 	UpdateEvent(*ent.EventUpdateOne) (*ent.Event, error)
 	Delete(context.Context, *ent.Event) error
+
+	FindTimelineEventsByCursor(timelineID int, cursor *cursor.Cursor, limit query.Limit) ([]*ent.Event, error)
 }
 
 type repositoryImpl struct {
 	client  *ent.Client
 	context context.Context
+}
+
+func (r repositoryImpl) FindTimelineEventsByCursor(timelineID int, cursor *cursor.Cursor, limit query.Limit) ([]*ent.Event, error) {
+	query := r.client.Event.Query().
+		Where(event.HasTimelineWith(timeline.ID(timelineID))).
+		Order(
+			event.ByDate(sql.OrderDesc()),
+			event.ByID(sql.OrderDesc()),
+		).
+		Limit(limit.Limit)
+
+	if cursor != nil {
+		query = query.Where(func(s *sql.Selector) {
+			s.Where(sql.P(func(b *sql.Builder) {
+				b.WriteString("(").Ident(event.FieldDate).WriteByte(',').Ident(event.FieldID).WriteString(")").
+					WriteOp(sql.OpLTE).
+					WriteString("(").Arg(cursor.Timestamp).WriteString(", ").Arg(cursor.ID).WriteString(")")
+			}))
+		})
+	}
+	return query.All(r.context)
 }
 
 func (r repositoryImpl) Delete(ctx context.Context, event *ent.Event) error {

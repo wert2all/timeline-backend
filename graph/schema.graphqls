@@ -4,6 +4,12 @@
 
 type Query {
   timelineEvents(timelineId: Int!, limit: Limit): [TimelineEvent!]!
+  timelineCursorEvents(
+    accountId: Int!
+    timelineId: Int!
+    limit: Limit
+    cursor: String
+  ): TimelineEvents!
   myAccountTimelines(accountId: Int!): [ShortTimeline!]!
 }
 
@@ -63,6 +69,17 @@ type TimelineEvent {
   url: String
   tags: [String!]!
   previewlyImageId: Int
+}
+
+type PageInfo {
+  startCursor: String
+  endCursor: String
+  hasNextPage: Boolean!
+}
+
+type TimelineEvents {
+  events: [TimelineEvent!]!
+  page: PageInfo!
 }
 
 input AddTimeline {

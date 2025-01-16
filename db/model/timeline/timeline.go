@@ -8,6 +8,8 @@ import (
 
 type Timeline interface {
 	GetAccountTimelines(*ent.Account) ([]*ent.Timeline, error)
+	GetAccountTimeline(account *ent.Account, timelineID int) (*ent.Timeline, error)
+
 	CreateTimeline(string, *ent.Account) (*ent.Timeline, error)
 	GetTimeline(int) (*ent.Timeline, error)
 	AttachEvent(*ent.Timeline, *ent.Event) (*ent.Timeline, error)
@@ -43,6 +45,10 @@ func (t timelineModelImpl) CreateTimeline(timelineName string, user *ent.Account
 
 func (t timelineModelImpl) GetAccountTimelines(user *ent.Account) ([]*ent.Timeline, error) {
 	return t.repository.GetAccountTimelines(user)
+}
+
+func (t timelineModelImpl) GetAccountTimeline(account *ent.Account, timelineID int) (*ent.Timeline, error) {
+	return t.repository.GetAccountTimeline(account, timelineID)
 }
 
 func NewTimelineModel(timelineRepository timeline.Repository) Timeline {
