@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.7.0](https://github.com/wert2all/timeline-backend/compare/v1.6.1...v1.7.0) (2025-01-16)
+
+
+### Features
+
+* expose event as cursor based pagination ([abd8002](https://github.com/wert2all/timeline-backend/commit/abd8002b57f5a1425dd1be9d0feea6a0982af5ea))
+
+
+### Bug Fixes
+
+* disable introspaction for production ([7160a96](https://github.com/wert2all/timeline-backend/commit/7160a96d7fd25f28b9b41b899afecd36a649ba17))
+* token should be base64 encoded ([aae46c1](https://github.com/wert2all/timeline-backend/commit/aae46c12e9546c74223037f5674adc1f3c3df346))
+
 ## [1.6.1](https://github.com/wert2all/timeline-backend/compare/v1.6.0...v1.6.1) (2025-01-13)
 
 
