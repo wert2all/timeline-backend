@@ -60,7 +60,7 @@ func InitContainer(config config.Config, appContext context.Context) {
 func initApplication(config config.Config) {
 	initService(func(entClient *ent.Client) app.Application {
 		return app.NewApplication(
-			newRouter(middlewares.NewMiddlewares()),
+			newRouter(middlewares.NewMiddlewares(), config.App.Development),
 			config.App.Listen,
 			func() {
 				entClient.Close()
