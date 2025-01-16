@@ -16,8 +16,8 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 )
 
-func newRouter(middlewares middlewares.Middlewares) *chi.Mux {
-	srv := createGQLServer(createSchema())
+func newRouter(middlewares middlewares.Middlewares, isDevelopment bool) *chi.Mux {
+	srv := createGQLServer(createSchema(), isDevelopment)
 	gqlHandler := func(w http.ResponseWriter, r *http.Request) { srv.ServeHTTP(w, r) }
 
 	router := chi.NewRouter()
@@ -42,7 +42,7 @@ func createSchema() graphql.ExecutableSchema {
 	)
 }
 
-func createGQLServer(schema graphql.ExecutableSchema) *handler.Server {
+func createGQLServer(schema graphql.ExecutableSchema, shouldIntospect bool) *handler.Server {
 	srv := handler.New(schema)
 
 	srv.AddTransport(transport.Options{})
@@ -50,7 +50,9 @@ func createGQLServer(schema graphql.ExecutableSchema) *handler.Server {
 	srv.AddTransport(transport.MultipartForm{})
 	srv.SetQueryCache(lru.New[*ast.QueryDocument](1000))
 
-	srv.Use(extension.Introspection{})
+	if shouldIntospect {
+		srv.Use(extension.Introspection{})
+	}
 	srv.Use(extension.AutomaticPersistedQuery{
 		Cache: lru.New[string](100),
 	})

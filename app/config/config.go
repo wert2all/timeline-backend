@@ -16,7 +16,6 @@ type (
 	}
 
 	Cors struct {
-		Debug         bool
 		AllowedOrigin string
 	}
 
@@ -25,8 +24,9 @@ type (
 		Port int
 	}
 	App struct {
-		Cors   Cors
-		Listen ListenHost
+		Cors        Cors
+		Listen      ListenHost
+		Development bool
 	}
 
 	Google struct {
@@ -51,7 +51,7 @@ func NewConfig() Config {
 	var (
 		listenHostFlag     string
 		listenPortFlag     int
-		debugFlag          bool
+		developmentFlag    bool
 		postgresPort       int
 		postgresHost       string
 		postgresDB         string
@@ -65,7 +65,7 @@ func NewConfig() Config {
 	flag.StringVar(&listenHostFlag, "listen-host", "localhost", "Listen host")
 	flag.IntVar(&listenPortFlag, "listen-port", 8000, "Listen port")
 
-	flag.BoolVar(&debugFlag, "debug", false, "Debug mode")
+	flag.BoolVar(&developmentFlag, "development", false, "Development mode")
 
 	flag.StringVar(&postgresHost, "postgres-host", "localhost", "Postgres host")
 	flag.IntVar(&postgresPort, "postgres-port", 5432, "Postgres port")
@@ -82,12 +82,12 @@ func NewConfig() Config {
 		App: App{
 			Cors: Cors{
 				AllowedOrigin: "*",
-				Debug:         debugFlag,
 			},
 			Listen: ListenHost{
 				Host: listenHostFlag,
 				Port: listenPortFlag,
 			},
+			Development: developmentFlag,
 		},
 		Postgres: Postgres{
 			Port:     postgresPort,
