@@ -7,11 +7,10 @@ import (
 	appContext "timeline/backend/app/context"
 	"timeline/backend/db/model/timeline"
 	"timeline/backend/db/model/user"
-	"timeline/backend/db/query"
 	"timeline/backend/domain/db/cursor"
+	"timeline/backend/domain/gql/validator"
 	domainUser "timeline/backend/domain/user"
 	"timeline/backend/ent"
-	"timeline/backend/graph/convert"
 	"timeline/backend/graph/resolvers"
 )
 
@@ -23,8 +22,8 @@ type (
 	}
 	ValidGetCursorEventsArguments struct {
 		timeline ent.Timeline
-		limit    query.Limit
 		cursor   *cursor.Cursor
+		limit    int
 	}
 )
 
@@ -47,8 +46,8 @@ func (v validatorImpl) Validate(ctx context.Context, arguments resolvers.Argumen
 
 	return ValidGetCursorEventsArguments{
 		timeline: *timeline,
-		limit:    convert.ToLimit(args.limit),
 		cursor:   cursor,
+		limit:    validator.NewLimit(args.limit),
 	}, nil
 }
 

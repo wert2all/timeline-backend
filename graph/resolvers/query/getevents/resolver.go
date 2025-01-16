@@ -5,7 +5,6 @@ import (
 
 	"timeline/backend/db/model/event"
 	"timeline/backend/db/model/tag"
-	"timeline/backend/db/query"
 	"timeline/backend/domain/db/cursor"
 	"timeline/backend/ent"
 	"timeline/backend/graph/convert"
@@ -28,7 +27,7 @@ func NewResolver(eventModel event.Model, tagModel tag.Model) resolvers.Resolver[
 
 func (r resolverImpl) Resolve(ctx context.Context, arguments resolvers.ValidArguments[ValidGetCursorEventsArguments]) (*model.TimelineEvents, error) {
 	args := arguments.GetArguments()
-	events, err := r.eventModel.GetTimelineEvents(args.timeline, args.cursor, args.limit.Increase(1))
+	events, err := r.eventModel.GetTimelineEvents(args.timeline, args.cursor, args.limit+1)
 	if err != nil {
 		return nil, err
 	}
@@ -54,9 +53,9 @@ func (r resolverImpl) createTags(events []*ent.Event) map[int][]string {
 	return tags
 }
 
-func (r resolverImpl) modifyLastEvent(events []*ent.Event, limit query.Limit) ([]*ent.Event, *ent.Event) {
-	if len(events) == limit.Increase(1).Limit {
-		return events[:len(events)-1], events[limit.Limit]
+func (r resolverImpl) modifyLastEvent(events []*ent.Event, limit int) ([]*ent.Event, *ent.Event) {
+	if len(events) == limit+1 {
+		return events[:len(events)-1], events[limit]
 	}
 	return events, nil
 }

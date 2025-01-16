@@ -4,7 +4,6 @@ import (
 	"context"
 	"time"
 
-	"timeline/backend/db/query"
 	"timeline/backend/domain/db/cursor"
 	"timeline/backend/ent"
 	"timeline/backend/ent/event"
@@ -19,7 +18,7 @@ type Repository interface {
 	UpdateEvent(*ent.EventUpdateOne) (*ent.Event, error)
 	Delete(context.Context, *ent.Event) error
 
-	FindTimelineEventsByCursor(timelineID int, cursor *cursor.Cursor, limit query.Limit) ([]*ent.Event, error)
+	FindTimelineEventsByCursor(timelineID int, cursor *cursor.Cursor, limit int) ([]*ent.Event, error)
 }
 
 type repositoryImpl struct {
@@ -27,14 +26,14 @@ type repositoryImpl struct {
 	context context.Context
 }
 
-func (r repositoryImpl) FindTimelineEventsByCursor(timelineID int, cursor *cursor.Cursor, limit query.Limit) ([]*ent.Event, error) {
+func (r repositoryImpl) FindTimelineEventsByCursor(timelineID int, cursor *cursor.Cursor, limit int) ([]*ent.Event, error) {
 	query := r.client.Event.Query().
 		Where(event.HasTimelineWith(timeline.ID(timelineID))).
 		Order(
 			event.ByDate(sql.OrderDesc()),
 			event.ByID(sql.OrderDesc()),
 		).
-		Limit(limit.Limit)
+		Limit(limit)
 
 	if cursor != nil {
 		query = query.Where(func(s *sql.Selector) {
