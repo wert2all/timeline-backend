@@ -5,7 +5,6 @@ import (
 
 	"timeline/backend/db/model/tag"
 	"timeline/backend/db/model/timeline"
-	"timeline/backend/db/query"
 	"timeline/backend/db/repository/event"
 	"timeline/backend/domain/db/cursor"
 	"timeline/backend/ent"
@@ -19,7 +18,7 @@ type Model interface {
 	Update(*ent.EventUpdateOne) (*ent.Event, error)
 	GetEventByID(int) (*ent.Event, error)
 
-	GetTimelineEvents(timeline ent.Timeline, cursor *cursor.Cursor, limit query.Limit) ([]*ent.Event, error)
+	GetTimelineEvents(timeline ent.Timeline, cursor *cursor.Cursor, limit int) ([]*ent.Event, error)
 
 	UpdateEvent(*ent.Event, *eventValidator.BaseValidEventInput) (*ent.Event, error)
 }
@@ -32,7 +31,7 @@ type modelImpl struct {
 }
 
 // GetTimelineEvents implements Model.
-func (m modelImpl) GetTimelineEvents(timeline ent.Timeline, cursor *cursor.Cursor, limit query.Limit) ([]*ent.Event, error) {
+func (m modelImpl) GetTimelineEvents(timeline ent.Timeline, cursor *cursor.Cursor, limit int) ([]*ent.Event, error) {
 	return m.eventRepository.FindTimelineEventsByCursor(timeline.ID, cursor, limit)
 }
 
