@@ -66,6 +66,7 @@ type ComplexityRoot struct {
 		Authorize    func(childComplexity int) int
 		DeleteEvent  func(childComplexity int, eventID int) int
 		EditEvent    func(childComplexity int, event model.ExistTimelineEventInput) int
+		SaveAccount  func(childComplexity int, accountID int, account model.SaveAccountInput) int
 		SaveSettings func(childComplexity int, accountID int, settings []*model.AccountSettingInput) int
 	}
 
@@ -127,6 +128,7 @@ type MutationResolver interface {
 	AddEvent(ctx context.Context, event model.TimelineEventInput) (*model.TimelineEvent, error)
 	EditEvent(ctx context.Context, event model.ExistTimelineEventInput) (*model.TimelineEvent, error)
 	DeleteEvent(ctx context.Context, eventID int) (model.Status, error)
+	SaveAccount(ctx context.Context, accountID int, account model.SaveAccountInput) (*model.ShortAccount, error)
 	SaveSettings(ctx context.Context, accountID int, settings []*model.AccountSettingInput) (model.Status, error)
 }
 type QueryResolver interface {
@@ -250,6 +252,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.EditEvent(childComplexity, args["event"].(model.ExistTimelineEventInput)), true
+
+	case "Mutation.saveAccount":
+		if e.complexity.Mutation.SaveAccount == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_saveAccount_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.SaveAccount(childComplexity, args["accountId"].(int), args["account"].(model.SaveAccountInput)), true
 
 	case "Mutation.saveSettings":
 		if e.complexity.Mutation.SaveSettings == nil {
@@ -500,6 +514,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputAddTimeline,
 		ec.unmarshalInputExistTimelineEventInput,
 		ec.unmarshalInputLimit,
+		ec.unmarshalInputSaveAccountInput,
 		ec.unmarshalInputTimelineEventInput,
 	)
 	first := true
@@ -726,6 +741,57 @@ func (ec *executionContext) field_Mutation_editEvent_argsEvent(
 	}
 
 	var zeroVal model.ExistTimelineEventInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_saveAccount_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := ec.field_Mutation_saveAccount_argsAccountID(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["accountId"] = arg0
+	arg1, err := ec.field_Mutation_saveAccount_argsAccount(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["account"] = arg1
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_saveAccount_argsAccountID(
+	ctx context.Context,
+	rawArgs map[string]any,
+) (int, error) {
+	if _, ok := rawArgs["accountId"]; !ok {
+		var zeroVal int
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("accountId"))
+	if tmp, ok := rawArgs["accountId"]; ok {
+		return ec.unmarshalNInt2int(ctx, tmp)
+	}
+
+	var zeroVal int
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_saveAccount_argsAccount(
+	ctx context.Context,
+	rawArgs map[string]any,
+) (model.SaveAccountInput, error) {
+	if _, ok := rawArgs["account"]; !ok {
+		var zeroVal model.SaveAccountInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("account"))
+	if tmp, ok := rawArgs["account"]; ok {
+		return ec.unmarshalNSaveAccountInput2timelineᚋbackendᚋgraphᚋmodelᚐSaveAccountInput(ctx, tmp)
+	}
+
+	var zeroVal model.SaveAccountInput
 	return zeroVal, nil
 }
 
@@ -1627,6 +1693,73 @@ func (ec *executionContext) fieldContext_Mutation_deleteEvent(ctx context.Contex
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_deleteEvent_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_saveAccount(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_saveAccount(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().SaveAccount(rctx, fc.Args["accountId"].(int), fc.Args["account"].(model.SaveAccountInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.ShortAccount)
+	fc.Result = res
+	return ec.marshalNShortAccount2ᚖtimelineᚋbackendᚋgraphᚋmodelᚐShortAccount(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_saveAccount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_ShortAccount_id(ctx, field)
+			case "name":
+				return ec.fieldContext_ShortAccount_name(ctx, field)
+			case "previewlyToken":
+				return ec.fieldContext_ShortAccount_previewlyToken(ctx, field)
+			case "avatar":
+				return ec.fieldContext_ShortAccount_avatar(ctx, field)
+			case "settings":
+				return ec.fieldContext_ShortAccount_settings(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ShortAccount", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_saveAccount_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -5177,6 +5310,40 @@ func (ec *executionContext) unmarshalInputLimit(ctx context.Context, obj any) (m
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputSaveAccountInput(ctx context.Context, obj any) (model.SaveAccountInput, error) {
+	var it model.SaveAccountInput
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"name", "avatarID"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "name":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Name = data
+		case "avatarID":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("avatarID"))
+			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.AvatarID = data
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputTimelineEventInput(ctx context.Context, obj any) (model.TimelineEventInput, error) {
 	var it model.TimelineEventInput
 	asMap := map[string]any{}
@@ -5414,6 +5581,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "deleteEvent":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_deleteEvent(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "saveAccount":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_saveAccount(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
@@ -6292,6 +6466,15 @@ func (ec *executionContext) marshalNPageInfo2ᚖtimelineᚋbackendᚋgraphᚋmod
 	return ec._PageInfo(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalNSaveAccountInput2timelineᚋbackendᚋgraphᚋmodelᚐSaveAccountInput(ctx context.Context, v any) (model.SaveAccountInput, error) {
+	res, err := ec.unmarshalInputSaveAccountInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNShortAccount2timelineᚋbackendᚋgraphᚋmodelᚐShortAccount(ctx context.Context, sel ast.SelectionSet, v model.ShortAccount) graphql.Marshaler {
+	return ec._ShortAccount(ctx, sel, &v)
+}
+
 func (ec *executionContext) marshalNShortAccount2ᚕᚖtimelineᚋbackendᚋgraphᚋmodelᚐShortAccount(ctx context.Context, sel ast.SelectionSet, v []*model.ShortAccount) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
@@ -6328,6 +6511,16 @@ func (ec *executionContext) marshalNShortAccount2ᚕᚖtimelineᚋbackendᚋgrap
 	wg.Wait()
 
 	return ret
+}
+
+func (ec *executionContext) marshalNShortAccount2ᚖtimelineᚋbackendᚋgraphᚋmodelᚐShortAccount(ctx context.Context, sel ast.SelectionSet, v *model.ShortAccount) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._ShortAccount(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNShortTimeline2timelineᚋbackendᚋgraphᚋmodelᚐShortTimeline(ctx context.Context, sel ast.SelectionSet, v model.ShortTimeline) graphql.Marshaler {

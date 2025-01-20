@@ -61,6 +61,11 @@ type PageInfo struct {
 type Query struct {
 }
 
+type SaveAccountInput struct {
+	Name     string `json:"name"`
+	AvatarID *int   `json:"avatarID,omitempty"`
+}
+
 type ShortAccount struct {
 	ID             int                `json:"id"`
 	Name           *string            `json:"name,omitempty"`

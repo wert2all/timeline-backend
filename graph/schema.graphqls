@@ -22,6 +22,7 @@ type Mutation {
   editEvent(event: ExistTimelineEventInput!): TimelineEvent!
   deleteEvent(eventId: Int!): Status!
 
+  saveAccount(accountId: Int!, account: SaveAccountInput!): ShortAccount!
   saveSettings(accountId: Int!, settings: [AccountSettingInput]): Status!
 }
 
@@ -123,7 +124,11 @@ input AccountSettingInput {
   value: String
 }
 
-scalar Time
+input SaveAccountInput {
+  name: String!
+  avatarID: Int
+}
+
 enum TimelineType {
   default
   selebrate
@@ -133,3 +138,5 @@ enum Status {
   success
   error
 }
+
+scalar Time

@@ -10,6 +10,8 @@ import (
 type (
 	Repository interface {
 		Create(int, string, string, string) (*ent.Account, error)
+
+		Save(account *ent.Account, name string, avatarID *int) (*ent.Account, error)
 	}
 
 	repositoryImp struct {
@@ -17,6 +19,11 @@ type (
 		client  *ent.Client
 	}
 )
+
+// Save implements Repository.
+func (r repositoryImp) Save(account *ent.Account, name string, avatarID *int) (*ent.Account, error) {
+	return r.client.Account.UpdateOne(account).SetName(name).Save(r.context)
+}
 
 // Create implements Repository.
 func (r repositoryImp) Create(userID int,
