@@ -6,7 +6,6 @@ package graph
 
 import (
 	"context"
-
 	appContext "timeline/backend/app/context"
 	tagModel "timeline/backend/db/model/tag"
 	"timeline/backend/db/model/timeline"
@@ -158,6 +157,33 @@ func (r *mutationResolver) DeleteEvent(ctx context.Context, eventID int) (model.
 	return resolvers.Resolve(ctx, factory.New(eventID), validator, resolver)
 }
 
+// SaveAccount is the resolver for the saveAccount field.
+func (r *mutationResolver) SaveAccount(ctx context.Context, accountID int, account model.SaveAccountInput) (*model.ShortAccount, error) {
+	var factory saveAccountResolver.SaveAccountArgumentsFactory
+	var validator resolvers.Validator[saveAccountResolver.SaveAccountArguments, saveAccountResolver.ValidSaveAccountArguments]
+	var resolver resolvers.Resolver[*model.ShortAccount, saveAccountResolver.ValidSaveAccountArguments]
+
+	errFactoryResolve := container.Resolve(&factory)
+	if errFactoryResolve != nil {
+		utils.F("Couldnt resolve SaveAccount factory: %v", errFactoryResolve)
+		return nil, errFactoryResolve
+	}
+
+	errValidatorResolve := container.Resolve(&validator)
+	if errValidatorResolve != nil {
+		utils.F("Couldnt resolve SaveAccount validator: %v", errValidatorResolve)
+		return nil, errValidatorResolve
+	}
+
+	errResolverResolve := container.Resolve(&resolver)
+	if errResolverResolve != nil {
+		utils.F("Couldnt resolve SaveAccount resolver: %v", errResolverResolve)
+		return nil, errResolverResolve
+	}
+
+	return resolvers.Resolve(ctx, factory.New(accountID, account), validator, resolver)
+}
+
 // SaveSettings is the resolver for the saveSettings field.
 func (r *mutationResolver) SaveSettings(ctx context.Context, accountID int, settings []*model.AccountSettingInput) (model.Status, error) {
 	var factory settingsResolver.SaveSettingsArgumentFactory
@@ -251,33 +277,6 @@ func (r *queryResolver) TimelineCursorEvents(ctx context.Context, accountID int,
 	return resolvers.Resolve(ctx, factory.New(accountID, timelineID, limit, cursor), validator, resolver)
 }
 
-// SaveAccount is the resolver for the saveAccount field.
-func (r *mutationResolver) SaveAccount(ctx context.Context, accountID int, account model.SaveAccountInput) (*model.ShortAccount, error) {
-	var factory saveAccountResolver.SaveAccountArgumentsFactory
-	var validator resolvers.Validator[saveAccountResolver.SaveAccountArguments, saveAccountResolver.ValidSaveAccountArguments]
-	var resolver resolvers.Resolver[*model.ShortAccount, saveAccountResolver.ValidSaveAccountArguments]
-
-	errFactoryResolve := container.Resolve(&factory)
-	if errFactoryResolve != nil {
-		utils.F("Couldnt resolve SaveAccount factory: %v", errFactoryResolve)
-		return nil, errFactoryResolve
-	}
-
-	errValidatorResolve := container.Resolve(&validator)
-	if errValidatorResolve != nil {
-		utils.F("Couldnt resolve SaveAccount validator: %v", errValidatorResolve)
-		return nil, errValidatorResolve
-	}
-
-	errResolverResolve := container.Resolve(&resolver)
-	if errResolverResolve != nil {
-		utils.F("Couldnt resolve SaveAccount resolver: %v", errResolverResolve)
-		return nil, errResolverResolve
-	}
-
-	return resolvers.Resolve(ctx, factory.New(accountID, account), validator, resolver)
-}
-
 // MyAccountTimelines is the resolver for the myAccountTimelines field.
 func (r *queryResolver) MyAccountTimelines(ctx context.Context, accountID int) ([]*model.ShortTimeline, error) {
 	var resolver myAccountTimelines.Resolver
@@ -310,7 +309,5 @@ func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 // Query returns QueryResolver implementation.
 func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
-type (
-	mutationResolver struct{ *Resolver }
-	queryResolver    struct{ *Resolver }
-)
+type mutationResolver struct{ *Resolver }
+type queryResolver struct{ *Resolver }
