@@ -29,12 +29,19 @@ type UserModel interface {
 	GetUser(int) (*ent.User, error)
 	GetUserAccounts(*ent.User) ([]*ent.Account, error)
 	GetUserAccount(int, int) (*ent.Account, error)
+
+	SaveUserAccount(account *ent.Account, name string, avatarID *int) (*ent.Account, error)
 }
 
 type userModelImp struct {
 	userRepository          user.Repository
 	accountRepository       account.Repository
 	previewlyMutationClient previewly.MutationClient
+}
+
+// SaveUserAccount implements UserModel.
+func (u userModelImp) SaveUserAccount(account *ent.Account, name string, avatarID *int) (*ent.Account, error) {
+	return u.accountRepository.Save(account, name, avatarID)
 }
 
 // GetUserAccount implements UserModel.
