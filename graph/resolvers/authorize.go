@@ -68,7 +68,6 @@ func (a authorizeResolverImpl) Resolve(_ context.Context, arguments ValidArgumen
 		ID:       userEntity.ID,
 		Name:     userEntity.Name,
 		Email:    userEntity.Email,
-		Avatar:   userEntity.Avatar,
 		IsNew:    arguments.GetArguments().IsNew,
 		Accounts: gqlAccounts,
 	}, nil

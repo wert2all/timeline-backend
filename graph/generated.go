@@ -49,7 +49,7 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Account struct {
-		Avatar   func(childComplexity int) int
+		AvatarID func(childComplexity int) int
 		ID       func(childComplexity int) int
 		Name     func(childComplexity int) int
 		Settings func(childComplexity int) int
@@ -83,7 +83,6 @@ type ComplexityRoot struct {
 	}
 
 	ShortAccount struct {
-		Avatar         func(childComplexity int) int
 		AvatarID       func(childComplexity int) int
 		ID             func(childComplexity int) int
 		Name           func(childComplexity int) int
@@ -115,7 +114,6 @@ type ComplexityRoot struct {
 
 	User struct {
 		Accounts func(childComplexity int) int
-		Avatar   func(childComplexity int) int
 		Email    func(childComplexity int) int
 		ID       func(childComplexity int) int
 		IsNew    func(childComplexity int) int
@@ -157,12 +155,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 	switch typeName + "." + field {
 
-	case "Account.avatar":
-		if e.complexity.Account.Avatar == nil {
+	case "Account.avatarId":
+		if e.complexity.Account.AvatarID == nil {
 			break
 		}
 
-		return e.complexity.Account.Avatar(childComplexity), true
+		return e.complexity.Account.AvatarID(childComplexity), true
 
 	case "Account.id":
 		if e.complexity.Account.ID == nil {
@@ -335,13 +333,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.TimelineEvents(childComplexity, args["timelineId"].(int), args["limit"].(*model.Limit)), true
 
-	case "ShortAccount.avatar":
-		if e.complexity.ShortAccount.Avatar == nil {
-			break
-		}
-
-		return e.complexity.ShortAccount.Avatar(childComplexity), true
-
 	case "ShortAccount.avatarId":
 		if e.complexity.ShortAccount.AvatarID == nil {
 			break
@@ -474,13 +465,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.User.Accounts(childComplexity), true
-
-	case "User.avatar":
-		if e.complexity.User.Avatar == nil {
-			break
-		}
-
-		return e.complexity.User.Avatar(childComplexity), true
 
 	case "User.email":
 		if e.complexity.User.Email == nil {
@@ -1207,8 +1191,8 @@ func (ec *executionContext) fieldContext_Account_name(_ context.Context, field g
 	return fc, nil
 }
 
-func (ec *executionContext) _Account_avatar(ctx context.Context, field graphql.CollectedField, obj *model.Account) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Account_avatar(ctx, field)
+func (ec *executionContext) _Account_avatarId(ctx context.Context, field graphql.CollectedField, obj *model.Account) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Account_avatarId(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1221,7 +1205,7 @@ func (ec *executionContext) _Account_avatar(ctx context.Context, field graphql.C
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Avatar, nil
+		return obj.AvatarID, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1230,19 +1214,19 @@ func (ec *executionContext) _Account_avatar(ctx context.Context, field graphql.C
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*string)
+	res := resTmp.(*int)
 	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Account_avatar(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Account_avatarId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Account",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
+			return nil, errors.New("field of type Int does not have child fields")
 		},
 	}
 	return fc, nil
@@ -1428,8 +1412,6 @@ func (ec *executionContext) fieldContext_Mutation_authorize(_ context.Context, f
 				return ec.fieldContext_User_name(ctx, field)
 			case "email":
 				return ec.fieldContext_User_email(ctx, field)
-			case "avatar":
-				return ec.fieldContext_User_avatar(ctx, field)
 			case "isNew":
 				return ec.fieldContext_User_isNew(ctx, field)
 			case "accounts":
@@ -1752,8 +1734,6 @@ func (ec *executionContext) fieldContext_Mutation_saveAccount(ctx context.Contex
 				return ec.fieldContext_ShortAccount_name(ctx, field)
 			case "previewlyToken":
 				return ec.fieldContext_ShortAccount_previewlyToken(ctx, field)
-			case "avatar":
-				return ec.fieldContext_ShortAccount_avatar(ctx, field)
 			case "avatarId":
 				return ec.fieldContext_ShortAccount_avatarId(ctx, field)
 			case "settings":
@@ -2400,47 +2380,6 @@ func (ec *executionContext) _ShortAccount_previewlyToken(ctx context.Context, fi
 }
 
 func (ec *executionContext) fieldContext_ShortAccount_previewlyToken(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "ShortAccount",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _ShortAccount_avatar(ctx context.Context, field graphql.CollectedField, obj *model.ShortAccount) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_ShortAccount_avatar(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Avatar, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*string)
-	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_ShortAccount_avatar(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "ShortAccount",
 		Field:      field,
@@ -3255,47 +3194,6 @@ func (ec *executionContext) fieldContext_User_email(_ context.Context, field gra
 	return fc, nil
 }
 
-func (ec *executionContext) _User_avatar(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_User_avatar(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Avatar, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*string)
-	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_User_avatar(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "User",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _User_isNew(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_User_isNew(ctx, field)
 	if err != nil {
@@ -3385,8 +3283,6 @@ func (ec *executionContext) fieldContext_User_accounts(_ context.Context, field 
 				return ec.fieldContext_ShortAccount_name(ctx, field)
 			case "previewlyToken":
 				return ec.fieldContext_ShortAccount_previewlyToken(ctx, field)
-			case "avatar":
-				return ec.fieldContext_ShortAccount_avatar(ctx, field)
 			case "avatarId":
 				return ec.fieldContext_ShortAccount_avatarId(ctx, field)
 			case "settings":
@@ -5513,8 +5409,8 @@ func (ec *executionContext) _Account(ctx context.Context, sel ast.SelectionSet, 
 			}
 		case "name":
 			out.Values[i] = ec._Account_name(ctx, field, obj)
-		case "avatar":
-			out.Values[i] = ec._Account_avatar(ctx, field, obj)
+		case "avatarId":
+			out.Values[i] = ec._Account_avatarId(ctx, field, obj)
 		case "settings":
 			out.Values[i] = ec._Account_settings(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -5857,8 +5753,6 @@ func (ec *executionContext) _ShortAccount(ctx context.Context, sel ast.Selection
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "avatar":
-			out.Values[i] = ec._ShortAccount_avatar(ctx, field, obj)
 		case "avatarId":
 			out.Values[i] = ec._ShortAccount_avatarId(ctx, field, obj)
 		case "settings":
@@ -6061,8 +5955,6 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "avatar":
-			out.Values[i] = ec._User_avatar(ctx, field, obj)
 		case "isNew":
 			out.Values[i] = ec._User_isNew(ctx, field, obj)
 			if out.Values[i] == graphql.Null {

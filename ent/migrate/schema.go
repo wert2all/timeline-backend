@@ -13,7 +13,6 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "name", Type: field.TypeString},
 		{Name: "previewly_token", Type: field.TypeString, Default: ""},
-		{Name: "avatar", Type: field.TypeString},
 		{Name: "avatar_id", Type: field.TypeInt, Nullable: true},
 		{Name: "user_account", Type: field.TypeInt, Nullable: true},
 	}
@@ -25,7 +24,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "accounts_users_account",
-				Columns:    []*schema.Column{AccountsColumns[5]},
+				Columns:    []*schema.Column{AccountsColumns[4]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

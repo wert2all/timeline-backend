@@ -58,7 +58,6 @@ func ToShortAccount(accountEntity ent.Account, settings []*ent.Settings) *model.
 
 	return &model.ShortAccount{
 		Name:           &accountEntity.Name,
-		Avatar:         accountEntity.Avatar,
 		ID:             accountEntity.ID,
 		PreviewlyToken: accountEntity.PreviewlyToken,
 		AvatarID:       accountEntity.AvatarID,

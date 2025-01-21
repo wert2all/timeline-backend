@@ -57,20 +57,6 @@ func (au *AccountUpdate) SetNillablePreviewlyToken(s *string) *AccountUpdate {
 	return au
 }
 
-// SetAvatar sets the "avatar" field.
-func (au *AccountUpdate) SetAvatar(s string) *AccountUpdate {
-	au.mutation.SetAvatar(s)
-	return au
-}
-
-// SetNillableAvatar sets the "avatar" field if the given value is not nil.
-func (au *AccountUpdate) SetNillableAvatar(s *string) *AccountUpdate {
-	if s != nil {
-		au.SetAvatar(*s)
-	}
-	return au
-}
-
 // SetAvatarID sets the "avatar_id" field.
 func (au *AccountUpdate) SetAvatarID(i int) *AccountUpdate {
 	au.mutation.ResetAvatarID()
@@ -219,9 +205,6 @@ func (au *AccountUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := au.mutation.PreviewlyToken(); ok {
 		_spec.SetField(account.FieldPreviewlyToken, field.TypeString, value)
 	}
-	if value, ok := au.mutation.Avatar(); ok {
-		_spec.SetField(account.FieldAvatar, field.TypeString, value)
-	}
 	if value, ok := au.mutation.AvatarID(); ok {
 		_spec.SetField(account.FieldAvatarID, field.TypeInt, value)
 	}
@@ -349,20 +332,6 @@ func (auo *AccountUpdateOne) SetPreviewlyToken(s string) *AccountUpdateOne {
 func (auo *AccountUpdateOne) SetNillablePreviewlyToken(s *string) *AccountUpdateOne {
 	if s != nil {
 		auo.SetPreviewlyToken(*s)
-	}
-	return auo
-}
-
-// SetAvatar sets the "avatar" field.
-func (auo *AccountUpdateOne) SetAvatar(s string) *AccountUpdateOne {
-	auo.mutation.SetAvatar(s)
-	return auo
-}
-
-// SetNillableAvatar sets the "avatar" field if the given value is not nil.
-func (auo *AccountUpdateOne) SetNillableAvatar(s *string) *AccountUpdateOne {
-	if s != nil {
-		auo.SetAvatar(*s)
 	}
 	return auo
 }
@@ -544,9 +513,6 @@ func (auo *AccountUpdateOne) sqlSave(ctx context.Context) (_node *Account, err e
 	}
 	if value, ok := auo.mutation.PreviewlyToken(); ok {
 		_spec.SetField(account.FieldPreviewlyToken, field.TypeString, value)
-	}
-	if value, ok := auo.mutation.Avatar(); ok {
-		_spec.SetField(account.FieldAvatar, field.TypeString, value)
 	}
 	if value, ok := auo.mutation.AvatarID(); ok {
 		_spec.SetField(account.FieldAvatarID, field.TypeInt, value)

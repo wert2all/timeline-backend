@@ -9,7 +9,7 @@ import (
 
 type (
 	Repository interface {
-		Create(int, string, string, string) (*ent.Account, error)
+		Create(userID int, name string, previewlyToken string) (*ent.Account, error)
 
 		Save(account *ent.Account, name string, avatarID *int) (*ent.Account, error)
 	}
@@ -26,14 +26,9 @@ func (r repositoryImp) Save(account *ent.Account, name string, avatarID *int) (*
 }
 
 // Create implements Repository.
-func (r repositoryImp) Create(userID int,
-	name string,
-	avatar string,
-	previewlyToken string,
-) (*ent.Account, error) {
+func (r repositoryImp) Create(userID int, name string, previewlyToken string) (*ent.Account, error) {
 	account, err := r.client.Account.Create().
 		SetName(name).
-		SetAvatar(avatar).
 		SetPreviewlyToken(previewlyToken).
 		Save(r.context)
 	if err != nil {

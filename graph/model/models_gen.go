@@ -12,7 +12,7 @@ import (
 type Account struct {
 	ID       int                `json:"id"`
 	Name     *string            `json:"name,omitempty"`
-	Avatar   *string            `json:"avatar,omitempty"`
+	AvatarID *int               `json:"avatarId,omitempty"`
 	Settings []*AccountSettings `json:"settings"`
 }
 
@@ -70,7 +70,6 @@ type ShortAccount struct {
 	ID             int                `json:"id"`
 	Name           *string            `json:"name,omitempty"`
 	PreviewlyToken string             `json:"previewlyToken"`
-	Avatar         *string            `json:"avatar,omitempty"`
 	AvatarID       *int               `json:"avatarId,omitempty"`
 	Settings       []*AccountSettings `json:"settings"`
 }
@@ -114,7 +113,6 @@ type User struct {
 	ID       int             `json:"id"`
 	Name     *string         `json:"name,omitempty"`
 	Email    string          `json:"email"`
-	Avatar   *string         `json:"avatar,omitempty"`
 	IsNew    bool            `json:"isNew"`
 	Accounts []*ShortAccount `json:"accounts"`
 }
