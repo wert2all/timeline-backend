@@ -71,6 +71,33 @@ func (au *AccountUpdate) SetNillableAvatar(s *string) *AccountUpdate {
 	return au
 }
 
+// SetAvatarID sets the "avatar_id" field.
+func (au *AccountUpdate) SetAvatarID(i int) *AccountUpdate {
+	au.mutation.ResetAvatarID()
+	au.mutation.SetAvatarID(i)
+	return au
+}
+
+// SetNillableAvatarID sets the "avatar_id" field if the given value is not nil.
+func (au *AccountUpdate) SetNillableAvatarID(i *int) *AccountUpdate {
+	if i != nil {
+		au.SetAvatarID(*i)
+	}
+	return au
+}
+
+// AddAvatarID adds i to the "avatar_id" field.
+func (au *AccountUpdate) AddAvatarID(i int) *AccountUpdate {
+	au.mutation.AddAvatarID(i)
+	return au
+}
+
+// ClearAvatarID clears the value of the "avatar_id" field.
+func (au *AccountUpdate) ClearAvatarID() *AccountUpdate {
+	au.mutation.ClearAvatarID()
+	return au
+}
+
 // AddTimelineIDs adds the "timeline" edge to the Timeline entity by IDs.
 func (au *AccountUpdate) AddTimelineIDs(ids ...int) *AccountUpdate {
 	au.mutation.AddTimelineIDs(ids...)
@@ -194,6 +221,15 @@ func (au *AccountUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := au.mutation.Avatar(); ok {
 		_spec.SetField(account.FieldAvatar, field.TypeString, value)
+	}
+	if value, ok := au.mutation.AvatarID(); ok {
+		_spec.SetField(account.FieldAvatarID, field.TypeInt, value)
+	}
+	if value, ok := au.mutation.AddedAvatarID(); ok {
+		_spec.AddField(account.FieldAvatarID, field.TypeInt, value)
+	}
+	if au.mutation.AvatarIDCleared() {
+		_spec.ClearField(account.FieldAvatarID, field.TypeInt)
 	}
 	if au.mutation.TimelineCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -328,6 +364,33 @@ func (auo *AccountUpdateOne) SetNillableAvatar(s *string) *AccountUpdateOne {
 	if s != nil {
 		auo.SetAvatar(*s)
 	}
+	return auo
+}
+
+// SetAvatarID sets the "avatar_id" field.
+func (auo *AccountUpdateOne) SetAvatarID(i int) *AccountUpdateOne {
+	auo.mutation.ResetAvatarID()
+	auo.mutation.SetAvatarID(i)
+	return auo
+}
+
+// SetNillableAvatarID sets the "avatar_id" field if the given value is not nil.
+func (auo *AccountUpdateOne) SetNillableAvatarID(i *int) *AccountUpdateOne {
+	if i != nil {
+		auo.SetAvatarID(*i)
+	}
+	return auo
+}
+
+// AddAvatarID adds i to the "avatar_id" field.
+func (auo *AccountUpdateOne) AddAvatarID(i int) *AccountUpdateOne {
+	auo.mutation.AddAvatarID(i)
+	return auo
+}
+
+// ClearAvatarID clears the value of the "avatar_id" field.
+func (auo *AccountUpdateOne) ClearAvatarID() *AccountUpdateOne {
+	auo.mutation.ClearAvatarID()
 	return auo
 }
 
@@ -484,6 +547,15 @@ func (auo *AccountUpdateOne) sqlSave(ctx context.Context) (_node *Account, err e
 	}
 	if value, ok := auo.mutation.Avatar(); ok {
 		_spec.SetField(account.FieldAvatar, field.TypeString, value)
+	}
+	if value, ok := auo.mutation.AvatarID(); ok {
+		_spec.SetField(account.FieldAvatarID, field.TypeInt, value)
+	}
+	if value, ok := auo.mutation.AddedAvatarID(); ok {
+		_spec.AddField(account.FieldAvatarID, field.TypeInt, value)
+	}
+	if auo.mutation.AvatarIDCleared() {
+		_spec.ClearField(account.FieldAvatarID, field.TypeInt)
 	}
 	if auo.mutation.TimelineCleared() {
 		edge := &sqlgraph.EdgeSpec{

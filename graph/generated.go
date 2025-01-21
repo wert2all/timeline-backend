@@ -84,6 +84,7 @@ type ComplexityRoot struct {
 
 	ShortAccount struct {
 		Avatar         func(childComplexity int) int
+		AvatarID       func(childComplexity int) int
 		ID             func(childComplexity int) int
 		Name           func(childComplexity int) int
 		PreviewlyToken func(childComplexity int) int
@@ -340,6 +341,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ShortAccount.Avatar(childComplexity), true
+
+	case "ShortAccount.avatarId":
+		if e.complexity.ShortAccount.AvatarID == nil {
+			break
+		}
+
+		return e.complexity.ShortAccount.AvatarID(childComplexity), true
 
 	case "ShortAccount.id":
 		if e.complexity.ShortAccount.ID == nil {
@@ -1746,6 +1754,8 @@ func (ec *executionContext) fieldContext_Mutation_saveAccount(ctx context.Contex
 				return ec.fieldContext_ShortAccount_previewlyToken(ctx, field)
 			case "avatar":
 				return ec.fieldContext_ShortAccount_avatar(ctx, field)
+			case "avatarId":
+				return ec.fieldContext_ShortAccount_avatarId(ctx, field)
 			case "settings":
 				return ec.fieldContext_ShortAccount_settings(ctx, field)
 			}
@@ -2438,6 +2448,47 @@ func (ec *executionContext) fieldContext_ShortAccount_avatar(_ context.Context, 
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ShortAccount_avatarId(ctx context.Context, field graphql.CollectedField, obj *model.ShortAccount) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ShortAccount_avatarId(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.AvatarID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ShortAccount_avatarId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ShortAccount",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
 		},
 	}
 	return fc, nil
@@ -3336,6 +3387,8 @@ func (ec *executionContext) fieldContext_User_accounts(_ context.Context, field 
 				return ec.fieldContext_ShortAccount_previewlyToken(ctx, field)
 			case "avatar":
 				return ec.fieldContext_ShortAccount_avatar(ctx, field)
+			case "avatarId":
+				return ec.fieldContext_ShortAccount_avatarId(ctx, field)
 			case "settings":
 				return ec.fieldContext_ShortAccount_settings(ctx, field)
 			}
@@ -5806,6 +5859,8 @@ func (ec *executionContext) _ShortAccount(ctx context.Context, sel ast.Selection
 			}
 		case "avatar":
 			out.Values[i] = ec._ShortAccount_avatar(ctx, field, obj)
+		case "avatarId":
+			out.Values[i] = ec._ShortAccount_avatarId(ctx, field, obj)
 		case "settings":
 			out.Values[i] = ec._ShortAccount_settings(ctx, field, obj)
 			if out.Values[i] == graphql.Null {

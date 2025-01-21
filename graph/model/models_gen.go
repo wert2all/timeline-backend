@@ -71,6 +71,7 @@ type ShortAccount struct {
 	Name           *string            `json:"name,omitempty"`
 	PreviewlyToken string             `json:"previewlyToken"`
 	Avatar         *string            `json:"avatar,omitempty"`
+	AvatarID       *int               `json:"avatarId,omitempty"`
 	Settings       []*AccountSettings `json:"settings"`
 }
 

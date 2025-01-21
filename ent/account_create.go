@@ -49,6 +49,20 @@ func (ac *AccountCreate) SetAvatar(s string) *AccountCreate {
 	return ac
 }
 
+// SetAvatarID sets the "avatar_id" field.
+func (ac *AccountCreate) SetAvatarID(i int) *AccountCreate {
+	ac.mutation.SetAvatarID(i)
+	return ac
+}
+
+// SetNillableAvatarID sets the "avatar_id" field if the given value is not nil.
+func (ac *AccountCreate) SetNillableAvatarID(i *int) *AccountCreate {
+	if i != nil {
+		ac.SetAvatarID(*i)
+	}
+	return ac
+}
+
 // AddTimelineIDs adds the "timeline" edge to the Timeline entity by IDs.
 func (ac *AccountCreate) AddTimelineIDs(ids ...int) *AccountCreate {
 	ac.mutation.AddTimelineIDs(ids...)
@@ -179,6 +193,10 @@ func (ac *AccountCreate) createSpec() (*Account, *sqlgraph.CreateSpec) {
 		_spec.SetField(account.FieldAvatar, field.TypeString, value)
 		_node.Avatar = &value
 	}
+	if value, ok := ac.mutation.AvatarID(); ok {
+		_spec.SetField(account.FieldAvatarID, field.TypeInt, value)
+		_node.AvatarID = &value
+	}
 	if nodes := ac.mutation.TimelineIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -300,6 +318,30 @@ func (u *AccountUpsert) UpdateAvatar() *AccountUpsert {
 	return u
 }
 
+// SetAvatarID sets the "avatar_id" field.
+func (u *AccountUpsert) SetAvatarID(v int) *AccountUpsert {
+	u.Set(account.FieldAvatarID, v)
+	return u
+}
+
+// UpdateAvatarID sets the "avatar_id" field to the value that was provided on create.
+func (u *AccountUpsert) UpdateAvatarID() *AccountUpsert {
+	u.SetExcluded(account.FieldAvatarID)
+	return u
+}
+
+// AddAvatarID adds v to the "avatar_id" field.
+func (u *AccountUpsert) AddAvatarID(v int) *AccountUpsert {
+	u.Add(account.FieldAvatarID, v)
+	return u
+}
+
+// ClearAvatarID clears the value of the "avatar_id" field.
+func (u *AccountUpsert) ClearAvatarID() *AccountUpsert {
+	u.SetNull(account.FieldAvatarID)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
@@ -379,6 +421,34 @@ func (u *AccountUpsertOne) SetAvatar(v string) *AccountUpsertOne {
 func (u *AccountUpsertOne) UpdateAvatar() *AccountUpsertOne {
 	return u.Update(func(s *AccountUpsert) {
 		s.UpdateAvatar()
+	})
+}
+
+// SetAvatarID sets the "avatar_id" field.
+func (u *AccountUpsertOne) SetAvatarID(v int) *AccountUpsertOne {
+	return u.Update(func(s *AccountUpsert) {
+		s.SetAvatarID(v)
+	})
+}
+
+// AddAvatarID adds v to the "avatar_id" field.
+func (u *AccountUpsertOne) AddAvatarID(v int) *AccountUpsertOne {
+	return u.Update(func(s *AccountUpsert) {
+		s.AddAvatarID(v)
+	})
+}
+
+// UpdateAvatarID sets the "avatar_id" field to the value that was provided on create.
+func (u *AccountUpsertOne) UpdateAvatarID() *AccountUpsertOne {
+	return u.Update(func(s *AccountUpsert) {
+		s.UpdateAvatarID()
+	})
+}
+
+// ClearAvatarID clears the value of the "avatar_id" field.
+func (u *AccountUpsertOne) ClearAvatarID() *AccountUpsertOne {
+	return u.Update(func(s *AccountUpsert) {
+		s.ClearAvatarID()
 	})
 }
 
@@ -625,6 +695,34 @@ func (u *AccountUpsertBulk) SetAvatar(v string) *AccountUpsertBulk {
 func (u *AccountUpsertBulk) UpdateAvatar() *AccountUpsertBulk {
 	return u.Update(func(s *AccountUpsert) {
 		s.UpdateAvatar()
+	})
+}
+
+// SetAvatarID sets the "avatar_id" field.
+func (u *AccountUpsertBulk) SetAvatarID(v int) *AccountUpsertBulk {
+	return u.Update(func(s *AccountUpsert) {
+		s.SetAvatarID(v)
+	})
+}
+
+// AddAvatarID adds v to the "avatar_id" field.
+func (u *AccountUpsertBulk) AddAvatarID(v int) *AccountUpsertBulk {
+	return u.Update(func(s *AccountUpsert) {
+		s.AddAvatarID(v)
+	})
+}
+
+// UpdateAvatarID sets the "avatar_id" field to the value that was provided on create.
+func (u *AccountUpsertBulk) UpdateAvatarID() *AccountUpsertBulk {
+	return u.Update(func(s *AccountUpsert) {
+		s.UpdateAvatarID()
+	})
+}
+
+// ClearAvatarID clears the value of the "avatar_id" field.
+func (u *AccountUpsertBulk) ClearAvatarID() *AccountUpsertBulk {
+	return u.Update(func(s *AccountUpsert) {
+		s.ClearAvatarID()
 	})
 }
 
