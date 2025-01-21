@@ -10,7 +10,6 @@ import (
 	"timeline/backend/ent"
 	entEvent "timeline/backend/ent/event"
 	eventValidator "timeline/backend/graph/resolvers/mutation/event"
-	"timeline/backend/lib/utils"
 )
 
 type Model interface {
@@ -43,21 +42,23 @@ func (m modelImpl) UpdateEvent(event *ent.Event, input *eventValidator.BaseValid
 			tags = append(tags, tagEntity)
 		}
 	}
-	utils.D(input)
 	var shouldUpdateEntity *ent.EventUpdateOne
 	shouldUpdateEntity = event.Update().
 		SetTitle(input.Title).
 		SetDescription(input.Description).
 		SetShowTime(input.ShowTime).
 		SetDate(input.Date).
-		SetNillablePreviewlyImageID(input.PreviewlyImageID).
 		AddTags(tags...).
 		ClearTimeline()
 
 	if input.Url != nil {
 		shouldUpdateEntity = shouldUpdateEntity.SetURL(input.Url.String())
 	}
-
+	if input.PreviewlyImageID != nil {
+		shouldUpdateEntity = shouldUpdateEntity.SetPreviewlyImageID(*input.PreviewlyImageID)
+	} else {
+		shouldUpdateEntity = shouldUpdateEntity.ClearPreviewlyImageID()
+	}
 	updatedEntity, updateErr := m.Update(shouldUpdateEntity)
 
 	if updateErr != nil {
