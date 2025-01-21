@@ -45,3 +45,23 @@ func ToShortTimelines(timelines []*ent.Timeline) []*model.ShortTimeline {
 	}
 	return converted
 }
+
+func ToShortAccount(accountEntity ent.Account, settings []*ent.Settings) *model.ShortAccount {
+	gqlSettings := make([]*model.AccountSettings, len(settings))
+
+	for i, setting := range settings {
+		gqlSettings[i] = &model.AccountSettings{
+			Key:   setting.Key,
+			Value: setting.Value,
+		}
+	}
+
+	return &model.ShortAccount{
+		Name:           &accountEntity.Name,
+		Avatar:         accountEntity.Avatar,
+		ID:             accountEntity.ID,
+		PreviewlyToken: accountEntity.PreviewlyToken,
+		AvatarID:       accountEntity.AvatarID,
+		Settings:       gqlSettings,
+	}
+}

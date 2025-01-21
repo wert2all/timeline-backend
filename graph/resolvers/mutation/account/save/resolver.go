@@ -5,6 +5,7 @@ import (
 
 	"timeline/backend/db/model/settings"
 	"timeline/backend/db/model/user"
+	"timeline/backend/graph/convert"
 	"timeline/backend/graph/model"
 	"timeline/backend/graph/resolvers"
 	enumvalues "timeline/backend/lib/enum-values"
@@ -26,21 +27,7 @@ func (r resolverImpl) Resolve(ctx context.Context, arguments resolvers.ValidArgu
 	}
 
 	settings := r.settingsModel.GetSettings(enumvalues.SettingsTypeAccount, accountEntity.ID)
-	gqlSettings := make([]*model.AccountSettings, len(settings))
-
-	for i, setting := range settings {
-		gqlSettings[i] = &model.AccountSettings{
-			Key:   setting.Key,
-			Value: setting.Value,
-		}
-	}
-	return &model.ShortAccount{
-		Name:           &accountEntity.Name,
-		Avatar:         accountEntity.Avatar,
-		ID:             accountEntity.ID,
-		PreviewlyToken: accountEntity.PreviewlyToken,
-		Settings:       gqlSettings,
-	}, nil
+	return convert.ToShortAccount(*accountEntity, settings), nil
 }
 
 func NewResolver(userModel user.UserModel, settings settings.Model) resolvers.Resolver[*model.ShortAccount, ValidSaveAccountArguments] {

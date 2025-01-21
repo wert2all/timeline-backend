@@ -47,6 +47,8 @@ type AccountMutation struct {
 	name            *string
 	previewly_token *string
 	avatar          *string
+	avatar_id       *int
+	addavatar_id    *int
 	clearedFields   map[string]struct{}
 	timeline        map[int]struct{}
 	removedtimeline map[int]struct{}
@@ -264,6 +266,76 @@ func (m *AccountMutation) ResetAvatar() {
 	m.avatar = nil
 }
 
+// SetAvatarID sets the "avatar_id" field.
+func (m *AccountMutation) SetAvatarID(i int) {
+	m.avatar_id = &i
+	m.addavatar_id = nil
+}
+
+// AvatarID returns the value of the "avatar_id" field in the mutation.
+func (m *AccountMutation) AvatarID() (r int, exists bool) {
+	v := m.avatar_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAvatarID returns the old "avatar_id" field's value of the Account entity.
+// If the Account object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AccountMutation) OldAvatarID(ctx context.Context) (v *int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAvatarID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAvatarID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAvatarID: %w", err)
+	}
+	return oldValue.AvatarID, nil
+}
+
+// AddAvatarID adds i to the "avatar_id" field.
+func (m *AccountMutation) AddAvatarID(i int) {
+	if m.addavatar_id != nil {
+		*m.addavatar_id += i
+	} else {
+		m.addavatar_id = &i
+	}
+}
+
+// AddedAvatarID returns the value that was added to the "avatar_id" field in this mutation.
+func (m *AccountMutation) AddedAvatarID() (r int, exists bool) {
+	v := m.addavatar_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearAvatarID clears the value of the "avatar_id" field.
+func (m *AccountMutation) ClearAvatarID() {
+	m.avatar_id = nil
+	m.addavatar_id = nil
+	m.clearedFields[account.FieldAvatarID] = struct{}{}
+}
+
+// AvatarIDCleared returns if the "avatar_id" field was cleared in this mutation.
+func (m *AccountMutation) AvatarIDCleared() bool {
+	_, ok := m.clearedFields[account.FieldAvatarID]
+	return ok
+}
+
+// ResetAvatarID resets all changes to the "avatar_id" field.
+func (m *AccountMutation) ResetAvatarID() {
+	m.avatar_id = nil
+	m.addavatar_id = nil
+	delete(m.clearedFields, account.FieldAvatarID)
+}
+
 // AddTimelineIDs adds the "timeline" edge to the Timeline entity by ids.
 func (m *AccountMutation) AddTimelineIDs(ids ...int) {
 	if m.timeline == nil {
@@ -391,7 +463,7 @@ func (m *AccountMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *AccountMutation) Fields() []string {
-	fields := make([]string, 0, 3)
+	fields := make([]string, 0, 4)
 	if m.name != nil {
 		fields = append(fields, account.FieldName)
 	}
@@ -400,6 +472,9 @@ func (m *AccountMutation) Fields() []string {
 	}
 	if m.avatar != nil {
 		fields = append(fields, account.FieldAvatar)
+	}
+	if m.avatar_id != nil {
+		fields = append(fields, account.FieldAvatarID)
 	}
 	return fields
 }
@@ -415,6 +490,8 @@ func (m *AccountMutation) Field(name string) (ent.Value, bool) {
 		return m.PreviewlyToken()
 	case account.FieldAvatar:
 		return m.Avatar()
+	case account.FieldAvatarID:
+		return m.AvatarID()
 	}
 	return nil, false
 }
@@ -430,6 +507,8 @@ func (m *AccountMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldPreviewlyToken(ctx)
 	case account.FieldAvatar:
 		return m.OldAvatar(ctx)
+	case account.FieldAvatarID:
+		return m.OldAvatarID(ctx)
 	}
 	return nil, fmt.Errorf("unknown Account field %s", name)
 }
@@ -460,6 +539,13 @@ func (m *AccountMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetAvatar(v)
 		return nil
+	case account.FieldAvatarID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAvatarID(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Account field %s", name)
 }
@@ -467,13 +553,21 @@ func (m *AccountMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *AccountMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	if m.addavatar_id != nil {
+		fields = append(fields, account.FieldAvatarID)
+	}
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *AccountMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case account.FieldAvatarID:
+		return m.AddedAvatarID()
+	}
 	return nil, false
 }
 
@@ -482,6 +576,13 @@ func (m *AccountMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *AccountMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case account.FieldAvatarID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddAvatarID(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Account numeric field %s", name)
 }
@@ -489,7 +590,11 @@ func (m *AccountMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *AccountMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(account.FieldAvatarID) {
+		fields = append(fields, account.FieldAvatarID)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -502,6 +607,11 @@ func (m *AccountMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *AccountMutation) ClearField(name string) error {
+	switch name {
+	case account.FieldAvatarID:
+		m.ClearAvatarID()
+		return nil
+	}
 	return fmt.Errorf("unknown Account nullable field %s", name)
 }
 
@@ -517,6 +627,9 @@ func (m *AccountMutation) ResetField(name string) error {
 		return nil
 	case account.FieldAvatar:
 		m.ResetAvatar()
+		return nil
+	case account.FieldAvatarID:
+		m.ResetAvatarID()
 		return nil
 	}
 	return fmt.Errorf("unknown Account field %s", name)

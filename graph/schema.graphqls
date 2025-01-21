@@ -36,6 +36,7 @@ type ShortAccount {
   name: String
   previewlyToken: String!
   avatar: String
+  avatarId: Int
   settings: [AccountSettings!]!
 }
 

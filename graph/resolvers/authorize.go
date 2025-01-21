@@ -8,6 +8,7 @@ import (
 	"timeline/backend/db/model/timeline"
 	"timeline/backend/db/model/user"
 	"timeline/backend/ent"
+	"timeline/backend/graph/convert"
 	"timeline/backend/graph/model"
 	enumvalues "timeline/backend/lib/enum-values"
 
@@ -60,21 +61,7 @@ func (a authorizeResolverImpl) Resolve(_ context.Context, arguments ValidArgumen
 	gqlAccounts := make([]*model.ShortAccount, len(accounts))
 	for i, accountEntity := range accounts {
 		settings := a.settings.GetSettings(enumvalues.SettingsTypeAccount, accountEntity.ID)
-		gqlSettings := make([]*model.AccountSettings, len(settings))
-
-		for i, setting := range settings {
-			gqlSettings[i] = &model.AccountSettings{
-				Key:   setting.Key,
-				Value: setting.Value,
-			}
-		}
-		gqlAccounts[i] = &model.ShortAccount{
-			Name:           &accountEntity.Name,
-			Avatar:         accountEntity.Avatar,
-			ID:             accountEntity.ID,
-			PreviewlyToken: accountEntity.PreviewlyToken,
-			Settings:       gqlSettings,
-		}
+		gqlAccounts[i] = convert.ToShortAccount(*accountEntity, settings)
 	}
 
 	return &model.User{

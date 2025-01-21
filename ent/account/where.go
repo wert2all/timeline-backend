@@ -69,6 +69,11 @@ func Avatar(v string) predicate.Account {
 	return predicate.Account(sql.FieldEQ(FieldAvatar, v))
 }
 
+// AvatarID applies equality check predicate on the "avatar_id" field. It's identical to AvatarIDEQ.
+func AvatarID(v int) predicate.Account {
+	return predicate.Account(sql.FieldEQ(FieldAvatarID, v))
+}
+
 // NameEQ applies the EQ predicate on the "name" field.
 func NameEQ(v string) predicate.Account {
 	return predicate.Account(sql.FieldEQ(FieldName, v))
@@ -262,6 +267,56 @@ func AvatarEqualFold(v string) predicate.Account {
 // AvatarContainsFold applies the ContainsFold predicate on the "avatar" field.
 func AvatarContainsFold(v string) predicate.Account {
 	return predicate.Account(sql.FieldContainsFold(FieldAvatar, v))
+}
+
+// AvatarIDEQ applies the EQ predicate on the "avatar_id" field.
+func AvatarIDEQ(v int) predicate.Account {
+	return predicate.Account(sql.FieldEQ(FieldAvatarID, v))
+}
+
+// AvatarIDNEQ applies the NEQ predicate on the "avatar_id" field.
+func AvatarIDNEQ(v int) predicate.Account {
+	return predicate.Account(sql.FieldNEQ(FieldAvatarID, v))
+}
+
+// AvatarIDIn applies the In predicate on the "avatar_id" field.
+func AvatarIDIn(vs ...int) predicate.Account {
+	return predicate.Account(sql.FieldIn(FieldAvatarID, vs...))
+}
+
+// AvatarIDNotIn applies the NotIn predicate on the "avatar_id" field.
+func AvatarIDNotIn(vs ...int) predicate.Account {
+	return predicate.Account(sql.FieldNotIn(FieldAvatarID, vs...))
+}
+
+// AvatarIDGT applies the GT predicate on the "avatar_id" field.
+func AvatarIDGT(v int) predicate.Account {
+	return predicate.Account(sql.FieldGT(FieldAvatarID, v))
+}
+
+// AvatarIDGTE applies the GTE predicate on the "avatar_id" field.
+func AvatarIDGTE(v int) predicate.Account {
+	return predicate.Account(sql.FieldGTE(FieldAvatarID, v))
+}
+
+// AvatarIDLT applies the LT predicate on the "avatar_id" field.
+func AvatarIDLT(v int) predicate.Account {
+	return predicate.Account(sql.FieldLT(FieldAvatarID, v))
+}
+
+// AvatarIDLTE applies the LTE predicate on the "avatar_id" field.
+func AvatarIDLTE(v int) predicate.Account {
+	return predicate.Account(sql.FieldLTE(FieldAvatarID, v))
+}
+
+// AvatarIDIsNil applies the IsNil predicate on the "avatar_id" field.
+func AvatarIDIsNil() predicate.Account {
+	return predicate.Account(sql.FieldIsNull(FieldAvatarID))
+}
+
+// AvatarIDNotNil applies the NotNil predicate on the "avatar_id" field.
+func AvatarIDNotNil() predicate.Account {
+	return predicate.Account(sql.FieldNotNull(FieldAvatarID))
 }
 
 // HasTimeline applies the HasEdge predicate on the "timeline" edge.
