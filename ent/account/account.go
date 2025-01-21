@@ -16,8 +16,6 @@ const (
 	FieldName = "name"
 	// FieldPreviewlyToken holds the string denoting the previewly_token field in the database.
 	FieldPreviewlyToken = "previewly_token"
-	// FieldAvatar holds the string denoting the avatar field in the database.
-	FieldAvatar = "avatar"
 	// FieldAvatarID holds the string denoting the avatar_id field in the database.
 	FieldAvatarID = "avatar_id"
 	// EdgeTimeline holds the string denoting the timeline edge name in mutations.
@@ -47,7 +45,6 @@ var Columns = []string{
 	FieldID,
 	FieldName,
 	FieldPreviewlyToken,
-	FieldAvatar,
 	FieldAvatarID,
 }
 
@@ -95,11 +92,6 @@ func ByName(opts ...sql.OrderTermOption) OrderOption {
 // ByPreviewlyToken orders the results by the previewly_token field.
 func ByPreviewlyToken(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPreviewlyToken, opts...).ToFunc()
-}
-
-// ByAvatar orders the results by the avatar field.
-func ByAvatar(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldAvatar, opts...).ToFunc()
 }
 
 // ByAvatarID orders the results by the avatar_id field.

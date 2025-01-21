@@ -35,7 +35,6 @@ type ShortAccount {
   id: Int!
   name: String
   previewlyToken: String!
-  avatar: String
   avatarId: Int
   settings: [AccountSettings!]!
 }
@@ -43,7 +42,7 @@ type ShortAccount {
 type Account {
   id: Int!
   name: String
-  avatar: String
+  avatarId: Int
   settings: [AccountSettings!]!
 }
 
@@ -56,7 +55,6 @@ type User {
   id: Int!
   name: String
   email: String!
-  avatar: String
   isNew: Boolean!
   accounts: [ShortAccount]!
 }

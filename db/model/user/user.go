@@ -71,7 +71,7 @@ func (u userModelImp) CheckOrCreate(ctx context.Context, googleUser SomeUser) (*
 		if err != nil {
 			return nil, err
 		}
-		account, errorAccount := u.accountRepository.Create(createdUser.ID, googleUser.Name, googleUser.Avatar, *token)
+		account, errorAccount := u.accountRepository.Create(createdUser.ID, googleUser.Name, *token)
 		if errorAccount != nil {
 			return nil, errorAccount
 		}

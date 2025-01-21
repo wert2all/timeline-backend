@@ -43,12 +43,6 @@ func (ac *AccountCreate) SetNillablePreviewlyToken(s *string) *AccountCreate {
 	return ac
 }
 
-// SetAvatar sets the "avatar" field.
-func (ac *AccountCreate) SetAvatar(s string) *AccountCreate {
-	ac.mutation.SetAvatar(s)
-	return ac
-}
-
 // SetAvatarID sets the "avatar_id" field.
 func (ac *AccountCreate) SetAvatarID(i int) *AccountCreate {
 	ac.mutation.SetAvatarID(i)
@@ -151,9 +145,6 @@ func (ac *AccountCreate) check() error {
 			return &ValidationError{Name: "previewly_token", err: fmt.Errorf(`ent: validator failed for field "Account.previewly_token": %w`, err)}
 		}
 	}
-	if _, ok := ac.mutation.Avatar(); !ok {
-		return &ValidationError{Name: "avatar", err: errors.New(`ent: missing required field "Account.avatar"`)}
-	}
 	return nil
 }
 
@@ -188,10 +179,6 @@ func (ac *AccountCreate) createSpec() (*Account, *sqlgraph.CreateSpec) {
 	if value, ok := ac.mutation.PreviewlyToken(); ok {
 		_spec.SetField(account.FieldPreviewlyToken, field.TypeString, value)
 		_node.PreviewlyToken = value
-	}
-	if value, ok := ac.mutation.Avatar(); ok {
-		_spec.SetField(account.FieldAvatar, field.TypeString, value)
-		_node.Avatar = &value
 	}
 	if value, ok := ac.mutation.AvatarID(); ok {
 		_spec.SetField(account.FieldAvatarID, field.TypeInt, value)
@@ -306,18 +293,6 @@ func (u *AccountUpsert) UpdatePreviewlyToken() *AccountUpsert {
 	return u
 }
 
-// SetAvatar sets the "avatar" field.
-func (u *AccountUpsert) SetAvatar(v string) *AccountUpsert {
-	u.Set(account.FieldAvatar, v)
-	return u
-}
-
-// UpdateAvatar sets the "avatar" field to the value that was provided on create.
-func (u *AccountUpsert) UpdateAvatar() *AccountUpsert {
-	u.SetExcluded(account.FieldAvatar)
-	return u
-}
-
 // SetAvatarID sets the "avatar_id" field.
 func (u *AccountUpsert) SetAvatarID(v int) *AccountUpsert {
 	u.Set(account.FieldAvatarID, v)
@@ -407,20 +382,6 @@ func (u *AccountUpsertOne) SetPreviewlyToken(v string) *AccountUpsertOne {
 func (u *AccountUpsertOne) UpdatePreviewlyToken() *AccountUpsertOne {
 	return u.Update(func(s *AccountUpsert) {
 		s.UpdatePreviewlyToken()
-	})
-}
-
-// SetAvatar sets the "avatar" field.
-func (u *AccountUpsertOne) SetAvatar(v string) *AccountUpsertOne {
-	return u.Update(func(s *AccountUpsert) {
-		s.SetAvatar(v)
-	})
-}
-
-// UpdateAvatar sets the "avatar" field to the value that was provided on create.
-func (u *AccountUpsertOne) UpdateAvatar() *AccountUpsertOne {
-	return u.Update(func(s *AccountUpsert) {
-		s.UpdateAvatar()
 	})
 }
 
@@ -681,20 +642,6 @@ func (u *AccountUpsertBulk) SetPreviewlyToken(v string) *AccountUpsertBulk {
 func (u *AccountUpsertBulk) UpdatePreviewlyToken() *AccountUpsertBulk {
 	return u.Update(func(s *AccountUpsert) {
 		s.UpdatePreviewlyToken()
-	})
-}
-
-// SetAvatar sets the "avatar" field.
-func (u *AccountUpsertBulk) SetAvatar(v string) *AccountUpsertBulk {
-	return u.Update(func(s *AccountUpsert) {
-		s.SetAvatar(v)
-	})
-}
-
-// UpdateAvatar sets the "avatar" field to the value that was provided on create.
-func (u *AccountUpsertBulk) UpdateAvatar() *AccountUpsertBulk {
-	return u.Update(func(s *AccountUpsert) {
-		s.UpdateAvatar()
 	})
 }
 
