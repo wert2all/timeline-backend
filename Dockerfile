@@ -2,8 +2,6 @@ FROM golang:alpine AS builder
 
 LABEL stage=gobuilder
 
-ENV CGO_ENABLED 0
-
 RUN apk update --no-cache && apk add --no-cache tzdata
 
 WORKDIR /build
@@ -12,7 +10,7 @@ COPY go.mod .
 COPY go.sum .
 RUN go mod download
 COPY . .
-RUN go build -ldflags="-s -w" -o /app/timeline-backend server.go
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o /app/timeline-backend server.go
 
 FROM scratch
 
