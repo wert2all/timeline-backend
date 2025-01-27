@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.8.0](https://github.com/wert2all/timeline-backend/compare/v1.7.0...v1.8.0) (2025-01-27)
+
+
+### Features
+
+* add account GQL ([14a30a1](https://github.com/wert2all/timeline-backend/commit/14a30a17e287ccb51ddd1c621518ec8bcd100df7))
+* expose avatarId of account ([6b9d60b](https://github.com/wert2all/timeline-backend/commit/6b9d60b6c3850e7c352b964716a430e3339697ab))
+* saving account ([351140a](https://github.com/wert2all/timeline-backend/commit/351140a7f8925df0c08fa649ef3c35b5a49c0e4c))
+
+
+### Bug Fixes
+
+* fix removing event image ([d02fd40](https://github.com/wert2all/timeline-backend/commit/d02fd40b02060e9210459fa453fe3250a1ffe01c))
+* fix static test ([8274114](https://github.com/wert2all/timeline-backend/commit/8274114b269b0dbd17d9907262425b0a0670e722))
+* remove account avatar ([2a16042](https://github.com/wert2all/timeline-backend/commit/2a16042b60b45a74aa7ab61d873075e354e05570))
+
 ## [1.7.0](https://github.com/wert2all/timeline-backend/compare/v1.6.1...v1.7.0) (2025-01-16)
 
 
