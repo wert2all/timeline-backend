@@ -1,6 +1,7 @@
 package di
 
 import (
+	accountModel "timeline/backend/db/model/account"
 	eventModel "timeline/backend/db/model/event"
 	"timeline/backend/db/model/settings"
 	tagModel "timeline/backend/db/model/tag"
@@ -16,6 +17,7 @@ import (
 	eventValidator "timeline/backend/graph/resolvers/mutation/event"
 	myAccountTimelines "timeline/backend/graph/resolvers/query/timeline"
 
+	addAccountResolver "timeline/backend/graph/resolvers/mutation/account/add"
 	saveAccountResolver "timeline/backend/graph/resolvers/mutation/account/save"
 	getEventsResolver "timeline/backend/graph/resolvers/query/getevents"
 )
@@ -40,6 +42,9 @@ func initArgumentFactories() {
 	})
 	initService(func() saveAccountResolver.SaveAccountArgumentsFactory {
 		return saveAccountResolver.SaveAccountArgumentsFactory{}
+	})
+	initService(func() addAccountResolver.AddAccountArgumentFactory {
+		return addAccountResolver.AddAccountArgumentFactory{}
 	})
 }
 
@@ -72,6 +77,9 @@ func initValidators() {
 	initService(func(userModel userModel.UserModel, userExtractor domainUser.UserExtractor) resolvers.Validator[saveAccountResolver.SaveAccountArguments, saveAccountResolver.ValidSaveAccountArguments] {
 		return saveAccountResolver.NewValidator(userModel, userExtractor)
 	})
+	initService(func(userExtractor domainUser.UserExtractor, userModel userModel.UserModel) resolvers.Validator[addAccountResolver.AddAccountArguments, addAccountResolver.ValidAddAccountArguments] {
+		return addAccountResolver.NewValidator(userExtractor, userModel)
+	})
 }
 
 func initResolvers() {
@@ -101,5 +109,8 @@ func initResolvers() {
 	})
 	initService(func(userModel userModel.UserModel, settingsModel settings.Model) resolvers.Resolver[*model.ShortAccount, saveAccountResolver.ValidSaveAccountArguments] {
 		return saveAccountResolver.NewResolver(userModel, settingsModel)
+	})
+	initService(func(accountModel accountModel.Model, settingsModel settings.Model) resolvers.Resolver[*model.ShortAccount, addAccountResolver.ValidAddAccountArguments] {
+		return addAccountResolver.NewResolver(accountModel, settingsModel)
 	})
 }

@@ -13,6 +13,7 @@ import (
 	"timeline/backend/graph/convert"
 	"timeline/backend/graph/model"
 	"timeline/backend/graph/resolvers"
+	addAccountResolver "timeline/backend/graph/resolvers/mutation/account/add"
 	saveAccountResolver "timeline/backend/graph/resolvers/mutation/account/save"
 	settingsResolver "timeline/backend/graph/resolvers/mutation/account/settings"
 	getEventsResolver "timeline/backend/graph/resolvers/query/getevents"
@@ -155,6 +156,33 @@ func (r *mutationResolver) DeleteEvent(ctx context.Context, eventID int) (model.
 	}
 
 	return resolvers.Resolve(ctx, factory.New(eventID), validator, resolver)
+}
+
+// AddAccount is the resolver for the addAccount field.
+func (r *mutationResolver) AddAccount(ctx context.Context, name string) (*model.ShortAccount, error) {
+	var factory addAccountResolver.AddAccountArgumentFactory
+	var validator resolvers.Validator[addAccountResolver.AddAccountArguments, addAccountResolver.ValidAddAccountArguments]
+	var resolver resolvers.Resolver[*model.ShortAccount, addAccountResolver.ValidAddAccountArguments]
+
+	errFactoryResolve := container.Resolve(&factory)
+	if errFactoryResolve != nil {
+		utils.F("Couldnt resolve AddAccount factory: %v", errFactoryResolve)
+		return nil, errFactoryResolve
+	}
+
+	errValidatorResolve := container.Resolve(&validator)
+	if errValidatorResolve != nil {
+		utils.F("Couldnt resolve AddAccount validator: %v", errValidatorResolve)
+		return nil, errValidatorResolve
+	}
+
+	errResolverResolve := container.Resolve(&resolver)
+	if errResolverResolve != nil {
+		utils.F("Couldnt resolve AddAccount resolver: %v", errResolverResolve)
+		return nil, errResolverResolve
+	}
+
+	return resolvers.Resolve(ctx, factory.New(name), validator, resolver)
 }
 
 // SaveAccount is the resolver for the saveAccount field.

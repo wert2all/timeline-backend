@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"timeline/backend/app/config"
+	accountModel "timeline/backend/db/model/account"
 	eventModel "timeline/backend/db/model/event"
 	settingsModel "timeline/backend/db/model/settings"
 	tagModel "timeline/backend/db/model/tag"
@@ -60,6 +61,9 @@ func initModels() {
 	})
 	initService(func(repository settings.Repository) settingsModel.Model {
 		return settingsModel.NewModel(repository)
+	})
+	initService(func(accountRepository account.Repository, userRepository user.Repository, previewlyMutationClient previewly.MutationClient) accountModel.Model {
+		return accountModel.NewModel(accountRepository, userRepository, previewlyMutationClient)
 	})
 }
 
