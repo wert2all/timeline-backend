@@ -2,10 +2,11 @@ package user
 
 import (
 	"context"
-	"errors"
 
 	"timeline/backend/db/model/user"
 
+	"github.com/99designs/gqlgen/graphql"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 	"google.golang.org/api/idtoken"
 )
 
@@ -16,11 +17,23 @@ type UserExtractor struct {
 
 func (u UserExtractor) ExtractUserFromToken(ctx context.Context, token *string) (*user.CheckOrCreate, error) {
 	if token == nil {
-		return nil, errors.New("token is nil")
+		return nil, &gqlerror.Error{
+			Message: "empty token",
+			Path:    graphql.GetPath(ctx),
+			Extensions: map[string]interface{}{
+				"code": "auth/empty_token",
+			},
+		}
 	}
 	payload, err := idtoken.Validate(ctx, *token, u.googleClientID)
 	if err != nil {
-		return nil, errors.New("Invalid token")
+		return nil, &gqlerror.Error{
+			Message: "invalid token",
+			Path:    graphql.GetPath(ctx),
+			Extensions: map[string]interface{}{
+				"code": "auth/invalid_token",
+			},
+		}
 	}
 
 	someUser := user.NewSomeUser(
@@ -32,7 +45,13 @@ func (u UserExtractor) ExtractUserFromToken(ctx context.Context, token *string) 
 
 	userCheck, err := u.userModel.CheckOrCreate(ctx, someUser)
 	if err != nil {
-		return nil, errors.New("Blocked")
+		return nil, &gqlerror.Error{
+			Message: "blocked",
+			Path:    graphql.GetPath(ctx),
+			Extensions: map[string]interface{}{
+				"code": "auth/blocked_user",
+			},
+		}
 	}
 	return userCheck, nil
 }
