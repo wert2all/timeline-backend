@@ -1,6 +1,7 @@
 package di
 
 import (
+	"context"
 	"net/http"
 
 	middlewares "timeline/backend/app/middleware"
@@ -8,6 +9,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/vektah/gqlparser/v2/ast"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler"
@@ -49,6 +51,10 @@ func createGQLServer(schema graphql.ExecutableSchema, shouldIntospect bool) *han
 	srv.AddTransport(transport.POST{})
 	srv.AddTransport(transport.MultipartForm{})
 	srv.SetQueryCache(lru.New[*ast.QueryDocument](1000))
+
+	srv.SetRecoverFunc(func(ctx context.Context, err interface{}) error {
+		return gqlerror.Errorf("Internal server error!")
+	})
 
 	if shouldIntospect {
 		srv.Use(extension.Introspection{})
