@@ -17,7 +17,7 @@ type Model interface {
 	Update(*ent.EventUpdateOne) (*ent.Event, error)
 	GetEventByID(int) (*ent.Event, error)
 
-	GetTimelineEvents(timeline ent.Timeline, cursor *cursor.Cursor, limit int) ([]*ent.Event, error)
+	GetTimelineEvents(timeline ent.Timeline, withPrivate bool, cursor *cursor.Cursor, limit int) ([]*ent.Event, error)
 
 	UpdateEvent(*ent.Event, *eventValidator.BaseValidEventInput) (*ent.Event, error)
 }
@@ -30,8 +30,8 @@ type modelImpl struct {
 }
 
 // GetTimelineEvents implements Model.
-func (m modelImpl) GetTimelineEvents(timeline ent.Timeline, cursor *cursor.Cursor, limit int) ([]*ent.Event, error) {
-	return m.eventRepository.FindTimelineEventsByCursor(timeline.ID, cursor, limit)
+func (m modelImpl) GetTimelineEvents(timeline ent.Timeline, withPrivate bool, cursor *cursor.Cursor, limit int) ([]*ent.Event, error) {
+	return m.eventRepository.FindTimelineEventsByCursor(timeline.ID, withPrivate, cursor, limit)
 }
 
 func (m modelImpl) UpdateEvent(event *ent.Event, input *eventValidator.BaseValidEventInput) (*ent.Event, error) {
