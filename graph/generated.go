@@ -79,7 +79,7 @@ type ComplexityRoot struct {
 
 	Query struct {
 		MyAccountTimelines   func(childComplexity int, accountID int) int
-		TimelineCursorEvents func(childComplexity int, accountID int, timelineID int, limit *model.Limit, cursor *string) int
+		TimelineCursorEvents func(childComplexity int, accountID *int, timelineID int, limit *model.Limit, cursor *string) int
 		TimelineEvents       func(childComplexity int, timelineID int, limit *model.Limit) int
 	}
 
@@ -134,7 +134,7 @@ type MutationResolver interface {
 }
 type QueryResolver interface {
 	TimelineEvents(ctx context.Context, timelineID int, limit *model.Limit) ([]*model.TimelineEvent, error)
-	TimelineCursorEvents(ctx context.Context, accountID int, timelineID int, limit *model.Limit, cursor *string) (*model.TimelineEvents, error)
+	TimelineCursorEvents(ctx context.Context, accountID *int, timelineID int, limit *model.Limit, cursor *string) (*model.TimelineEvents, error)
 	MyAccountTimelines(ctx context.Context, accountID int) ([]*model.ShortTimeline, error)
 }
 
@@ -333,7 +333,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.TimelineCursorEvents(childComplexity, args["accountId"].(int), args["timelineId"].(int), args["limit"].(*model.Limit), args["cursor"].(*string)), true
+		return e.complexity.Query.TimelineCursorEvents(childComplexity, args["accountId"].(*int), args["timelineId"].(int), args["limit"].(*model.Limit), args["cursor"].(*string)), true
 
 	case "Query.timelineEvents":
 		if e.complexity.Query.TimelineEvents == nil {
@@ -964,18 +964,18 @@ func (ec *executionContext) field_Query_timelineCursorEvents_args(ctx context.Co
 func (ec *executionContext) field_Query_timelineCursorEvents_argsAccountID(
 	ctx context.Context,
 	rawArgs map[string]any,
-) (int, error) {
+) (*int, error) {
 	if _, ok := rawArgs["accountId"]; !ok {
-		var zeroVal int
+		var zeroVal *int
 		return zeroVal, nil
 	}
 
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("accountId"))
 	if tmp, ok := rawArgs["accountId"]; ok {
-		return ec.unmarshalNInt2int(ctx, tmp)
+		return ec.unmarshalOInt2ᚖint(ctx, tmp)
 	}
 
-	var zeroVal int
+	var zeroVal *int
 	return zeroVal, nil
 }
 
@@ -2135,7 +2135,7 @@ func (ec *executionContext) _Query_timelineCursorEvents(ctx context.Context, fie
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().TimelineCursorEvents(rctx, fc.Args["accountId"].(int), fc.Args["timelineId"].(int), fc.Args["limit"].(*model.Limit), fc.Args["cursor"].(*string))
+		return ec.resolvers.Query().TimelineCursorEvents(rctx, fc.Args["accountId"].(*int), fc.Args["timelineId"].(int), fc.Args["limit"].(*model.Limit), fc.Args["cursor"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)

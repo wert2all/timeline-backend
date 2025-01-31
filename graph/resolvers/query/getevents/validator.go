@@ -21,34 +21,43 @@ type (
 		userExtractor domainUser.UserExtractor
 	}
 	ValidGetCursorEventsArguments struct {
-		timeline ent.Timeline
-		cursor   *cursor.Cursor
-		limit    int
+		timeline  ent.Timeline
+		accountID *int
+		cursor    *cursor.Cursor
+		limit     int
 	}
 )
 
 func (v validatorImpl) Validate(ctx context.Context, arguments resolvers.Arguments[GetCursorEventsArguments]) (resolvers.ValidArguments[ValidGetCursorEventsArguments], error) {
-	token := appContext.GetToken(ctx)
-	user, errExtraction := v.userExtractor.ExtractUserFromToken(ctx, token)
-	if errExtraction != nil {
-		return nil, errors.New("could not expose events: " + errExtraction.Error())
-	}
 	args := arguments.GetArguments()
-	account, err := v.userModel.GetUserAccount(args.accountID, user.ID)
-	if err != nil {
-		return nil, errors.New("could not expose events: " + err.Error())
-	}
-	timeline, errTimeline := v.timelineModel.GetAccountTimeline(account, args.timelineID)
+	timeline, errTimeline := v.timelineModel.GetTimeline(args.timelineID)
 	if errTimeline != nil {
 		return nil, errors.New("could not expose events: " + errTimeline.Error())
 	}
 	cursor, _ := cursor.Decode(args.cursor)
 
 	return ValidGetCursorEventsArguments{
-		timeline: *timeline,
-		cursor:   cursor,
-		limit:    validator.NewLimit(args.limit),
+		timeline:  *timeline,
+		accountID: v.expractAccountID(ctx, args.accountID),
+		cursor:    cursor,
+		limit:     validator.NewLimit(args.limit),
 	}, nil
+}
+
+func (v validatorImpl) expractAccountID(ctx context.Context, requestAccountID *int) *int {
+	token := appContext.GetToken(ctx)
+	user, errExtraction := v.userExtractor.ExtractUserFromToken(ctx, token)
+	if errExtraction != nil {
+		return nil
+	}
+	if requestAccountID != nil {
+		account, err := v.userModel.GetUserAccount(*requestAccountID, user.ID)
+		if err != nil {
+			return nil
+		}
+		return &account.ID
+	}
+	return nil
 }
 
 func NewValidator(userModel user.UserModel, timelineModel timeline.Timeline, userExtractor domainUser.UserExtractor) resolvers.Validator[GetCursorEventsArguments, ValidGetCursorEventsArguments] {

@@ -5,7 +5,7 @@
 type Query {
   timelineEvents(timelineId: Int!, limit: Limit): [TimelineEvent!]!
   timelineCursorEvents(
-    accountId: Int!
+    accountId: Int
     timelineId: Int!
     limit: Limit
     cursor: String

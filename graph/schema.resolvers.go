@@ -6,6 +6,7 @@ package graph
 
 import (
 	"context"
+
 	appContext "timeline/backend/app/context"
 	tagModel "timeline/backend/db/model/tag"
 	"timeline/backend/db/model/timeline"
@@ -279,7 +280,7 @@ func (r *queryResolver) TimelineEvents(ctx context.Context, timelineID int, limi
 }
 
 // TimelineCursorEvents is the resolver for the timelineCursorEvents field.
-func (r *queryResolver) TimelineCursorEvents(ctx context.Context, accountID int, timelineID int, limit *model.Limit, cursor *string) (*model.TimelineEvents, error) {
+func (r *queryResolver) TimelineCursorEvents(ctx context.Context, accountID *int, timelineID int, limit *model.Limit, cursor *string) (*model.TimelineEvents, error) {
 	var factory getEventsResolver.GetCursorEventsArgumentFactory
 	var validator resolvers.Validator[getEventsResolver.GetCursorEventsArguments, getEventsResolver.ValidGetCursorEventsArguments]
 	var resolver resolvers.Resolver[*model.TimelineEvents, getEventsResolver.ValidGetCursorEventsArguments]
@@ -302,7 +303,7 @@ func (r *queryResolver) TimelineCursorEvents(ctx context.Context, accountID int,
 		return nil, errResolverResolve
 	}
 
-	return resolvers.Resolve(ctx, factory.New(accountID, timelineID, limit, cursor), validator, resolver)
+	return resolvers.Resolve(ctx, factory.New(timelineID, accountID, limit, cursor), validator, resolver)
 }
 
 // MyAccountTimelines is the resolver for the myAccountTimelines field.
@@ -337,5 +338,7 @@ func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 // Query returns QueryResolver implementation.
 func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
-type mutationResolver struct{ *Resolver }
-type queryResolver struct{ *Resolver }
+type (
+	mutationResolver struct{ *Resolver }
+	queryResolver    struct{ *Resolver }
+)

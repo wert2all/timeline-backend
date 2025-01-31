@@ -18,7 +18,7 @@ type Repository interface {
 	UpdateEvent(*ent.EventUpdateOne) (*ent.Event, error)
 	Delete(context.Context, *ent.Event) error
 
-	FindTimelineEventsByCursor(timelineID int, cursor *cursor.Cursor, limit int) ([]*ent.Event, error)
+	FindTimelineEventsByCursor(timelineID int, withPrivate bool, cursor *cursor.Cursor, limit int) ([]*ent.Event, error)
 }
 
 type repositoryImpl struct {
@@ -26,7 +26,7 @@ type repositoryImpl struct {
 	context context.Context
 }
 
-func (r repositoryImpl) FindTimelineEventsByCursor(timelineID int, cursor *cursor.Cursor, limit int) ([]*ent.Event, error) {
+func (r repositoryImpl) FindTimelineEventsByCursor(timelineID int, withPrivate bool, cursor *cursor.Cursor, limit int) ([]*ent.Event, error) {
 	query := r.client.Event.Query().
 		Where(event.HasTimelineWith(timeline.ID(timelineID))).
 		Order(
