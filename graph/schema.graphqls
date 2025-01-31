@@ -3,7 +3,6 @@
 # https://gqlgen.com/getting-started/
 
 type Query {
-  timelineEvents(timelineId: Int!, limit: Limit): [TimelineEvent!]!
   timelineCursorEvents(
     accountId: Int
     timelineId: Int!

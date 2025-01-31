@@ -1,7 +1,6 @@
 package timeline
 
 import (
-	"timeline/backend/db/query"
 	"timeline/backend/db/repository/timeline"
 	"timeline/backend/ent"
 )
@@ -13,7 +12,6 @@ type Timeline interface {
 	CreateTimeline(string, *ent.Account) (*ent.Timeline, error)
 	GetTimeline(int) (*ent.Timeline, error)
 	AttachEvent(*ent.Timeline, *ent.Event) (*ent.Timeline, error)
-	GetEvents(*ent.Timeline, query.Limit) ([]*ent.Event, error)
 
 	CheckUserTimeline(*ent.Timeline, int) error
 }
@@ -25,10 +23,6 @@ type timelineModelImpl struct {
 // CheckUserTimeline implements Timeline.
 func (t timelineModelImpl) CheckUserTimeline(timeline *ent.Timeline, userID int) error {
 	return t.repository.CheckUserTimeline(timeline, userID)
-}
-
-func (t timelineModelImpl) GetEvents(timeline *ent.Timeline, limit query.Limit) ([]*ent.Event, error) {
-	return t.repository.GetTimelineEvents(timeline, limit)
 }
 
 func (t timelineModelImpl) AttachEvent(timeline *ent.Timeline, event *ent.Event) (*ent.Timeline, error) {

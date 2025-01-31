@@ -6,12 +6,8 @@ package graph
 
 import (
 	"context"
-
 	appContext "timeline/backend/app/context"
-	tagModel "timeline/backend/db/model/tag"
-	"timeline/backend/db/model/timeline"
 	domainUser "timeline/backend/domain/user"
-	"timeline/backend/graph/convert"
 	"timeline/backend/graph/model"
 	"timeline/backend/graph/resolvers"
 	addAccountResolver "timeline/backend/graph/resolvers/mutation/account/add"
@@ -240,45 +236,6 @@ func (r *mutationResolver) SaveSettings(ctx context.Context, accountID int, sett
 	return resolvers.Resolve(ctx, factory.New(accountID, settings), validator, resolver)
 }
 
-// TimelineEvents is the resolver for the timelineEvents field.
-func (r *queryResolver) TimelineEvents(ctx context.Context, timelineID int, limit *model.Limit) ([]*model.TimelineEvent, error) {
-	var timelineModel timeline.Timeline
-	var tagModel tagModel.Model
-
-	err := container.Resolve(&timelineModel)
-	if err != nil {
-		utils.F("Couldnt resolve model Timeline: %v", err)
-		return nil, err
-	}
-
-	errTagResolve := container.Resolve(&tagModel)
-	if errTagResolve != nil {
-		utils.F("Couldnt resolve model Tag: %v", errTagResolve)
-		return nil, errTagResolve
-	}
-
-	timeline, error := timelineModel.GetTimeline(timelineID)
-	if error != nil {
-		return nil, error
-	}
-	events, error := timelineModel.GetEvents(timeline, convert.ToLimit(limit))
-	if error != nil {
-		return nil, error
-	}
-
-	tags := make(map[int][]string)
-	for _, event := range events {
-		tagsEntities := tagModel.GetEventTags(event)
-		entityTags := make([]string, 0)
-		for _, tagEntity := range tagsEntities {
-			entityTags = append(entityTags, tagEntity.Tag)
-		}
-		tags[event.ID] = entityTags
-	}
-
-	return convert.ToEvents(events, tags), nil
-}
-
 // TimelineCursorEvents is the resolver for the timelineCursorEvents field.
 func (r *queryResolver) TimelineCursorEvents(ctx context.Context, accountID *int, timelineID int, limit *model.Limit, cursor *string) (*model.TimelineEvents, error) {
 	var factory getEventsResolver.GetCursorEventsArgumentFactory
@@ -338,7 +295,5 @@ func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 // Query returns QueryResolver implementation.
 func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
-type (
-	mutationResolver struct{ *Resolver }
-	queryResolver    struct{ *Resolver }
-)
+type mutationResolver struct{ *Resolver }
+type queryResolver struct{ *Resolver }
