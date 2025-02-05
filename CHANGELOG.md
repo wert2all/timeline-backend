@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.9.0](https://github.com/wert2all/timeline-backend/compare/v1.8.0...v1.9.0) (2025-02-05)
+
+
+### Features
+
+* add code to auth GQL errors ([8e42030](https://github.com/wert2all/timeline-backend/commit/8e420308cac27cfbd12af1f8c52a746883698195))
+
+
+### Bug Fixes
+
+* accountId for expose timeline event is optional ([f1c7f29](https://github.com/wert2all/timeline-backend/commit/f1c7f2918adaebcd16a1999f9659f5df8c19a9e7))
+* fix showing private events ([6795595](https://github.com/wert2all/timeline-backend/commit/67955956852c7f7bd699449cc136132adec1fdff))
+* remove useless GQL operation ([4981245](https://github.com/wert2all/timeline-backend/commit/49812459a80effb76e6a99257dcc7c85cecfdc4f))
+* return error on panic ([9a89fc0](https://github.com/wert2all/timeline-backend/commit/9a89fc06f60a445f232a00a071c7dbe213dd24de))
+
 ## [1.8.0](https://github.com/wert2all/timeline-backend/compare/v1.7.0...v1.8.0) (2025-01-27)
 
 
