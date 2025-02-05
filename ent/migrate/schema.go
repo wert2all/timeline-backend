@@ -42,6 +42,7 @@ var (
 		{Name: "description", Type: field.TypeString, Nullable: true},
 		{Name: "url", Type: field.TypeString, Nullable: true},
 		{Name: "previewly_image_id", Type: field.TypeInt, Nullable: true},
+		{Name: "private", Type: field.TypeBool, Default: true},
 		{Name: "timeline_event", Type: field.TypeInt, Nullable: true},
 	}
 	// EventsTable holds the schema information for the "events" table.
@@ -52,7 +53,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "events_timelines_event",
-				Columns:    []*schema.Column{EventsColumns[10]},
+				Columns:    []*schema.Column{EventsColumns[11]},
 				RefColumns: []*schema.Column{TimelinesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

@@ -179,6 +179,20 @@ func (eu *EventUpdate) ClearPreviewlyImageID() *EventUpdate {
 	return eu
 }
 
+// SetPrivate sets the "private" field.
+func (eu *EventUpdate) SetPrivate(b bool) *EventUpdate {
+	eu.mutation.SetPrivate(b)
+	return eu
+}
+
+// SetNillablePrivate sets the "private" field if the given value is not nil.
+func (eu *EventUpdate) SetNillablePrivate(b *bool) *EventUpdate {
+	if b != nil {
+		eu.SetPrivate(*b)
+	}
+	return eu
+}
+
 // SetTimelineID sets the "timeline" edge to the Timeline entity by ID.
 func (eu *EventUpdate) SetTimelineID(id int) *EventUpdate {
 	eu.mutation.SetTimelineID(id)
@@ -335,6 +349,9 @@ func (eu *EventUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if eu.mutation.PreviewlyImageIDCleared() {
 		_spec.ClearField(event.FieldPreviewlyImageID, field.TypeInt)
+	}
+	if value, ok := eu.mutation.Private(); ok {
+		_spec.SetField(event.FieldPrivate, field.TypeBool, value)
 	}
 	if eu.mutation.TimelineCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -579,6 +596,20 @@ func (euo *EventUpdateOne) ClearPreviewlyImageID() *EventUpdateOne {
 	return euo
 }
 
+// SetPrivate sets the "private" field.
+func (euo *EventUpdateOne) SetPrivate(b bool) *EventUpdateOne {
+	euo.mutation.SetPrivate(b)
+	return euo
+}
+
+// SetNillablePrivate sets the "private" field if the given value is not nil.
+func (euo *EventUpdateOne) SetNillablePrivate(b *bool) *EventUpdateOne {
+	if b != nil {
+		euo.SetPrivate(*b)
+	}
+	return euo
+}
+
 // SetTimelineID sets the "timeline" edge to the Timeline entity by ID.
 func (euo *EventUpdateOne) SetTimelineID(id int) *EventUpdateOne {
 	euo.mutation.SetTimelineID(id)
@@ -765,6 +796,9 @@ func (euo *EventUpdateOne) sqlSave(ctx context.Context) (_node *Event, err error
 	}
 	if euo.mutation.PreviewlyImageIDCleared() {
 		_spec.ClearField(event.FieldPreviewlyImageID, field.TypeInt)
+	}
+	if value, ok := euo.mutation.Private(); ok {
+		_spec.SetField(event.FieldPrivate, field.TypeBool, value)
 	}
 	if euo.mutation.TimelineCleared() {
 		edge := &sqlgraph.EdgeSpec{

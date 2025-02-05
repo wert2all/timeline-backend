@@ -95,6 +95,11 @@ func PreviewlyImageID(v int) predicate.Event {
 	return predicate.Event(sql.FieldEQ(FieldPreviewlyImageID, v))
 }
 
+// Private applies equality check predicate on the "private" field. It's identical to PrivateEQ.
+func Private(v bool) predicate.Event {
+	return predicate.Event(sql.FieldEQ(FieldPrivate, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.Event {
 	return predicate.Event(sql.FieldEQ(FieldCreatedAt, v))
@@ -553,6 +558,16 @@ func PreviewlyImageIDIsNil() predicate.Event {
 // PreviewlyImageIDNotNil applies the NotNil predicate on the "previewly_image_id" field.
 func PreviewlyImageIDNotNil() predicate.Event {
 	return predicate.Event(sql.FieldNotNull(FieldPreviewlyImageID))
+}
+
+// PrivateEQ applies the EQ predicate on the "private" field.
+func PrivateEQ(v bool) predicate.Event {
+	return predicate.Event(sql.FieldEQ(FieldPrivate, v))
+}
+
+// PrivateNEQ applies the NEQ predicate on the "private" field.
+func PrivateNEQ(v bool) predicate.Event {
+	return predicate.Event(sql.FieldNEQ(FieldPrivate, v))
 }
 
 // HasTimeline applies the HasEdge predicate on the "timeline" edge.

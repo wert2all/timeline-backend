@@ -36,6 +36,8 @@ type Event struct {
 	URL string `json:"url,omitempty"`
 	// PreviewlyImageID holds the value of the "previewly_image_id" field.
 	PreviewlyImageID *int `json:"previewly_image_id,omitempty"`
+	// Private holds the value of the "private" field.
+	Private bool `json:"private,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the EventQuery when eager-loading is set.
 	Edges          EventEdges `json:"edges"`
@@ -79,7 +81,7 @@ func (*Event) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case event.FieldShowTime:
+		case event.FieldShowTime, event.FieldPrivate:
 			values[i] = new(sql.NullBool)
 		case event.FieldID, event.FieldPreviewlyImageID:
 			values[i] = new(sql.NullInt64)
@@ -165,6 +167,12 @@ func (e *Event) assignValues(columns []string, values []any) error {
 				e.PreviewlyImageID = new(int)
 				*e.PreviewlyImageID = int(value.Int64)
 			}
+		case event.FieldPrivate:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field private", values[i])
+			} else if value.Valid {
+				e.Private = value.Bool
+			}
 		case event.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field timeline_event", value)
@@ -246,6 +254,9 @@ func (e *Event) String() string {
 		builder.WriteString("previewly_image_id=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
+	builder.WriteString(", ")
+	builder.WriteString("private=")
+	builder.WriteString(fmt.Sprintf("%v", e.Private))
 	builder.WriteByte(')')
 	return builder.String()
 }

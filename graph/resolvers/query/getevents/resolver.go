@@ -28,7 +28,7 @@ func NewResolver(eventModel event.Model, tagModel tag.Model) resolvers.Resolver[
 func (r resolverImpl) Resolve(ctx context.Context, arguments resolvers.ValidArguments[ValidGetCursorEventsArguments]) (*model.TimelineEvents, error) {
 	args := arguments.GetArguments()
 
-	events, err := r.eventModel.GetTimelineEvents(args.timeline, args.accountID != nil, args.cursor, args.limit+1)
+	events, err := r.eventModel.GetTimelineEvents(args.timeline, args.withPrivate, args.cursor, args.limit+1)
 	if err != nil {
 		return nil, err
 	}

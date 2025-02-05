@@ -33,6 +33,8 @@ const (
 	FieldURL = "url"
 	// FieldPreviewlyImageID holds the string denoting the previewly_image_id field in the database.
 	FieldPreviewlyImageID = "previewly_image_id"
+	// FieldPrivate holds the string denoting the private field in the database.
+	FieldPrivate = "private"
 	// EdgeTimeline holds the string denoting the timeline edge name in mutations.
 	EdgeTimeline = "timeline"
 	// EdgeTags holds the string denoting the tags edge name in mutations.
@@ -65,6 +67,7 @@ var Columns = []string{
 	FieldDescription,
 	FieldURL,
 	FieldPreviewlyImageID,
+	FieldPrivate,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "events"
@@ -99,6 +102,8 @@ var (
 	DefaultCreatedAt func() time.Time
 	// DefaultShowTime holds the default value on creation for the "showTime" field.
 	DefaultShowTime bool
+	// DefaultPrivate holds the default value on creation for the "private" field.
+	DefaultPrivate bool
 )
 
 // Type defines the type for the "type" enum field.
@@ -178,6 +183,11 @@ func ByURL(opts ...sql.OrderTermOption) OrderOption {
 // ByPreviewlyImageID orders the results by the previewly_image_id field.
 func ByPreviewlyImageID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPreviewlyImageID, opts...).ToFunc()
+}
+
+// ByPrivate orders the results by the private field.
+func ByPrivate(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPrivate, opts...).ToFunc()
 }
 
 // ByTimelineField orders the results by timeline field.

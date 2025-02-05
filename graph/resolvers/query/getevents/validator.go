@@ -21,10 +21,10 @@ type (
 		userExtractor domainUser.UserExtractor
 	}
 	ValidGetCursorEventsArguments struct {
-		timeline  ent.Timeline
-		accountID *int
-		cursor    *cursor.Cursor
-		limit     int
+		timeline    ent.Timeline
+		withPrivate bool
+		cursor      *cursor.Cursor
+		limit       int
 	}
 )
 
@@ -37,14 +37,25 @@ func (v validatorImpl) Validate(ctx context.Context, arguments resolvers.Argumen
 	cursor, _ := cursor.Decode(args.cursor)
 
 	return ValidGetCursorEventsArguments{
-		timeline:  *timeline,
-		accountID: v.expractAccountID(ctx, args.accountID),
-		cursor:    cursor,
-		limit:     validator.NewLimit(args.limit),
+		timeline:    *timeline,
+		withPrivate: v.withPrivate(ctx, v.extractAccountID(ctx, args.accountID), *timeline),
+		cursor:      cursor,
+		limit:       validator.NewLimit(args.limit),
 	}, nil
 }
 
-func (v validatorImpl) expractAccountID(ctx context.Context, requestAccountID *int) *int {
+func (v validatorImpl) withPrivate(ctx context.Context, accountID *int, timeline ent.Timeline) bool {
+	if accountID != nil {
+		timelineAccountID, err := timeline.QueryAccount().OnlyID(ctx)
+		if err != nil {
+			return false
+		}
+		return *accountID == timelineAccountID
+	}
+	return false
+}
+
+func (v validatorImpl) extractAccountID(ctx context.Context, requestAccountID *int) *int {
 	token := appContext.GetToken(ctx)
 	user, errExtraction := v.userExtractor.ExtractUserFromToken(ctx, token)
 	if errExtraction != nil {

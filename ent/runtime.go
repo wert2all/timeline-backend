@@ -33,6 +33,10 @@ func init() {
 	eventDescShowTime := eventFields[4].Descriptor()
 	// event.DefaultShowTime holds the default value on creation for the showTime field.
 	event.DefaultShowTime = eventDescShowTime.Default.(bool)
+	// eventDescPrivate is the schema descriptor for private field.
+	eventDescPrivate := eventFields[9].Descriptor()
+	// event.DefaultPrivate holds the default value on creation for the private field.
+	event.DefaultPrivate = eventDescPrivate.Default.(bool)
 	settingsFields := schema.Settings{}.Fields()
 	_ = settingsFields
 	// settingsDescEntityID is the schema descriptor for entity_id field.
