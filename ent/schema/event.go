@@ -26,6 +26,7 @@ func (Event) Fields() []ent.Field {
 		field.String("description").Optional(),
 		field.String("url").Optional(),
 		field.Int("previewly_image_id").Optional().Nillable(),
+		field.Bool("private").Default(true),
 	}
 }
 

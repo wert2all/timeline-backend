@@ -142,6 +142,20 @@ func (ec *EventCreate) SetNillablePreviewlyImageID(i *int) *EventCreate {
 	return ec
 }
 
+// SetPrivate sets the "private" field.
+func (ec *EventCreate) SetPrivate(b bool) *EventCreate {
+	ec.mutation.SetPrivate(b)
+	return ec
+}
+
+// SetNillablePrivate sets the "private" field if the given value is not nil.
+func (ec *EventCreate) SetNillablePrivate(b *bool) *EventCreate {
+	if b != nil {
+		ec.SetPrivate(*b)
+	}
+	return ec
+}
+
 // SetTimelineID sets the "timeline" edge to the Timeline entity by ID.
 func (ec *EventCreate) SetTimelineID(id int) *EventCreate {
 	ec.mutation.SetTimelineID(id)
@@ -223,6 +237,10 @@ func (ec *EventCreate) defaults() {
 		v := event.DefaultShowTime
 		ec.mutation.SetShowTime(v)
 	}
+	if _, ok := ec.mutation.Private(); !ok {
+		v := event.DefaultPrivate
+		ec.mutation.SetPrivate(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -243,6 +261,9 @@ func (ec *EventCreate) check() error {
 	}
 	if _, ok := ec.mutation.ShowTime(); !ok {
 		return &ValidationError{Name: "showTime", err: errors.New(`ent: missing required field "Event.showTime"`)}
+	}
+	if _, ok := ec.mutation.Private(); !ok {
+		return &ValidationError{Name: "private", err: errors.New(`ent: missing required field "Event.private"`)}
 	}
 	return nil
 }
@@ -306,6 +327,10 @@ func (ec *EventCreate) createSpec() (*Event, *sqlgraph.CreateSpec) {
 	if value, ok := ec.mutation.PreviewlyImageID(); ok {
 		_spec.SetField(event.FieldPreviewlyImageID, field.TypeInt, value)
 		_node.PreviewlyImageID = &value
+	}
+	if value, ok := ec.mutation.Private(); ok {
+		_spec.SetField(event.FieldPrivate, field.TypeBool, value)
+		_node.Private = value
 	}
 	if nodes := ec.mutation.TimelineIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -524,6 +549,18 @@ func (u *EventUpsert) ClearPreviewlyImageID() *EventUpsert {
 	return u
 }
 
+// SetPrivate sets the "private" field.
+func (u *EventUpsert) SetPrivate(v bool) *EventUpsert {
+	u.Set(event.FieldPrivate, v)
+	return u
+}
+
+// UpdatePrivate sets the "private" field to the value that was provided on create.
+func (u *EventUpsert) UpdatePrivate() *EventUpsert {
+	u.SetExcluded(event.FieldPrivate)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
@@ -720,6 +757,20 @@ func (u *EventUpsertOne) UpdatePreviewlyImageID() *EventUpsertOne {
 func (u *EventUpsertOne) ClearPreviewlyImageID() *EventUpsertOne {
 	return u.Update(func(s *EventUpsert) {
 		s.ClearPreviewlyImageID()
+	})
+}
+
+// SetPrivate sets the "private" field.
+func (u *EventUpsertOne) SetPrivate(v bool) *EventUpsertOne {
+	return u.Update(func(s *EventUpsert) {
+		s.SetPrivate(v)
+	})
+}
+
+// UpdatePrivate sets the "private" field to the value that was provided on create.
+func (u *EventUpsertOne) UpdatePrivate() *EventUpsertOne {
+	return u.Update(func(s *EventUpsert) {
+		s.UpdatePrivate()
 	})
 }
 
@@ -1085,6 +1136,20 @@ func (u *EventUpsertBulk) UpdatePreviewlyImageID() *EventUpsertBulk {
 func (u *EventUpsertBulk) ClearPreviewlyImageID() *EventUpsertBulk {
 	return u.Update(func(s *EventUpsert) {
 		s.ClearPreviewlyImageID()
+	})
+}
+
+// SetPrivate sets the "private" field.
+func (u *EventUpsertBulk) SetPrivate(v bool) *EventUpsertBulk {
+	return u.Update(func(s *EventUpsert) {
+		s.SetPrivate(v)
+	})
+}
+
+// UpdatePrivate sets the "private" field to the value that was provided on create.
+func (u *EventUpsertBulk) UpdatePrivate() *EventUpsertBulk {
+	return u.Update(func(s *EventUpsert) {
+		s.UpdatePrivate()
 	})
 }
 

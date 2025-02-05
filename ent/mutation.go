@@ -699,6 +699,7 @@ type EventMutation struct {
 	url                   *string
 	previewly_image_id    *int
 	addpreviewly_image_id *int
+	private               *bool
 	clearedFields         map[string]struct{}
 	timeline              *int
 	clearedtimeline       bool
@@ -1218,6 +1219,42 @@ func (m *EventMutation) ResetPreviewlyImageID() {
 	delete(m.clearedFields, event.FieldPreviewlyImageID)
 }
 
+// SetPrivate sets the "private" field.
+func (m *EventMutation) SetPrivate(b bool) {
+	m.private = &b
+}
+
+// Private returns the value of the "private" field in the mutation.
+func (m *EventMutation) Private() (r bool, exists bool) {
+	v := m.private
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPrivate returns the old "private" field's value of the Event entity.
+// If the Event object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EventMutation) OldPrivate(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPrivate is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPrivate requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPrivate: %w", err)
+	}
+	return oldValue.Private, nil
+}
+
+// ResetPrivate resets all changes to the "private" field.
+func (m *EventMutation) ResetPrivate() {
+	m.private = nil
+}
+
 // SetTimelineID sets the "timeline" edge to the Timeline entity by id.
 func (m *EventMutation) SetTimelineID(id int) {
 	m.timeline = &id
@@ -1345,7 +1382,7 @@ func (m *EventMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *EventMutation) Fields() []string {
-	fields := make([]string, 0, 9)
+	fields := make([]string, 0, 10)
 	if m.created_at != nil {
 		fields = append(fields, event.FieldCreatedAt)
 	}
@@ -1373,6 +1410,9 @@ func (m *EventMutation) Fields() []string {
 	if m.previewly_image_id != nil {
 		fields = append(fields, event.FieldPreviewlyImageID)
 	}
+	if m.private != nil {
+		fields = append(fields, event.FieldPrivate)
+	}
 	return fields
 }
 
@@ -1399,6 +1439,8 @@ func (m *EventMutation) Field(name string) (ent.Value, bool) {
 		return m.URL()
 	case event.FieldPreviewlyImageID:
 		return m.PreviewlyImageID()
+	case event.FieldPrivate:
+		return m.Private()
 	}
 	return nil, false
 }
@@ -1426,6 +1468,8 @@ func (m *EventMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldURL(ctx)
 	case event.FieldPreviewlyImageID:
 		return m.OldPreviewlyImageID(ctx)
+	case event.FieldPrivate:
+		return m.OldPrivate(ctx)
 	}
 	return nil, fmt.Errorf("unknown Event field %s", name)
 }
@@ -1497,6 +1541,13 @@ func (m *EventMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetPreviewlyImageID(v)
+		return nil
+	case event.FieldPrivate:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPrivate(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Event field %s", name)
@@ -1621,6 +1672,9 @@ func (m *EventMutation) ResetField(name string) error {
 		return nil
 	case event.FieldPreviewlyImageID:
 		m.ResetPreviewlyImageID()
+		return nil
+	case event.FieldPrivate:
+		m.ResetPrivate()
 		return nil
 	}
 	return fmt.Errorf("unknown Event field %s", name)
