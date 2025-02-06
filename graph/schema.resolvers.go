@@ -14,6 +14,7 @@ import (
 	saveAccountResolver "timeline/backend/graph/resolvers/mutation/account/save"
 	settingsResolver "timeline/backend/graph/resolvers/mutation/account/settings"
 	getEventsResolver "timeline/backend/graph/resolvers/query/getevents"
+	getTimelineResover "timeline/backend/graph/resolvers/query/gettimeline"
 	myAccountTimelines "timeline/backend/graph/resolvers/query/timeline"
 	"timeline/backend/lib/utils"
 
@@ -287,6 +288,33 @@ func (r *queryResolver) MyAccountTimelines(ctx context.Context, accountID int) (
 	}
 
 	return resolver.Resolve(ctx, accountID, user.ID)
+}
+
+// Timeline is the resolver for the timeline field.
+func (r *queryResolver) Timeline(ctx context.Context, timelineID int) (*model.Timeline, error) {
+	var factory getTimelineResover.GetTimelineArgumentFactory
+	var validator resolvers.Validator[getTimelineResover.GetTimelineArguments, getTimelineResover.ValidGetTimelineArguments]
+	var resolver resolvers.Resolver[*model.Timeline, getTimelineResover.ValidGetTimelineArguments]
+
+	errFactoryResolve := container.Resolve(&factory)
+	if errFactoryResolve != nil {
+		utils.F("Couldnt resolve GetTimeline factory: %v", errFactoryResolve)
+		return nil, errFactoryResolve
+	}
+
+	errValidatorResolve := container.Resolve(&validator)
+	if errValidatorResolve != nil {
+		utils.F("Couldnt resolve GetTimeline validator: %v", errValidatorResolve)
+		return nil, errValidatorResolve
+	}
+
+	errResolverResolve := container.Resolve(&resolver)
+	if errResolverResolve != nil {
+		utils.F("Couldnt resolve GetTimeline resolver: %v", errResolverResolve)
+		return nil, errResolverResolve
+	}
+
+	return resolvers.Resolve(ctx, factory.New(timelineID), validator, resolver)
 }
 
 // Mutation returns MutationResolver implementation.

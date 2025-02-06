@@ -10,6 +10,7 @@ type Query {
     cursor: String
   ): TimelineEvents!
   myAccountTimelines(accountId: Int!): [ShortTimeline!]!
+  timeline(timelineId: Int!): Timeline
 }
 
 type Mutation {
@@ -24,6 +25,12 @@ type Mutation {
   addAccount(name: String!): ShortAccount!
   saveAccount(accountId: Int!, account: SaveAccountInput!): ShortAccount!
   saveSettings(accountId: Int!, settings: [AccountSettingInput]): Status!
+}
+
+type Timeline {
+  id: Int!
+  name: String
+  account: ShortAccount!
 }
 
 type ShortTimeline {

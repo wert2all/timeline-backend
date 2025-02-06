@@ -20,6 +20,7 @@ import (
 	addAccountResolver "timeline/backend/graph/resolvers/mutation/account/add"
 	saveAccountResolver "timeline/backend/graph/resolvers/mutation/account/save"
 	getEventsResolver "timeline/backend/graph/resolvers/query/getevents"
+	getTimelineResolver "timeline/backend/graph/resolvers/query/gettimeline"
 )
 
 func initOperationsResolvers() {
@@ -45,6 +46,9 @@ func initArgumentFactories() {
 	})
 	initService(func() addAccountResolver.AddAccountArgumentFactory {
 		return addAccountResolver.AddAccountArgumentFactory{}
+	})
+	initService(func() getTimelineResolver.GetTimelineArgumentFactory {
+		return getTimelineResolver.GetTimelineArgumentFactory{}
 	})
 }
 
@@ -80,6 +84,9 @@ func initValidators() {
 	initService(func(userExtractor domainUser.UserExtractor, userModel userModel.UserModel) resolvers.Validator[addAccountResolver.AddAccountArguments, addAccountResolver.ValidAddAccountArguments] {
 		return addAccountResolver.NewValidator(userExtractor, userModel)
 	})
+	initService(func() resolvers.Validator[getTimelineResolver.GetTimelineArguments, getTimelineResolver.ValidGetTimelineArguments] {
+		return getTimelineResolver.NewValidator()
+	})
 }
 
 func initResolvers() {
@@ -112,5 +119,8 @@ func initResolvers() {
 	})
 	initService(func(accountModel accountModel.Model, settingsModel settings.Model) resolvers.Resolver[*model.ShortAccount, addAccountResolver.ValidAddAccountArguments] {
 		return addAccountResolver.NewResolver(accountModel, settingsModel)
+	})
+	initService(func(timelineModel timelineModel.Timeline, settingsModel settings.Model) resolvers.Resolver[*model.Timeline, getTimelineResolver.ValidGetTimelineArguments] {
+		return getTimelineResolver.NewResolver(timelineModel, settingsModel)
 	})
 }
