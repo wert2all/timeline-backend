@@ -79,6 +79,12 @@ type ShortTimeline struct {
 	Name *string `json:"name,omitempty"`
 }
 
+type Timeline struct {
+	ID      int           `json:"id"`
+	Name    *string       `json:"name,omitempty"`
+	Account *ShortAccount `json:"account"`
+}
+
 type TimelineEvent struct {
 	ID               int          `json:"id"`
 	Date             time.Time    `json:"date"`
