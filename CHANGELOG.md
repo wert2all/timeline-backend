@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.10.0](https://github.com/wert2all/timeline-backend/compare/v1.9.0...v1.10.0) (2025-02-07)
+
+
+### Features
+
+* add timeline query ([a02b6d1](https://github.com/wert2all/timeline-backend/commit/a02b6d1b7403bbce1117c7a73140ab4052b6bc38))
+
+
+### Bug Fixes
+
+* fix private events ([5b115f3](https://github.com/wert2all/timeline-backend/commit/5b115f3387418b2502efddc115149ab3e6ac6168))
+
 ## [1.9.0](https://github.com/wert2all/timeline-backend/compare/v1.8.0...v1.9.0) (2025-02-05)
 
 
