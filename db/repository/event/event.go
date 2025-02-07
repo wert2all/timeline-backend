@@ -28,15 +28,16 @@ type repositoryImpl struct {
 
 func (r repositoryImpl) FindTimelineEventsByCursor(timelineID int, withPrivate bool, cursor *cursor.Cursor, limit int) ([]*ent.Event, error) {
 	query := r.client.Event.Query().
-		Where(
-			event.HasTimelineWith(timeline.ID(timelineID)),
-			event.Private(withPrivate),
-		).
+		Where(event.HasTimelineWith(timeline.ID(timelineID))).
 		Order(
 			event.ByDate(sql.OrderDesc()),
 			event.ByID(sql.OrderDesc()),
 		).
 		Limit(limit)
+
+	if !withPrivate {
+		query = query.Where(event.Private(false))
+	}
 
 	if cursor != nil {
 		query = query.Where(func(s *sql.Selector) {
