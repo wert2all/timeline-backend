@@ -48,13 +48,6 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
-	Account struct {
-		AvatarID func(childComplexity int) int
-		ID       func(childComplexity int) int
-		Name     func(childComplexity int) int
-		Settings func(childComplexity int) int
-	}
-
 	AccountSettings struct {
 		Key   func(childComplexity int) int
 		Value func(childComplexity int) int
@@ -84,6 +77,7 @@ type ComplexityRoot struct {
 	}
 
 	ShortAccount struct {
+		About          func(childComplexity int) int
 		AvatarID       func(childComplexity int) int
 		ID             func(childComplexity int) int
 		Name           func(childComplexity int) int
@@ -162,34 +156,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	ec := executionContext{nil, e, 0, 0, nil}
 	_ = ec
 	switch typeName + "." + field {
-
-	case "Account.avatarId":
-		if e.complexity.Account.AvatarID == nil {
-			break
-		}
-
-		return e.complexity.Account.AvatarID(childComplexity), true
-
-	case "Account.id":
-		if e.complexity.Account.ID == nil {
-			break
-		}
-
-		return e.complexity.Account.ID(childComplexity), true
-
-	case "Account.name":
-		if e.complexity.Account.Name == nil {
-			break
-		}
-
-		return e.complexity.Account.Name(childComplexity), true
-
-	case "Account.settings":
-		if e.complexity.Account.Settings == nil {
-			break
-		}
-
-		return e.complexity.Account.Settings(childComplexity), true
 
 	case "AccountSettings.key":
 		if e.complexity.AccountSettings.Key == nil {
@@ -352,6 +318,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.TimelineCursorEvents(childComplexity, args["accountId"].(*int), args["timelineId"].(int), args["limit"].(*model.Limit), args["cursor"].(*string)), true
+
+	case "ShortAccount.about":
+		if e.complexity.ShortAccount.About == nil {
+			break
+		}
+
+		return e.complexity.ShortAccount.About(childComplexity), true
 
 	case "ShortAccount.avatarId":
 		if e.complexity.ShortAccount.AvatarID == nil {
@@ -1152,182 +1125,6 @@ func (ec *executionContext) field___Type_fields_argsIncludeDeprecated(
 
 // region    **************************** field.gotpl *****************************
 
-func (ec *executionContext) _Account_id(ctx context.Context, field graphql.CollectedField, obj *model.Account) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Account_id(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int)
-	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Account_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Account",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Account_name(ctx context.Context, field graphql.CollectedField, obj *model.Account) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Account_name(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Name, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*string)
-	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Account_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Account",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Account_avatarId(ctx context.Context, field graphql.CollectedField, obj *model.Account) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Account_avatarId(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.AvatarID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*int)
-	fc.Result = res
-	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Account_avatarId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Account",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Account_settings(ctx context.Context, field graphql.CollectedField, obj *model.Account) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Account_settings(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Settings, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*model.AccountSettings)
-	fc.Result = res
-	return ec.marshalNAccountSettings2ᚕᚖtimelineᚋbackendᚋgraphᚋmodelᚐAccountSettingsᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Account_settings(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Account",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "key":
-				return ec.fieldContext_AccountSettings_key(ctx, field)
-			case "value":
-				return ec.fieldContext_AccountSettings_value(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type AccountSettings", field.Name)
-		},
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _AccountSettings_key(ctx context.Context, field graphql.CollectedField, obj *model.AccountSettings) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_AccountSettings_key(ctx, field)
 	if err != nil {
@@ -1782,6 +1579,8 @@ func (ec *executionContext) fieldContext_Mutation_addAccount(ctx context.Context
 				return ec.fieldContext_ShortAccount_previewlyToken(ctx, field)
 			case "avatarId":
 				return ec.fieldContext_ShortAccount_avatarId(ctx, field)
+			case "about":
+				return ec.fieldContext_ShortAccount_about(ctx, field)
 			case "settings":
 				return ec.fieldContext_ShortAccount_settings(ctx, field)
 			}
@@ -1849,6 +1648,8 @@ func (ec *executionContext) fieldContext_Mutation_saveAccount(ctx context.Contex
 				return ec.fieldContext_ShortAccount_previewlyToken(ctx, field)
 			case "avatarId":
 				return ec.fieldContext_ShortAccount_avatarId(ctx, field)
+			case "about":
+				return ec.fieldContext_ShortAccount_about(ctx, field)
 			case "settings":
 				return ec.fieldContext_ShortAccount_settings(ctx, field)
 			}
@@ -2531,6 +2332,47 @@ func (ec *executionContext) fieldContext_ShortAccount_avatarId(_ context.Context
 	return fc, nil
 }
 
+func (ec *executionContext) _ShortAccount_about(ctx context.Context, field graphql.CollectedField, obj *model.ShortAccount) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ShortAccount_about(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.About, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ShortAccount_about(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ShortAccount",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _ShortAccount_settings(ctx context.Context, field graphql.CollectedField, obj *model.ShortAccount) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_ShortAccount_settings(ctx, field)
 	if err != nil {
@@ -2798,6 +2640,8 @@ func (ec *executionContext) fieldContext_Timeline_account(_ context.Context, fie
 				return ec.fieldContext_ShortAccount_previewlyToken(ctx, field)
 			case "avatarId":
 				return ec.fieldContext_ShortAccount_avatarId(ctx, field)
+			case "about":
+				return ec.fieldContext_ShortAccount_about(ctx, field)
 			case "settings":
 				return ec.fieldContext_ShortAccount_settings(ctx, field)
 			}
@@ -3524,6 +3368,8 @@ func (ec *executionContext) fieldContext_User_accounts(_ context.Context, field 
 				return ec.fieldContext_ShortAccount_previewlyToken(ctx, field)
 			case "avatarId":
 				return ec.fieldContext_ShortAccount_avatarId(ctx, field)
+			case "about":
+				return ec.fieldContext_ShortAccount_about(ctx, field)
 			case "settings":
 				return ec.fieldContext_ShortAccount_settings(ctx, field)
 			}
@@ -5505,7 +5351,7 @@ func (ec *executionContext) unmarshalInputSaveAccountInput(ctx context.Context, 
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"name", "avatarID"}
+	fieldsInOrder := [...]string{"name", "about", "avatarID"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -5519,6 +5365,13 @@ func (ec *executionContext) unmarshalInputSaveAccountInput(ctx context.Context, 
 				return it, err
 			}
 			it.Name = data
+		case "about":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("about"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.About = data
 		case "avatarID":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("avatarID"))
 			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
@@ -5629,54 +5482,6 @@ func (ec *executionContext) unmarshalInputTimelineEventInput(ctx context.Context
 // endregion ************************** interface.gotpl ***************************
 
 // region    **************************** object.gotpl ****************************
-
-var accountImplementors = []string{"Account"}
-
-func (ec *executionContext) _Account(ctx context.Context, sel ast.SelectionSet, obj *model.Account) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, accountImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	deferred := make(map[string]*graphql.FieldSet)
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("Account")
-		case "id":
-			out.Values[i] = ec._Account_id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "name":
-			out.Values[i] = ec._Account_name(ctx, field, obj)
-		case "avatarId":
-			out.Values[i] = ec._Account_avatarId(ctx, field, obj)
-		case "settings":
-			out.Values[i] = ec._Account_settings(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch(ctx)
-	if out.Invalids > 0 {
-		return graphql.Null
-	}
-
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
-
-	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
-			Label:    label,
-			Path:     graphql.GetPath(ctx),
-			FieldSet: dfs,
-			Context:  ctx,
-		})
-	}
-
-	return out
-}
 
 var accountSettingsImplementors = []string{"AccountSettings"}
 
@@ -5998,6 +5803,8 @@ func (ec *executionContext) _ShortAccount(ctx context.Context, sel ast.Selection
 			}
 		case "avatarId":
 			out.Values[i] = ec._ShortAccount_avatarId(ctx, field, obj)
+		case "about":
+			out.Values[i] = ec._ShortAccount_about(ctx, field, obj)
 		case "settings":
 			out.Values[i] = ec._ShortAccount_settings(ctx, field, obj)
 			if out.Values[i] == graphql.Null {

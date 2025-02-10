@@ -84,6 +84,26 @@ func (au *AccountUpdate) ClearAvatarID() *AccountUpdate {
 	return au
 }
 
+// SetAbout sets the "about" field.
+func (au *AccountUpdate) SetAbout(s string) *AccountUpdate {
+	au.mutation.SetAbout(s)
+	return au
+}
+
+// SetNillableAbout sets the "about" field if the given value is not nil.
+func (au *AccountUpdate) SetNillableAbout(s *string) *AccountUpdate {
+	if s != nil {
+		au.SetAbout(*s)
+	}
+	return au
+}
+
+// ClearAbout clears the value of the "about" field.
+func (au *AccountUpdate) ClearAbout() *AccountUpdate {
+	au.mutation.ClearAbout()
+	return au
+}
+
 // AddTimelineIDs adds the "timeline" edge to the Timeline entity by IDs.
 func (au *AccountUpdate) AddTimelineIDs(ids ...int) *AccountUpdate {
 	au.mutation.AddTimelineIDs(ids...)
@@ -213,6 +233,12 @@ func (au *AccountUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if au.mutation.AvatarIDCleared() {
 		_spec.ClearField(account.FieldAvatarID, field.TypeInt)
+	}
+	if value, ok := au.mutation.About(); ok {
+		_spec.SetField(account.FieldAbout, field.TypeString, value)
+	}
+	if au.mutation.AboutCleared() {
+		_spec.ClearField(account.FieldAbout, field.TypeString)
 	}
 	if au.mutation.TimelineCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -360,6 +386,26 @@ func (auo *AccountUpdateOne) AddAvatarID(i int) *AccountUpdateOne {
 // ClearAvatarID clears the value of the "avatar_id" field.
 func (auo *AccountUpdateOne) ClearAvatarID() *AccountUpdateOne {
 	auo.mutation.ClearAvatarID()
+	return auo
+}
+
+// SetAbout sets the "about" field.
+func (auo *AccountUpdateOne) SetAbout(s string) *AccountUpdateOne {
+	auo.mutation.SetAbout(s)
+	return auo
+}
+
+// SetNillableAbout sets the "about" field if the given value is not nil.
+func (auo *AccountUpdateOne) SetNillableAbout(s *string) *AccountUpdateOne {
+	if s != nil {
+		auo.SetAbout(*s)
+	}
+	return auo
+}
+
+// ClearAbout clears the value of the "about" field.
+func (auo *AccountUpdateOne) ClearAbout() *AccountUpdateOne {
+	auo.mutation.ClearAbout()
 	return auo
 }
 
@@ -522,6 +568,12 @@ func (auo *AccountUpdateOne) sqlSave(ctx context.Context) (_node *Account, err e
 	}
 	if auo.mutation.AvatarIDCleared() {
 		_spec.ClearField(account.FieldAvatarID, field.TypeInt)
+	}
+	if value, ok := auo.mutation.About(); ok {
+		_spec.SetField(account.FieldAbout, field.TypeString, value)
+	}
+	if auo.mutation.AboutCleared() {
+		_spec.ClearField(account.FieldAbout, field.TypeString)
 	}
 	if auo.mutation.TimelineCleared() {
 		edge := &sqlgraph.EdgeSpec{

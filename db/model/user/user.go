@@ -30,7 +30,7 @@ type UserModel interface {
 	GetUserAccounts(*ent.User) ([]*ent.Account, error)
 	GetUserAccount(int, int) (*ent.Account, error)
 
-	SaveUserAccount(account *ent.Account, name string, avatarID *int) (*ent.Account, error)
+	SaveUserAccount(account *ent.Account, name string, about *string, avatarID *int) (*ent.Account, error)
 }
 
 type userModelImp struct {
@@ -40,8 +40,8 @@ type userModelImp struct {
 }
 
 // SaveUserAccount implements UserModel.
-func (u userModelImp) SaveUserAccount(account *ent.Account, name string, avatarID *int) (*ent.Account, error) {
-	return u.accountRepository.Save(account, name, avatarID)
+func (u userModelImp) SaveUserAccount(account *ent.Account, name string, about *string, avatarID *int) (*ent.Account, error) {
+	return u.accountRepository.Save(account, name, about, avatarID)
 }
 
 // GetUserAccount implements UserModel.

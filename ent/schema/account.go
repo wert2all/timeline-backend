@@ -17,6 +17,7 @@ func (Account) Fields() []ent.Field {
 		field.String("name"),
 		field.String("previewly_token").NotEmpty().Default(""),
 		field.Int("avatar_id").Nillable().Optional(),
+		field.String("about").Nillable().Optional(),
 	}
 }
 

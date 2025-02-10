@@ -61,6 +61,7 @@ func ToShortAccount(accountEntity ent.Account, settings []*ent.Settings) *model.
 		ID:             accountEntity.ID,
 		PreviewlyToken: accountEntity.PreviewlyToken,
 		AvatarID:       accountEntity.AvatarID,
+		About:          accountEntity.About,
 		Settings:       gqlSettings,
 	}
 }

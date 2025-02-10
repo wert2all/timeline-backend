@@ -9,13 +9,6 @@ import (
 	"time"
 )
 
-type Account struct {
-	ID       int                `json:"id"`
-	Name     *string            `json:"name,omitempty"`
-	AvatarID *int               `json:"avatarId,omitempty"`
-	Settings []*AccountSettings `json:"settings"`
-}
-
 type AccountSettingInput struct {
 	Key   string  `json:"key"`
 	Value *string `json:"value,omitempty"`
@@ -62,8 +55,9 @@ type Query struct {
 }
 
 type SaveAccountInput struct {
-	Name     string `json:"name"`
-	AvatarID *int   `json:"avatarID,omitempty"`
+	Name     string  `json:"name"`
+	About    *string `json:"about,omitempty"`
+	AvatarID *int    `json:"avatarID,omitempty"`
 }
 
 type ShortAccount struct {
@@ -71,6 +65,7 @@ type ShortAccount struct {
 	Name           *string            `json:"name,omitempty"`
 	PreviewlyToken string             `json:"previewlyToken"`
 	AvatarID       *int               `json:"avatarId,omitempty"`
+	About          *string            `json:"about,omitempty"`
 	Settings       []*AccountSettings `json:"settings"`
 }
 
