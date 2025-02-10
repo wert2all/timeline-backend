@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.11.0](https://github.com/wert2all/timeline-backend/compare/v1.10.0...v1.11.0) (2025-02-10)
+
+
+### Features
+
+* add about to account entity and GQL type ([54baa95](https://github.com/wert2all/timeline-backend/commit/54baa953f4c464cb835e8dbe18599d2b49b4a34f))
+
 ## [1.10.0](https://github.com/wert2all/timeline-backend/compare/v1.9.0...v1.10.0) (2025-02-07)
 
 
