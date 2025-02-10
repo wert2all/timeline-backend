@@ -43,13 +43,7 @@ type ShortAccount {
   name: String
   previewlyToken: String!
   avatarId: Int
-  settings: [AccountSettings!]!
-}
-
-type Account {
-  id: Int!
-  name: String
-  avatarId: Int
+  about: String
   settings: [AccountSettings!]!
 }
 
@@ -132,6 +126,7 @@ input AccountSettingInput {
 
 input SaveAccountInput {
   name: String!
+  about: String
   avatarID: Int
 }
 

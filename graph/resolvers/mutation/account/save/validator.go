@@ -15,6 +15,7 @@ type (
 	ValidSaveAccountArguments struct {
 		account  *ent.Account
 		name     string
+		about    *string
 		avatarID *int
 	}
 	validatorImpl struct {
@@ -38,6 +39,7 @@ func (v validatorImpl) Validate(ctx context.Context, arguments resolvers.Argumen
 	return ValidSaveAccountArguments{
 		account:  account,
 		name:     args.name,
+		about:    args.about,
 		avatarID: args.avatarID,
 	}, nil
 }

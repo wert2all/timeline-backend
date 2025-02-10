@@ -69,6 +69,11 @@ func AvatarID(v int) predicate.Account {
 	return predicate.Account(sql.FieldEQ(FieldAvatarID, v))
 }
 
+// About applies equality check predicate on the "about" field. It's identical to AboutEQ.
+func About(v string) predicate.Account {
+	return predicate.Account(sql.FieldEQ(FieldAbout, v))
+}
+
 // NameEQ applies the EQ predicate on the "name" field.
 func NameEQ(v string) predicate.Account {
 	return predicate.Account(sql.FieldEQ(FieldName, v))
@@ -247,6 +252,81 @@ func AvatarIDIsNil() predicate.Account {
 // AvatarIDNotNil applies the NotNil predicate on the "avatar_id" field.
 func AvatarIDNotNil() predicate.Account {
 	return predicate.Account(sql.FieldNotNull(FieldAvatarID))
+}
+
+// AboutEQ applies the EQ predicate on the "about" field.
+func AboutEQ(v string) predicate.Account {
+	return predicate.Account(sql.FieldEQ(FieldAbout, v))
+}
+
+// AboutNEQ applies the NEQ predicate on the "about" field.
+func AboutNEQ(v string) predicate.Account {
+	return predicate.Account(sql.FieldNEQ(FieldAbout, v))
+}
+
+// AboutIn applies the In predicate on the "about" field.
+func AboutIn(vs ...string) predicate.Account {
+	return predicate.Account(sql.FieldIn(FieldAbout, vs...))
+}
+
+// AboutNotIn applies the NotIn predicate on the "about" field.
+func AboutNotIn(vs ...string) predicate.Account {
+	return predicate.Account(sql.FieldNotIn(FieldAbout, vs...))
+}
+
+// AboutGT applies the GT predicate on the "about" field.
+func AboutGT(v string) predicate.Account {
+	return predicate.Account(sql.FieldGT(FieldAbout, v))
+}
+
+// AboutGTE applies the GTE predicate on the "about" field.
+func AboutGTE(v string) predicate.Account {
+	return predicate.Account(sql.FieldGTE(FieldAbout, v))
+}
+
+// AboutLT applies the LT predicate on the "about" field.
+func AboutLT(v string) predicate.Account {
+	return predicate.Account(sql.FieldLT(FieldAbout, v))
+}
+
+// AboutLTE applies the LTE predicate on the "about" field.
+func AboutLTE(v string) predicate.Account {
+	return predicate.Account(sql.FieldLTE(FieldAbout, v))
+}
+
+// AboutContains applies the Contains predicate on the "about" field.
+func AboutContains(v string) predicate.Account {
+	return predicate.Account(sql.FieldContains(FieldAbout, v))
+}
+
+// AboutHasPrefix applies the HasPrefix predicate on the "about" field.
+func AboutHasPrefix(v string) predicate.Account {
+	return predicate.Account(sql.FieldHasPrefix(FieldAbout, v))
+}
+
+// AboutHasSuffix applies the HasSuffix predicate on the "about" field.
+func AboutHasSuffix(v string) predicate.Account {
+	return predicate.Account(sql.FieldHasSuffix(FieldAbout, v))
+}
+
+// AboutIsNil applies the IsNil predicate on the "about" field.
+func AboutIsNil() predicate.Account {
+	return predicate.Account(sql.FieldIsNull(FieldAbout))
+}
+
+// AboutNotNil applies the NotNil predicate on the "about" field.
+func AboutNotNil() predicate.Account {
+	return predicate.Account(sql.FieldNotNull(FieldAbout))
+}
+
+// AboutEqualFold applies the EqualFold predicate on the "about" field.
+func AboutEqualFold(v string) predicate.Account {
+	return predicate.Account(sql.FieldEqualFold(FieldAbout, v))
+}
+
+// AboutContainsFold applies the ContainsFold predicate on the "about" field.
+func AboutContainsFold(v string) predicate.Account {
+	return predicate.Account(sql.FieldContainsFold(FieldAbout, v))
 }
 
 // HasTimeline applies the HasEdge predicate on the "timeline" edge.

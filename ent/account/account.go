@@ -18,6 +18,8 @@ const (
 	FieldPreviewlyToken = "previewly_token"
 	// FieldAvatarID holds the string denoting the avatar_id field in the database.
 	FieldAvatarID = "avatar_id"
+	// FieldAbout holds the string denoting the about field in the database.
+	FieldAbout = "about"
 	// EdgeTimeline holds the string denoting the timeline edge name in mutations.
 	EdgeTimeline = "timeline"
 	// EdgeUser holds the string denoting the user edge name in mutations.
@@ -46,6 +48,7 @@ var Columns = []string{
 	FieldName,
 	FieldPreviewlyToken,
 	FieldAvatarID,
+	FieldAbout,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "accounts"
@@ -97,6 +100,11 @@ func ByPreviewlyToken(opts ...sql.OrderTermOption) OrderOption {
 // ByAvatarID orders the results by the avatar_id field.
 func ByAvatarID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldAvatarID, opts...).ToFunc()
+}
+
+// ByAbout orders the results by the about field.
+func ByAbout(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAbout, opts...).ToFunc()
 }
 
 // ByTimelineCount orders the results by timeline count.

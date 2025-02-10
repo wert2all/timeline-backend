@@ -57,6 +57,20 @@ func (ac *AccountCreate) SetNillableAvatarID(i *int) *AccountCreate {
 	return ac
 }
 
+// SetAbout sets the "about" field.
+func (ac *AccountCreate) SetAbout(s string) *AccountCreate {
+	ac.mutation.SetAbout(s)
+	return ac
+}
+
+// SetNillableAbout sets the "about" field if the given value is not nil.
+func (ac *AccountCreate) SetNillableAbout(s *string) *AccountCreate {
+	if s != nil {
+		ac.SetAbout(*s)
+	}
+	return ac
+}
+
 // AddTimelineIDs adds the "timeline" edge to the Timeline entity by IDs.
 func (ac *AccountCreate) AddTimelineIDs(ids ...int) *AccountCreate {
 	ac.mutation.AddTimelineIDs(ids...)
@@ -183,6 +197,10 @@ func (ac *AccountCreate) createSpec() (*Account, *sqlgraph.CreateSpec) {
 	if value, ok := ac.mutation.AvatarID(); ok {
 		_spec.SetField(account.FieldAvatarID, field.TypeInt, value)
 		_node.AvatarID = &value
+	}
+	if value, ok := ac.mutation.About(); ok {
+		_spec.SetField(account.FieldAbout, field.TypeString, value)
+		_node.About = &value
 	}
 	if nodes := ac.mutation.TimelineIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -317,6 +335,24 @@ func (u *AccountUpsert) ClearAvatarID() *AccountUpsert {
 	return u
 }
 
+// SetAbout sets the "about" field.
+func (u *AccountUpsert) SetAbout(v string) *AccountUpsert {
+	u.Set(account.FieldAbout, v)
+	return u
+}
+
+// UpdateAbout sets the "about" field to the value that was provided on create.
+func (u *AccountUpsert) UpdateAbout() *AccountUpsert {
+	u.SetExcluded(account.FieldAbout)
+	return u
+}
+
+// ClearAbout clears the value of the "about" field.
+func (u *AccountUpsert) ClearAbout() *AccountUpsert {
+	u.SetNull(account.FieldAbout)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
@@ -410,6 +446,27 @@ func (u *AccountUpsertOne) UpdateAvatarID() *AccountUpsertOne {
 func (u *AccountUpsertOne) ClearAvatarID() *AccountUpsertOne {
 	return u.Update(func(s *AccountUpsert) {
 		s.ClearAvatarID()
+	})
+}
+
+// SetAbout sets the "about" field.
+func (u *AccountUpsertOne) SetAbout(v string) *AccountUpsertOne {
+	return u.Update(func(s *AccountUpsert) {
+		s.SetAbout(v)
+	})
+}
+
+// UpdateAbout sets the "about" field to the value that was provided on create.
+func (u *AccountUpsertOne) UpdateAbout() *AccountUpsertOne {
+	return u.Update(func(s *AccountUpsert) {
+		s.UpdateAbout()
+	})
+}
+
+// ClearAbout clears the value of the "about" field.
+func (u *AccountUpsertOne) ClearAbout() *AccountUpsertOne {
+	return u.Update(func(s *AccountUpsert) {
+		s.ClearAbout()
 	})
 }
 
@@ -670,6 +727,27 @@ func (u *AccountUpsertBulk) UpdateAvatarID() *AccountUpsertBulk {
 func (u *AccountUpsertBulk) ClearAvatarID() *AccountUpsertBulk {
 	return u.Update(func(s *AccountUpsert) {
 		s.ClearAvatarID()
+	})
+}
+
+// SetAbout sets the "about" field.
+func (u *AccountUpsertBulk) SetAbout(v string) *AccountUpsertBulk {
+	return u.Update(func(s *AccountUpsert) {
+		s.SetAbout(v)
+	})
+}
+
+// UpdateAbout sets the "about" field to the value that was provided on create.
+func (u *AccountUpsertBulk) UpdateAbout() *AccountUpsertBulk {
+	return u.Update(func(s *AccountUpsert) {
+		s.UpdateAbout()
+	})
+}
+
+// ClearAbout clears the value of the "about" field.
+func (u *AccountUpsertBulk) ClearAbout() *AccountUpsertBulk {
+	return u.Update(func(s *AccountUpsert) {
+		s.ClearAbout()
 	})
 }
 

@@ -21,7 +21,7 @@ type (
 // Resolve implements resolvers.Resolver.
 func (r resolverImpl) Resolve(ctx context.Context, arguments resolvers.ValidArguments[ValidSaveAccountArguments]) (*model.ShortAccount, error) {
 	args := arguments.GetArguments()
-	accountEntity, err := r.userModel.SaveUserAccount(args.account, args.name, args.avatarID)
+	accountEntity, err := r.userModel.SaveUserAccount(args.account, args.name, args.about, args.avatarID)
 	if err != nil {
 		return nil, err
 	}

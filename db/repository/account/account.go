@@ -11,7 +11,7 @@ type (
 	Repository interface {
 		Create(userID int, name string, previewlyToken string) (*ent.Account, error)
 
-		Save(account *ent.Account, name string, avatarID *int) (*ent.Account, error)
+		Save(account *ent.Account, name string, about *string, avatarID *int) (*ent.Account, error)
 	}
 
 	repositoryImp struct {
@@ -21,8 +21,8 @@ type (
 )
 
 // Save implements Repository.
-func (r repositoryImp) Save(account *ent.Account, name string, avatarID *int) (*ent.Account, error) {
-	return r.client.Account.UpdateOne(account).SetName(name).Save(r.context)
+func (r repositoryImp) Save(account *ent.Account, name string, about *string, avatarID *int) (*ent.Account, error) {
+	return r.client.Account.UpdateOne(account).SetName(name).SetNillableAbout(about).Save(r.context)
 }
 
 // Create implements Repository.

@@ -48,6 +48,7 @@ type AccountMutation struct {
 	previewly_token *string
 	avatar_id       *int
 	addavatar_id    *int
+	about           *string
 	clearedFields   map[string]struct{}
 	timeline        map[int]struct{}
 	removedtimeline map[int]struct{}
@@ -299,6 +300,55 @@ func (m *AccountMutation) ResetAvatarID() {
 	delete(m.clearedFields, account.FieldAvatarID)
 }
 
+// SetAbout sets the "about" field.
+func (m *AccountMutation) SetAbout(s string) {
+	m.about = &s
+}
+
+// About returns the value of the "about" field in the mutation.
+func (m *AccountMutation) About() (r string, exists bool) {
+	v := m.about
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAbout returns the old "about" field's value of the Account entity.
+// If the Account object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AccountMutation) OldAbout(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAbout is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAbout requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAbout: %w", err)
+	}
+	return oldValue.About, nil
+}
+
+// ClearAbout clears the value of the "about" field.
+func (m *AccountMutation) ClearAbout() {
+	m.about = nil
+	m.clearedFields[account.FieldAbout] = struct{}{}
+}
+
+// AboutCleared returns if the "about" field was cleared in this mutation.
+func (m *AccountMutation) AboutCleared() bool {
+	_, ok := m.clearedFields[account.FieldAbout]
+	return ok
+}
+
+// ResetAbout resets all changes to the "about" field.
+func (m *AccountMutation) ResetAbout() {
+	m.about = nil
+	delete(m.clearedFields, account.FieldAbout)
+}
+
 // AddTimelineIDs adds the "timeline" edge to the Timeline entity by ids.
 func (m *AccountMutation) AddTimelineIDs(ids ...int) {
 	if m.timeline == nil {
@@ -426,7 +476,7 @@ func (m *AccountMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *AccountMutation) Fields() []string {
-	fields := make([]string, 0, 3)
+	fields := make([]string, 0, 4)
 	if m.name != nil {
 		fields = append(fields, account.FieldName)
 	}
@@ -435,6 +485,9 @@ func (m *AccountMutation) Fields() []string {
 	}
 	if m.avatar_id != nil {
 		fields = append(fields, account.FieldAvatarID)
+	}
+	if m.about != nil {
+		fields = append(fields, account.FieldAbout)
 	}
 	return fields
 }
@@ -450,6 +503,8 @@ func (m *AccountMutation) Field(name string) (ent.Value, bool) {
 		return m.PreviewlyToken()
 	case account.FieldAvatarID:
 		return m.AvatarID()
+	case account.FieldAbout:
+		return m.About()
 	}
 	return nil, false
 }
@@ -465,6 +520,8 @@ func (m *AccountMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldPreviewlyToken(ctx)
 	case account.FieldAvatarID:
 		return m.OldAvatarID(ctx)
+	case account.FieldAbout:
+		return m.OldAbout(ctx)
 	}
 	return nil, fmt.Errorf("unknown Account field %s", name)
 }
@@ -494,6 +551,13 @@ func (m *AccountMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetAvatarID(v)
+		return nil
+	case account.FieldAbout:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAbout(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Account field %s", name)
@@ -543,6 +607,9 @@ func (m *AccountMutation) ClearedFields() []string {
 	if m.FieldCleared(account.FieldAvatarID) {
 		fields = append(fields, account.FieldAvatarID)
 	}
+	if m.FieldCleared(account.FieldAbout) {
+		fields = append(fields, account.FieldAbout)
+	}
 	return fields
 }
 
@@ -560,6 +627,9 @@ func (m *AccountMutation) ClearField(name string) error {
 	case account.FieldAvatarID:
 		m.ClearAvatarID()
 		return nil
+	case account.FieldAbout:
+		m.ClearAbout()
+		return nil
 	}
 	return fmt.Errorf("unknown Account nullable field %s", name)
 }
@@ -576,6 +646,9 @@ func (m *AccountMutation) ResetField(name string) error {
 		return nil
 	case account.FieldAvatarID:
 		m.ResetAvatarID()
+		return nil
+	case account.FieldAbout:
+		m.ResetAbout()
 		return nil
 	}
 	return fmt.Errorf("unknown Account field %s", name)
