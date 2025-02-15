@@ -22,11 +22,13 @@ type (
 
 // Save implements Repository.
 func (r repositoryImp) Save(account *ent.Account, name string, about *string, avatarID *int) (*ent.Account, error) {
-	return r.client.Account.UpdateOne(account).
-		SetName(name).
-		SetNillableAbout(about).
-		SetNillableAvatarID(avatarID).
-		Save(r.context)
+	updateOne := r.client.Account.UpdateOne(account).SetName(name).SetNillableAbout(about)
+	if avatarID != nil {
+		updateOne = updateOne.SetNillableAvatarID(avatarID)
+	} else {
+		updateOne = updateOne.ClearAvatarID()
+	}
+	return updateOne.Save(r.context)
 }
 
 // Create implements Repository.
