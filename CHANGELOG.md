@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.11.1](https://github.com/wert2all/timeline-backend/compare/v1.11.0...v1.11.1) (2025-02-15)
+
+
+### Bug Fixes
+
+* fix saving avatarId ([4950dc1](https://github.com/wert2all/timeline-backend/commit/4950dc1d9ce3fdf53b769e0939536b0c62c23296))
+* fix saving nil avatarID ([cba0e63](https://github.com/wert2all/timeline-backend/commit/cba0e630c7b3adb4d190714864ed4743313ecd2a))
+
 ## [1.11.0](https://github.com/wert2all/timeline-backend/compare/v1.10.0...v1.11.0) (2025-02-10)
 
 
