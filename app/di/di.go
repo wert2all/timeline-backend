@@ -63,6 +63,7 @@ func initApplication(config config.Config) {
 			newRouter(middlewares.NewMiddlewares(), config.App.Development),
 			config.App.Listen,
 			func() {
+				//nolint:errcheck
 				entClient.Close()
 				sentry.Flush(time.Second)
 			})
