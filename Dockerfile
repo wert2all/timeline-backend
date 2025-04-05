@@ -1,4 +1,4 @@
-FROM golang:alpine AS builder
+FROM golang:1.24.2-alpine AS builder
 
 LABEL stage=gobuilder
 
