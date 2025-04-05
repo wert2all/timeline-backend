@@ -5,9 +5,7 @@ import (
 	eventModel "timeline/backend/db/model/event"
 	"timeline/backend/db/model/settings"
 	tagModel "timeline/backend/db/model/tag"
-	"timeline/backend/db/model/timeline"
 	timelineModel "timeline/backend/db/model/timeline"
-	"timeline/backend/db/model/user"
 	userModel "timeline/backend/db/model/user"
 	"timeline/backend/db/repository/event"
 	domainUser "timeline/backend/domain/user"
@@ -66,7 +64,7 @@ func initValidators() {
 	initService(func(baseValidator eventValidator.BaseValidator) resolvers.Validator[resolvers.AddEventArguments, resolvers.ValidAddEventArguments] {
 		return resolvers.NewAddEventValidator(baseValidator)
 	})
-	initService(func(baseValidator eventValidator.BaseValidator, eventModel eventModel.Model, timelineModel timeline.Timeline) resolvers.Validator[resolvers.EditEventArguments, resolvers.ValidEditEventArguments] {
+	initService(func(baseValidator eventValidator.BaseValidator, eventModel eventModel.Model, timelineModel timelineModel.Timeline) resolvers.Validator[resolvers.EditEventArguments, resolvers.ValidEditEventArguments] {
 		return resolvers.NewEditEventValidator(baseValidator, eventModel, timelineModel)
 	})
 	initService(func(userModel userModel.UserModel, eventModel eventModel.Model, userExtractor domainUser.UserExtractor) resolvers.Validator[resolvers.DeleteEventArguments, resolvers.ValidDeleteEventArguments] {
@@ -75,7 +73,7 @@ func initValidators() {
 	initService(func(userModel userModel.UserModel, userExtractor domainUser.UserExtractor) resolvers.Validator[settingsResolver.SaveSettingsArguments, settingsResolver.ValidSaveSettingsArguments] {
 		return settingsResolver.NewSaveSettingsValidator(userModel, userExtractor)
 	})
-	initService(func(userModel userModel.UserModel, timelineModel timeline.Timeline, userExtractor domainUser.UserExtractor) resolvers.Validator[getEventsResolver.GetCursorEventsArguments, getEventsResolver.ValidGetCursorEventsArguments] {
+	initService(func(userModel userModel.UserModel, timelineModel timelineModel.Timeline, userExtractor domainUser.UserExtractor) resolvers.Validator[getEventsResolver.GetCursorEventsArguments, getEventsResolver.ValidGetCursorEventsArguments] {
 		return getEventsResolver.NewValidator(userModel, timelineModel, userExtractor)
 	})
 	initService(func(userModel userModel.UserModel, userExtractor domainUser.UserExtractor) resolvers.Validator[saveAccountResolver.SaveAccountArguments, saveAccountResolver.ValidSaveAccountArguments] {
@@ -90,7 +88,7 @@ func initValidators() {
 }
 
 func initResolvers() {
-	initService(func(timelineModel timelineModel.Timeline, userModel user.UserModel, settings settings.Model) resolvers.Resolver[*model.User, resolvers.ValidAuthorizeArguments] {
+	initService(func(timelineModel timelineModel.Timeline, userModel userModel.UserModel, settings settings.Model) resolvers.Resolver[*model.User, resolvers.ValidAuthorizeArguments] {
 		return resolvers.NewAutorizeResolver(timelineModel, userModel, settings)
 	})
 	initService(func(timelineModel timelineModel.Timeline, userModel userModel.UserModel) resolvers.Resolver[*model.ShortTimeline, resolvers.ValidAddTimelineArguments] {
@@ -105,7 +103,7 @@ func initResolvers() {
 	initService(func(eventRepository event.Repository) resolvers.Resolver[model.Status, resolvers.ValidDeleteEventArguments] {
 		return resolvers.NewDeleteEventResolver(eventRepository)
 	})
-	initService(func(timelineModel timelineModel.Timeline, userModel user.UserModel) myAccountTimelines.Resolver {
+	initService(func(timelineModel timelineModel.Timeline, userModel userModel.UserModel) myAccountTimelines.Resolver {
 		return myAccountTimelines.NewMyAccountTimelinesResolver(timelineModel, userModel)
 	})
 	initService(func(settingsModel settings.Model) resolvers.Resolver[model.Status, settingsResolver.ValidSaveSettingsArguments] {
