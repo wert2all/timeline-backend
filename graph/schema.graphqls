@@ -11,6 +11,7 @@ type Query {
   ): TimelineEvents!
   myAccountTimelines(accountId: Int!): [ShortTimeline!]!
   timeline(timelineId: Int!): Timeline
+  event(eventId: Int!, accountId: Int): TimelineEvent
 }
 
 type Mutation {

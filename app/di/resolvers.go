@@ -17,6 +17,7 @@ import (
 
 	addAccountResolver "timeline/backend/graph/resolvers/mutation/account/add"
 	saveAccountResolver "timeline/backend/graph/resolvers/mutation/account/save"
+	getEventResolver "timeline/backend/graph/resolvers/query/getevent"
 	getEventsResolver "timeline/backend/graph/resolvers/query/getevents"
 	getTimelineResolver "timeline/backend/graph/resolvers/query/gettimeline"
 )
@@ -48,6 +49,7 @@ func initArgumentFactories() {
 	initService(func() getTimelineResolver.GetTimelineArgumentFactory {
 		return getTimelineResolver.GetTimelineArgumentFactory{}
 	})
+	initService(func() getEventResolver.GetEventArgumentFactory { return getEventResolver.GetEventArgumentFactory{} })
 }
 
 func initValidators() {
@@ -85,6 +87,9 @@ func initValidators() {
 	initService(func() resolvers.Validator[getTimelineResolver.GetTimelineArguments, getTimelineResolver.ValidGetTimelineArguments] {
 		return getTimelineResolver.NewValidator()
 	})
+	initService(func(userModel userModel.UserModel, userExtractor domainUser.UserExtractor) resolvers.Validator[getEventResolver.GetEventArguments, getEventResolver.ValidGetEventArguments] {
+		return getEventResolver.NewValidator(userModel, userExtractor)
+	})
 }
 
 func initResolvers() {
@@ -120,5 +125,8 @@ func initResolvers() {
 	})
 	initService(func(timelineModel timelineModel.Timeline, settingsModel settings.Model) resolvers.Resolver[*model.Timeline, getTimelineResolver.ValidGetTimelineArguments] {
 		return getTimelineResolver.NewResolver(timelineModel, settingsModel)
+	})
+	initService(func(eventModel eventModel.Model, tagModel tagModel.Model) resolvers.Resolver[*model.TimelineEvent, getEventResolver.ValidGetEventArguments] {
+		return getEventResolver.NewResolver(eventModel, tagModel)
 	})
 }
