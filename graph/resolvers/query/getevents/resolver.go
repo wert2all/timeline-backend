@@ -36,7 +36,7 @@ func (r resolverImpl) Resolve(ctx context.Context, arguments resolvers.ValidArgu
 	events, lastEvent := r.modifyLastEvent(events, args.limit)
 
 	return &model.TimelineEvents{
-		Events: convert.ToEvents(events, r.createTags(events)),
+		Events: convert.ToEvents(events, r.createTags(events), args.timeline.ID),
 		Page:   r.createPageInfo(args.cursor, lastEvent),
 	}, nil
 }
