@@ -27,11 +27,15 @@ func (r resolverImpl) Resolve(ctx context.Context, arguments resolvers.ValidArgu
 		return nil, err
 	}
 
-	if err := r.canShow(ctx, event, arguments); err != nil {
+	timeline, err := event.QueryTimeline().Only(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if err := r.canShow(ctx, event, arguments, timeline); err != nil {
 		return nil, err
 	}
 
-	return convert.ToEvent(event, r.getTags(event)), nil
+	return convert.ToEvent(event, r.getTags(event), timeline.ID), nil
 }
 
 func (r resolverImpl) getTags(event *ent.Event) []string {
@@ -44,15 +48,10 @@ func (r resolverImpl) getTags(event *ent.Event) []string {
 	return entityTags
 }
 
-func (r resolverImpl) canShow(ctx context.Context, event *ent.Event, arguments resolvers.ValidArguments[ValidGetEventArguments]) error {
+func (r resolverImpl) canShow(ctx context.Context, event *ent.Event, arguments resolvers.ValidArguments[ValidGetEventArguments], timeline *ent.Timeline) error {
 	args := arguments.GetArguments()
 	if event.Private {
 		if args.account != nil {
-			timeline, err := event.QueryTimeline().Only(ctx)
-			if err != nil {
-				return err
-			}
-
 			accountID, err := timeline.QueryAccount().OnlyID(ctx)
 			if err != nil {
 				return err

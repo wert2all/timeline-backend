@@ -85,6 +85,7 @@ type TimelineEvent struct {
 	Date             time.Time    `json:"date"`
 	Type             TimelineType `json:"type"`
 	Title            *string      `json:"title,omitempty"`
+	TimelineID       int          `json:"timelineId"`
 	Description      *string      `json:"description,omitempty"`
 	ShowTime         *bool        `json:"showTime,omitempty"`
 	URL              *string      `json:"url,omitempty"`
