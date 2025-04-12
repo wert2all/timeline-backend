@@ -6,7 +6,6 @@ package graph
 
 import (
 	"context"
-
 	appContext "timeline/backend/app/context"
 	domainUser "timeline/backend/domain/user"
 	"timeline/backend/graph/model"
@@ -352,7 +351,5 @@ func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 // Query returns QueryResolver implementation.
 func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
-type (
-	mutationResolver struct{ *Resolver }
-	queryResolver    struct{ *Resolver }
-)
+type mutationResolver struct{ *Resolver }
+type queryResolver struct{ *Resolver }

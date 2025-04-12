@@ -2210,6 +2210,8 @@ func (ec *executionContext) fieldContext_Query_event(ctx context.Context, field 
 				return ec.fieldContext_TimelineEvent_type(ctx, field)
 			case "title":
 				return ec.fieldContext_TimelineEvent_title(ctx, field)
+			case "timelineId":
+				return ec.fieldContext_TimelineEvent_timelineId(ctx, field)
 			case "description":
 				return ec.fieldContext_TimelineEvent_description(ctx, field)
 			case "showTime":
