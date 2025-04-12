@@ -20,7 +20,7 @@ func (u UserExtractor) ExtractUserFromToken(ctx context.Context, token *string) 
 		return nil, &gqlerror.Error{
 			Message: "empty token",
 			Path:    graphql.GetPath(ctx),
-			Extensions: map[string]interface{}{
+			Extensions: map[string]any{
 				"code": "auth/empty_token",
 			},
 		}
@@ -30,7 +30,7 @@ func (u UserExtractor) ExtractUserFromToken(ctx context.Context, token *string) 
 		return nil, &gqlerror.Error{
 			Message: "invalid token",
 			Path:    graphql.GetPath(ctx),
-			Extensions: map[string]interface{}{
+			Extensions: map[string]any{
 				"code": "auth/invalid_token",
 			},
 		}
@@ -48,7 +48,7 @@ func (u UserExtractor) ExtractUserFromToken(ctx context.Context, token *string) 
 		return nil, &gqlerror.Error{
 			Message: "blocked",
 			Path:    graphql.GetPath(ctx),
-			Extensions: map[string]interface{}{
+			Extensions: map[string]any{
 				"code": "auth/blocked_user",
 			},
 		}
