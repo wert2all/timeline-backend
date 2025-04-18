@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.12.0](https://github.com/wert2all/timeline-backend/compare/v1.11.1...v1.12.0) (2025-04-18)
+
+
+### Features
+
+* expose event ([d840ef1](https://github.com/wert2all/timeline-backend/commit/d840ef12e93e29b8021acc91facc2fed238077ca))
+* expose timelineID with event type ([ee0a53b](https://github.com/wert2all/timeline-backend/commit/ee0a53b22d3f1ca5be53582e359cedbb68d1a6d9))
+* **graph:** add account resolver for timeline ([7ffae59](https://github.com/wert2all/timeline-backend/commit/7ffae590fad4d4bd4b8c173df6a04d34308f52ae))
+* **timeline:** add timeline resolver for TimelineEvent ([235124b](https://github.com/wert2all/timeline-backend/commit/235124b4deb4d8005d8d8ec0543afc5a3879f5c1))
+
+
+### Bug Fixes
+
+* fix static tests ([327023e](https://github.com/wert2all/timeline-backend/commit/327023e757b91d9e9c9619a84d73373a3b04858c))
+
 ## [1.11.1](https://github.com/wert2all/timeline-backend/compare/v1.11.0...v1.11.1) (2025-02-15)
 
 
