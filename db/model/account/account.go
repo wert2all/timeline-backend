@@ -12,6 +12,7 @@ import (
 type (
 	Model interface {
 		NewAccount(ctx context.Context, user *ent.User, name string) (*ent.Account, error)
+		GetAccount(accountID int) (*ent.Account, error)
 	}
 	modelImp struct {
 		userRepository          user.Repository
@@ -19,6 +20,11 @@ type (
 		previewlyMutationClient previewly.MutationClient
 	}
 )
+
+// GetAccount implements Model.
+func (m modelImp) GetAccount(accountID int) (*ent.Account, error) {
+	return m.accountRepository.Get(accountID)
+}
 
 // New implements Model.
 func (m modelImp) NewAccount(ctx context.Context, user *ent.User, name string) (*ent.Account, error) {

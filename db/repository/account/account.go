@@ -5,11 +5,14 @@ import (
 	"fmt"
 
 	"timeline/backend/ent"
+	"timeline/backend/ent/account"
 )
 
 type (
 	Repository interface {
 		Create(userID int, name string, previewlyToken string) (*ent.Account, error)
+
+		Get(accountID int) (*ent.Account, error)
 
 		Save(account *ent.Account, name string, about *string, avatarID *int) (*ent.Account, error)
 	}
@@ -19,6 +22,11 @@ type (
 		client  *ent.Client
 	}
 )
+
+// Get implements Repository.
+func (r repositoryImp) Get(accountID int) (*ent.Account, error) {
+	return r.client.Account.Query().Where(account.ID(accountID)).Only(r.context)
+}
 
 // Save implements Repository.
 func (r repositoryImp) Save(account *ent.Account, name string, about *string, avatarID *int) (*ent.Account, error) {

@@ -60,24 +60,9 @@ type SaveAccountInput struct {
 	AvatarID *int    `json:"avatarID,omitempty"`
 }
 
-type ShortAccount struct {
-	ID             int                `json:"id"`
-	Name           *string            `json:"name,omitempty"`
-	PreviewlyToken string             `json:"previewlyToken"`
-	AvatarID       *int               `json:"avatarId,omitempty"`
-	About          *string            `json:"about,omitempty"`
-	Settings       []*AccountSettings `json:"settings"`
-}
-
 type ShortTimeline struct {
 	ID   int     `json:"id"`
 	Name *string `json:"name,omitempty"`
-}
-
-type Timeline struct {
-	ID      int           `json:"id"`
-	Name    *string       `json:"name,omitempty"`
-	Account *ShortAccount `json:"account"`
 }
 
 type TimelineEvent struct {

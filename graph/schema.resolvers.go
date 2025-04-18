@@ -6,8 +6,12 @@ package graph
 
 import (
 	"context"
+	"fmt"
 	appContext "timeline/backend/app/context"
+	"timeline/backend/db/model/account"
+	"timeline/backend/db/model/settings"
 	domainUser "timeline/backend/domain/user"
+	"timeline/backend/graph/convert"
 	"timeline/backend/graph/model"
 	"timeline/backend/graph/resolvers"
 	addAccountResolver "timeline/backend/graph/resolvers/mutation/account/add"
@@ -17,6 +21,7 @@ import (
 	getEventsResolver "timeline/backend/graph/resolvers/query/getevents"
 	getTimelineResover "timeline/backend/graph/resolvers/query/gettimeline"
 	myAccountTimelines "timeline/backend/graph/resolvers/query/timeline"
+	enumvalues "timeline/backend/lib/enum-values"
 	"timeline/backend/lib/utils"
 
 	container "github.com/golobby/container/v3"
@@ -345,11 +350,37 @@ func (r *queryResolver) Event(ctx context.Context, eventID int, accountID *int) 
 	return resolvers.Resolve(ctx, factory.New(eventID, accountID), validator, resolver)
 }
 
+// Account is the resolver for the account field.
+func (r *timelineResolver) Account(ctx context.Context, obj *model.Timeline) (*model.ShortAccount, error) {
+	var accountModel account.Model
+	var settingsModel settings.Model
+
+	if err := container.Resolve(&accountModel); err != nil {
+		return nil, fmt.Errorf("failed to resolve account model: %w", err)
+	}
+
+	if err := container.Resolve(&settingsModel); err != nil {
+		return nil, fmt.Errorf("failed to resolve settings model: %w", err)
+	}
+
+	accountEntity, err := accountModel.GetAccount(obj.AccountID)
+	if err != nil {
+		return nil, err
+	}
+	settings := settingsModel.GetSettings(enumvalues.SettingsTypeAccount, accountEntity.ID)
+
+	return convert.ToShortAccount(*accountEntity, settings), nil
+}
+
 // Mutation returns MutationResolver implementation.
 func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 
 // Query returns QueryResolver implementation.
 func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
+// Timeline returns TimelineResolver implementation.
+func (r *Resolver) Timeline() TimelineResolver { return &timelineResolver{r} }
+
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
+type timelineResolver struct{ *Resolver }
