@@ -10,6 +10,7 @@ import (
 	appContext "timeline/backend/app/context"
 	"timeline/backend/db/model/account"
 	"timeline/backend/db/model/settings"
+	"timeline/backend/db/model/timeline"
 	domainUser "timeline/backend/domain/user"
 	"timeline/backend/graph/convert"
 	"timeline/backend/graph/model"
@@ -25,6 +26,7 @@ import (
 	"timeline/backend/lib/utils"
 
 	container "github.com/golobby/container/v3"
+	"github.com/xorcare/pointer"
 )
 
 // Authorize is the resolver for the authorize field.
@@ -372,6 +374,25 @@ func (r *timelineResolver) Account(ctx context.Context, obj *model.Timeline) (*m
 	return convert.ToShortAccount(*accountEntity, settings), nil
 }
 
+// Timeline is the resolver for the timeline field.
+func (r *timelineEventResolver) Timeline(ctx context.Context, obj *model.TimelineEvent) (*model.Timeline, error) {
+	var timelineModel timeline.Timeline
+
+	if err := container.Resolve(&timelineModel); err != nil {
+		return nil, fmt.Errorf("failed to resolve timeline model: %w", err)
+	}
+
+	timelineEntity, err := timelineModel.GetTimeline(obj.TimelineID)
+	if err != nil {
+		return nil, err
+	}
+	return &model.Timeline{
+		ID:        timelineEntity.ID,
+		Name:      pointer.String(timelineEntity.Name),
+		AccountID: timelineEntity.QueryAccount().OnlyIDX(ctx),
+	}, nil
+}
+
 // Mutation returns MutationResolver implementation.
 func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 
@@ -381,6 +402,10 @@ func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 // Timeline returns TimelineResolver implementation.
 func (r *Resolver) Timeline() TimelineResolver { return &timelineResolver{r} }
 
+// TimelineEvent returns TimelineEventResolver implementation.
+func (r *Resolver) TimelineEvent() TimelineEventResolver { return &timelineEventResolver{r} }
+
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
 type timelineResolver struct{ *Resolver }
+type timelineEventResolver struct{ *Resolver }

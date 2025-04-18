@@ -5,10 +5,8 @@ import (
 
 	"timeline/backend/db/model/settings"
 	timelineModel "timeline/backend/db/model/timeline"
-	"timeline/backend/graph/convert"
 	"timeline/backend/graph/model"
 	"timeline/backend/graph/resolvers"
-	enumvalues "timeline/backend/lib/enum-values"
 )
 
 type (
@@ -30,12 +28,11 @@ func (r resolverImpl) Resolve(ctx context.Context, arguments resolvers.ValidArgu
 	if err != nil {
 		return nil, err
 	}
-	settings := r.settingsModel.GetSettings(enumvalues.SettingsTypeAccount, account.ID)
 
 	return &model.Timeline{
-		ID:      timeline.ID,
-		Name:    &timeline.Name,
-		Account: convert.ToShortAccount(*account, settings),
+		ID:        timeline.ID,
+		Name:      &timeline.Name,
+		AccountID: account.ID,
 	}, nil
 }
 
