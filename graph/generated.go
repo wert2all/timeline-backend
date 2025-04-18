@@ -42,6 +42,7 @@ type Config struct {
 type ResolverRoot interface {
 	Mutation() MutationResolver
 	Query() QueryResolver
+	Timeline() TimelineResolver
 }
 
 type DirectiveRoot struct {
@@ -92,9 +93,10 @@ type ComplexityRoot struct {
 	}
 
 	Timeline struct {
-		Account func(childComplexity int) int
-		ID      func(childComplexity int) int
-		Name    func(childComplexity int) int
+		Account   func(childComplexity int) int
+		AccountID func(childComplexity int) int
+		ID        func(childComplexity int) int
+		Name      func(childComplexity int) int
 	}
 
 	TimelineEvent struct {
@@ -139,6 +141,9 @@ type QueryResolver interface {
 	MyAccountTimelines(ctx context.Context, accountID int) ([]*model.ShortTimeline, error)
 	Timeline(ctx context.Context, timelineID int) (*model.Timeline, error)
 	Event(ctx context.Context, eventID int, accountID *int) (*model.TimelineEvent, error)
+}
+type TimelineResolver interface {
+	Account(ctx context.Context, obj *model.Timeline) (*model.ShortAccount, error)
 }
 
 type executableSchema struct {
@@ -396,6 +401,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Timeline.Account(childComplexity), true
+
+	case "Timeline.accountId":
+		if e.complexity.Timeline.AccountID == nil {
+			break
+		}
+
+		return e.complexity.Timeline.AccountID(childComplexity), true
 
 	case "Timeline.id":
 		if e.complexity.Timeline.ID == nil {
@@ -2146,6 +2158,8 @@ func (ec *executionContext) fieldContext_Query_timeline(ctx context.Context, fie
 				return ec.fieldContext_Timeline_id(ctx, field)
 			case "name":
 				return ec.fieldContext_Timeline_name(ctx, field)
+			case "accountId":
+				return ec.fieldContext_Timeline_accountId(ctx, field)
 			case "account":
 				return ec.fieldContext_Timeline_account(ctx, field)
 			}
@@ -2802,6 +2816,50 @@ func (ec *executionContext) fieldContext_Timeline_name(_ context.Context, field 
 	return fc, nil
 }
 
+func (ec *executionContext) _Timeline_accountId(ctx context.Context, field graphql.CollectedField, obj *model.Timeline) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Timeline_accountId(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.AccountID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Timeline_accountId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Timeline",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Timeline_account(ctx context.Context, field graphql.CollectedField, obj *model.Timeline) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Timeline_account(ctx, field)
 	if err != nil {
@@ -2816,7 +2874,7 @@ func (ec *executionContext) _Timeline_account(ctx context.Context, field graphql
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Account, nil
+		return ec.resolvers.Timeline().Account(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2837,8 +2895,8 @@ func (ec *executionContext) fieldContext_Timeline_account(_ context.Context, fie
 	fc = &graphql.FieldContext{
 		Object:     "Timeline",
 		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "id":
@@ -6340,15 +6398,51 @@ func (ec *executionContext) _Timeline(ctx context.Context, sel ast.SelectionSet,
 		case "id":
 			out.Values[i] = ec._Timeline_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "name":
 			out.Values[i] = ec._Timeline_name(ctx, field, obj)
-		case "account":
-			out.Values[i] = ec._Timeline_account(ctx, field, obj)
+		case "accountId":
+			out.Values[i] = ec._Timeline_accountId(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
+		case "account":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Timeline_account(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
