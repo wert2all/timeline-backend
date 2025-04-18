@@ -43,6 +43,7 @@ type ResolverRoot interface {
 	Mutation() MutationResolver
 	Query() QueryResolver
 	Timeline() TimelineResolver
+	TimelineEvent() TimelineEventResolver
 }
 
 type DirectiveRoot struct {
@@ -106,6 +107,7 @@ type ComplexityRoot struct {
 		PreviewlyImageID func(childComplexity int) int
 		ShowTime         func(childComplexity int) int
 		Tags             func(childComplexity int) int
+		Timeline         func(childComplexity int) int
 		TimelineID       func(childComplexity int) int
 		Title            func(childComplexity int) int
 		Type             func(childComplexity int) int
@@ -144,6 +146,9 @@ type QueryResolver interface {
 }
 type TimelineResolver interface {
 	Account(ctx context.Context, obj *model.Timeline) (*model.ShortAccount, error)
+}
+type TimelineEventResolver interface {
+	Timeline(ctx context.Context, obj *model.TimelineEvent) (*model.Timeline, error)
 }
 
 type executableSchema struct {
@@ -464,6 +469,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.TimelineEvent.Tags(childComplexity), true
+
+	case "TimelineEvent.timeline":
+		if e.complexity.TimelineEvent.Timeline == nil {
+			break
+		}
+
+		return e.complexity.TimelineEvent.Timeline(childComplexity), true
 
 	case "TimelineEvent.timelineId":
 		if e.complexity.TimelineEvent.TimelineID == nil {
@@ -1517,6 +1529,8 @@ func (ec *executionContext) fieldContext_Mutation_addEvent(ctx context.Context, 
 				return ec.fieldContext_TimelineEvent_title(ctx, field)
 			case "timelineId":
 				return ec.fieldContext_TimelineEvent_timelineId(ctx, field)
+			case "timeline":
+				return ec.fieldContext_TimelineEvent_timeline(ctx, field)
 			case "description":
 				return ec.fieldContext_TimelineEvent_description(ctx, field)
 			case "showTime":
@@ -1594,6 +1608,8 @@ func (ec *executionContext) fieldContext_Mutation_editEvent(ctx context.Context,
 				return ec.fieldContext_TimelineEvent_title(ctx, field)
 			case "timelineId":
 				return ec.fieldContext_TimelineEvent_timelineId(ctx, field)
+			case "timeline":
+				return ec.fieldContext_TimelineEvent_timeline(ctx, field)
 			case "description":
 				return ec.fieldContext_TimelineEvent_description(ctx, field)
 			case "showTime":
@@ -2226,6 +2242,8 @@ func (ec *executionContext) fieldContext_Query_event(ctx context.Context, field 
 				return ec.fieldContext_TimelineEvent_title(ctx, field)
 			case "timelineId":
 				return ec.fieldContext_TimelineEvent_timelineId(ctx, field)
+			case "timeline":
+				return ec.fieldContext_TimelineEvent_timeline(ctx, field)
 			case "description":
 				return ec.fieldContext_TimelineEvent_description(ctx, field)
 			case "showTime":
@@ -3135,6 +3153,60 @@ func (ec *executionContext) fieldContext_TimelineEvent_timelineId(_ context.Cont
 	return fc, nil
 }
 
+func (ec *executionContext) _TimelineEvent_timeline(ctx context.Context, field graphql.CollectedField, obj *model.TimelineEvent) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_TimelineEvent_timeline(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.TimelineEvent().Timeline(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Timeline)
+	fc.Result = res
+	return ec.marshalNTimeline2ᚖtimelineᚋbackendᚋgraphᚋmodelᚐTimeline(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_TimelineEvent_timeline(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TimelineEvent",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Timeline_id(ctx, field)
+			case "name":
+				return ec.fieldContext_Timeline_name(ctx, field)
+			case "accountId":
+				return ec.fieldContext_Timeline_accountId(ctx, field)
+			case "account":
+				return ec.fieldContext_Timeline_account(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Timeline", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _TimelineEvent_description(ctx context.Context, field graphql.CollectedField, obj *model.TimelineEvent) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_TimelineEvent_description(ctx, field)
 	if err != nil {
@@ -3392,6 +3464,8 @@ func (ec *executionContext) fieldContext_TimelineEvents_events(_ context.Context
 				return ec.fieldContext_TimelineEvent_title(ctx, field)
 			case "timelineId":
 				return ec.fieldContext_TimelineEvent_timelineId(ctx, field)
+			case "timeline":
+				return ec.fieldContext_TimelineEvent_timeline(ctx, field)
 			case "description":
 				return ec.fieldContext_TimelineEvent_description(ctx, field)
 			case "showTime":
@@ -6480,25 +6554,61 @@ func (ec *executionContext) _TimelineEvent(ctx context.Context, sel ast.Selectio
 		case "id":
 			out.Values[i] = ec._TimelineEvent_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "date":
 			out.Values[i] = ec._TimelineEvent_date(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "type":
 			out.Values[i] = ec._TimelineEvent_type(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "title":
 			out.Values[i] = ec._TimelineEvent_title(ctx, field, obj)
 		case "timelineId":
 			out.Values[i] = ec._TimelineEvent_timelineId(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
+		case "timeline":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._TimelineEvent_timeline(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "description":
 			out.Values[i] = ec._TimelineEvent_description(ctx, field, obj)
 		case "showTime":
@@ -6508,7 +6618,7 @@ func (ec *executionContext) _TimelineEvent(ctx context.Context, sel ast.Selectio
 		case "tags":
 			out.Values[i] = ec._TimelineEvent_tags(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "previewlyImageId":
 			out.Values[i] = ec._TimelineEvent_previewlyImageId(ctx, field, obj)
@@ -7252,6 +7362,20 @@ func (ec *executionContext) marshalNTime2timeᚐTime(ctx context.Context, sel as
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) marshalNTimeline2timelineᚋbackendᚋgraphᚋmodelᚐTimeline(ctx context.Context, sel ast.SelectionSet, v model.Timeline) graphql.Marshaler {
+	return ec._Timeline(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNTimeline2ᚖtimelineᚋbackendᚋgraphᚋmodelᚐTimeline(ctx context.Context, sel ast.SelectionSet, v *model.Timeline) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._Timeline(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNTimelineEvent2timelineᚋbackendᚋgraphᚋmodelᚐTimelineEvent(ctx context.Context, sel ast.SelectionSet, v model.TimelineEvent) graphql.Marshaler {

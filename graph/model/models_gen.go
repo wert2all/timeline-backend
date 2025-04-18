@@ -71,6 +71,7 @@ type TimelineEvent struct {
 	Type             TimelineType `json:"type"`
 	Title            *string      `json:"title,omitempty"`
 	TimelineID       int          `json:"timelineId"`
+	Timeline         *Timeline    `json:"timeline"`
 	Description      *string      `json:"description,omitempty"`
 	ShowTime         *bool        `json:"showTime,omitempty"`
 	URL              *string      `json:"url,omitempty"`

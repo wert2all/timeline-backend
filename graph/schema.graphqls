@@ -68,6 +68,7 @@ type TimelineEvent {
   type: TimelineType!
   title: String
   timelineId: Int!
+  timeline: Timeline!
   description: String
   showTime: Boolean
   url: String
