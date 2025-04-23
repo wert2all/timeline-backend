@@ -96,7 +96,7 @@ func initResolvers() {
 	initService(func(timelineModel timelineModel.Timeline, userModel userModel.UserModel, settings settings.Model) resolvers.Resolver[*model.User, resolvers.ValidAuthorizeArguments] {
 		return resolvers.NewAutorizeResolver(timelineModel, userModel, settings)
 	})
-	initService(func(timelineModel timelineModel.Timeline, userModel userModel.UserModel) resolvers.Resolver[*model.ShortTimeline, resolvers.ValidAddTimelineArguments] {
+	initService(func(timelineModel timelineModel.Timeline, userModel userModel.UserModel) resolvers.Resolver[*model.Timeline, resolvers.ValidAddTimelineArguments] {
 		return resolvers.NewAddTimelineResolver(userModel, timelineModel)
 	})
 	initService(func(timelineModel timelineModel.Timeline, eventModel eventModel.Model, tagModel tagModel.Model) resolvers.Resolver[*model.TimelineEvent, resolvers.ValidAddEventArguments] {

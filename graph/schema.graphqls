@@ -17,7 +17,7 @@ type Query {
 type Mutation {
   authorize: User
 
-  addTimeline(timeline: AddTimeline): ShortTimeline!
+  addTimeline(timeline: AddTimeline): Timeline!
 
   addEvent(event: TimelineEventInput!): TimelineEvent!
   editEvent(event: ExistTimelineEventInput!): TimelineEvent!
