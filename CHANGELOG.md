@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.12.1](https://github.com/wert2all/timeline-backend/compare/v1.12.0...v1.12.1) (2025-04-23)
+
+
+### Bug Fixes
+
+* **graph:** update timeline model in add-timeline resolver ([3610f8b](https://github.com/wert2all/timeline-backend/commit/3610f8b85e14e5357b065b383dba67a8e8fc7ba5))
+
 ## [1.12.0](https://github.com/wert2all/timeline-backend/compare/v1.11.1...v1.12.0) (2025-04-18)
 
 
