@@ -130,7 +130,7 @@ type ComplexityRoot struct {
 
 type MutationResolver interface {
 	Authorize(ctx context.Context) (*model.User, error)
-	AddTimeline(ctx context.Context, timeline *model.AddTimeline) (*model.ShortTimeline, error)
+	AddTimeline(ctx context.Context, timeline *model.AddTimeline) (*model.Timeline, error)
 	AddEvent(ctx context.Context, event model.TimelineEventInput) (*model.TimelineEvent, error)
 	EditEvent(ctx context.Context, event model.ExistTimelineEventInput) (*model.TimelineEvent, error)
 	DeleteEvent(ctx context.Context, eventID int) (model.Status, error)
@@ -1445,9 +1445,9 @@ func (ec *executionContext) _Mutation_addTimeline(ctx context.Context, field gra
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.ShortTimeline)
+	res := resTmp.(*model.Timeline)
 	fc.Result = res
-	return ec.marshalNShortTimeline2ᚖtimelineᚋbackendᚋgraphᚋmodelᚐShortTimeline(ctx, field.Selections, res)
+	return ec.marshalNTimeline2ᚖtimelineᚋbackendᚋgraphᚋmodelᚐTimeline(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_addTimeline(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1459,11 +1459,15 @@ func (ec *executionContext) fieldContext_Mutation_addTimeline(ctx context.Contex
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "id":
-				return ec.fieldContext_ShortTimeline_id(ctx, field)
+				return ec.fieldContext_Timeline_id(ctx, field)
 			case "name":
-				return ec.fieldContext_ShortTimeline_name(ctx, field)
+				return ec.fieldContext_Timeline_name(ctx, field)
+			case "accountId":
+				return ec.fieldContext_Timeline_accountId(ctx, field)
+			case "account":
+				return ec.fieldContext_Timeline_account(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type ShortTimeline", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type Timeline", field.Name)
 		},
 	}
 	defer func() {
@@ -7234,10 +7238,6 @@ func (ec *executionContext) marshalNShortAccount2ᚖtimelineᚋbackendᚋgraph�
 		return graphql.Null
 	}
 	return ec._ShortAccount(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalNShortTimeline2timelineᚋbackendᚋgraphᚋmodelᚐShortTimeline(ctx context.Context, sel ast.SelectionSet, v model.ShortTimeline) graphql.Marshaler {
-	return ec._ShortTimeline(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshalNShortTimeline2ᚕᚖtimelineᚋbackendᚋgraphᚋmodelᚐShortTimelineᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.ShortTimeline) graphql.Marshaler {

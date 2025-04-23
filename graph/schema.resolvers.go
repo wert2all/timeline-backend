@@ -57,10 +57,10 @@ func (r *mutationResolver) Authorize(ctx context.Context) (*model.User, error) {
 }
 
 // AddTimeline is the resolver for the addTimeline field.
-func (r *mutationResolver) AddTimeline(ctx context.Context, timeline *model.AddTimeline) (*model.ShortTimeline, error) {
+func (r *mutationResolver) AddTimeline(ctx context.Context, timeline *model.AddTimeline) (*model.Timeline, error) {
 	var factory resolvers.AddTimelineArgumentFactory
 	var validator resolvers.Validator[resolvers.AddTimelineArguments, resolvers.ValidAddTimelineArguments]
-	var resolver resolvers.Resolver[*model.ShortTimeline, resolvers.ValidAddTimelineArguments]
+	var resolver resolvers.Resolver[*model.Timeline, resolvers.ValidAddTimelineArguments]
 
 	errFactoryResolve := container.Resolve(&factory)
 	if errFactoryResolve != nil {

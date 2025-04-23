@@ -60,15 +60,19 @@ func (a addTimelineValidator) Validate(ctx context.Context, input Arguments[AddT
 func (a AddTimelineArguments) GetArguments() AddTimelineArguments           { return a }
 func (v ValidAddTimelineArguments) GetArguments() ValidAddTimelineArguments { return v }
 
-func (a addTimelimeMutation) Resolve(_ context.Context, arguments ValidArguments[ValidAddTimelineArguments]) (*model.ShortTimeline, error) {
+func (a addTimelimeMutation) Resolve(_ context.Context, arguments ValidArguments[ValidAddTimelineArguments]) (*model.Timeline, error) {
 	created, error := a.Timeline.CreateTimeline(arguments.GetArguments().name, arguments.GetArguments().account)
 	if error != nil {
 		return nil, error
 	}
-	return &model.ShortTimeline{ID: created.ID, Name: &created.Name}, nil
+	return &model.Timeline{
+		ID:        created.ID,
+		Name:      &created.Name,
+		AccountID: arguments.GetArguments().account.ID,
+	}, nil
 }
 
-func NewAddTimelineResolver(users user.UserModel, timeline timeline.Timeline) Resolver[*model.ShortTimeline, ValidAddTimelineArguments] {
+func NewAddTimelineResolver(users user.UserModel, timeline timeline.Timeline) Resolver[*model.Timeline, ValidAddTimelineArguments] {
 	return addTimelimeMutation{Users: users, Timeline: timeline}
 }
 
